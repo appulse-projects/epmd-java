@@ -1,6 +1,7 @@
 # Overview
 
 [![build_status](https://travis-ci.org/appulse-projects/epmd-java.svg?branch=master)](https://travis-ci.org/appulse-projects/epmd-java)
+[![maven_central](https://maven-badges.herokuapp.com/maven-central/io.appulse.epmd.java/core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.appulse.epmd.java/core)
 
 This is the set of projects, which implementing EPMD server and client.
 
