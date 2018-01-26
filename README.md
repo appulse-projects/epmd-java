@@ -2,7 +2,7 @@
 
 [![build_status](https://travis-ci.org/appulse-projects/epmd-java.svg?branch=master)](https://travis-ci.org/appulse-projects/epmd-java)
 
-This is a common appulse's logging project. It contains all needed dependencies and, also, colorizing for logging output.
+This is the set of projects, which implementing EPMD server and client.
 
 ## Development
 
