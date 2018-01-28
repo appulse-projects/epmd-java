@@ -50,6 +50,40 @@ import lombok.val;
 @FieldDefaults(level = PRIVATE)
 public class NodeInfo implements DataSerializable {
 
+  boolean ok;
+
+  Optional<Integer> port;
+
+  Optional<NodeType> type;
+
+  Optional<Protocol> protocol;
+
+  Optional<Version> high;
+
+  Optional<Version> low;
+
+  Optional<String> name;
+
+  public NodeInfo () {
+    port = empty();
+    type = empty();
+    protocol = empty();
+    high = empty();
+    low = empty();
+    name = empty();
+  }
+
+  @Builder
+  public NodeInfo (boolean ok, Integer port, NodeType type, Protocol protocol, Version high, Version low, String name) {
+    this.ok = ok;
+    this.port = ofNullable(port);
+    this.type = ofNullable(type);
+    this.protocol = ofNullable(protocol);
+    this.high = ofNullable(high);
+    this.low = ofNullable(low);
+    this.name = ofNullable(name);
+  }
+
   @Override
   public void write (@NonNull Bytes bytes) {
     if (!ok) {
@@ -85,39 +119,5 @@ public class NodeInfo implements DataSerializable {
 
     val length = bytes.getShort();
     name = of(bytes.getString(length, ISO_8859_1));
-  }
-
-  boolean ok;
-
-  Optional<Integer> port;
-
-  Optional<NodeType> type;
-
-  Optional<Protocol> protocol;
-
-  Optional<Version> high;
-
-  Optional<Version> low;
-
-  Optional<String> name;
-
-  public NodeInfo () {
-    port = empty();
-    type = empty();
-    protocol = empty();
-    high = empty();
-    low = empty();
-    name = empty();
-  }
-
-  @Builder
-  public NodeInfo (boolean ok, Integer port, NodeType type, Protocol protocol, Version high, Version low, String name) {
-    this.ok = ok;
-    this.port = ofNullable(port);
-    this.type = ofNullable(type);
-    this.protocol = ofNullable(protocol);
-    this.high = ofNullable(high);
-    this.low = ofNullable(low);
-    this.name = ofNullable(name);
   }
 }
