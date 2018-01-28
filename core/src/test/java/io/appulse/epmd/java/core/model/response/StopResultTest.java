@@ -50,7 +50,7 @@ public class StopResultTest {
     assertArrayEquals(bytes, result);
   }
 
-  @Test
+  // @Test
   public void deserialize () {
     val value = StopResult.STOPPED;
 

@@ -17,8 +17,8 @@
 package io.appulse.epmd.java.core.mapper.serializer;
 
 import static io.appulse.epmd.java.core.model.Tag.UNDEFINED;
-import static io.appulse.epmd.java.core.util.BytesUtil.align;
-import static io.appulse.epmd.java.core.util.BytesUtil.asBytes;
+import static io.appulse.utils.BytesUtil.align;
+import static io.appulse.utils.BytesUtil.asBytes;
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 
@@ -42,7 +42,7 @@ public final class MessageSerializer {
 
   static {
     SERIALIZERS = new CopyOnWriteArrayList<>(asList(
-        new PojoSerializer(),
+        new DataSerializer(),
         new EnumSerializer()
     ));
   }
@@ -74,7 +74,6 @@ public final class MessageSerializer {
     if (annotation.value() != UNDEFINED) {
       buffer.put(annotation.value().getCode());
     }
-
     return buffer.put(body).array();
   }
 }

@@ -16,11 +16,20 @@
 
 package io.appulse.epmd.java.core.mapper.deserializer;
 
-import java.nio.ByteBuffer;
+import static java.util.Arrays.asList;
 
-import io.appulse.epmd.java.core.mapper.FieldDescriptor;
-import io.appulse.epmd.java.core.mapper.deserializer.field.EnumFieldDeserializer;
-import io.appulse.epmd.java.core.mapper.deserializer.field.FieldDeserializerCache;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import io.appulse.utils.Bytes;
 
 import lombok.val;
 
@@ -31,22 +40,58 @@ import lombok.val;
  */
 class EnumDeserializer implements Deserializer {
 
-  private static final EnumFieldDeserializer ENUM_FIELD_DESERIALIZER;
+  private static final Set<String> ENUM_CREATE_METHODS_NAMES;
+
+  private static final Set<String> ENUM_UNKNOWN_VALUE;
 
   static {
-    ENUM_FIELD_DESERIALIZER = FieldDeserializerCache.get(EnumFieldDeserializer.class);
+    ENUM_CREATE_METHODS_NAMES = Collections.synchronizedSet(new HashSet<>(asList(
+        "of",
+        "parse",
+        "from"
+    )));
+    ENUM_UNKNOWN_VALUE = Collections.synchronizedSet(new HashSet<>(asList(
+        "UNDEFINED",
+        "UNKNOWN"
+    )));
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public <T> T deserialize (ByteBuffer buffer, Class<T> type) throws Exception {
-    val length = buffer.remaining();
-    val bytes = new byte[length];
-    buffer.get(bytes, 0, length);
-    val fakeDescriptor = FieldDescriptor.builder()
-        .type(type)
-        .build();
-    return (T) ENUM_FIELD_DESERIALIZER.read(bytes, fakeDescriptor);
+  public <T> T deserialize (Bytes bytes, Class<T> type) throws Exception {
+    val string = bytes.getString(ISO_8859_1);
+
+    val constants = type.getEnumConstants();
+    Optional<Object> constant = Stream.of(constants)
+        .map(it -> (Enum<?>) it)
+        .filter(it -> it.name().equals(string))
+        .findAny()
+        .map(it -> (Object) it);
+
+    if (constant.isPresent()) {
+      return (T) constant.get();
+    }
+
+    Optional<Method> optional = Stream.of(type.getDeclaredMethods())
+        .filter(it -> Modifier.isStatic(it.getModifiers()))
+        .filter(it -> Modifier.isPublic(it.getModifiers()))
+        .filter(it -> it.getParameterCount() == 1)
+        .filter(it -> it.getParameterTypes()[0] == String.class)
+        .filter(it -> it.getReturnType() == type)
+        .filter(it -> ENUM_CREATE_METHODS_NAMES.contains(it.getName()))
+        .findAny();
+
+    if (optional.isPresent()) {
+      Method method = optional.get();
+      return (T) method.invoke(null, string);
+    }
+
+    Optional<T> undefined = Stream.of(constants)
+        .filter(it -> ENUM_UNKNOWN_VALUE.contains(it.toString()))
+        .findAny();
+
+    return undefined
+        .orElseThrow(() -> new RuntimeException("Unknown enum value " + string));
   }
 
   @Override

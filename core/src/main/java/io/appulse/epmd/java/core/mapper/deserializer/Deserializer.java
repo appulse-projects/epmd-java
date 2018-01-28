@@ -16,7 +16,7 @@
 
 package io.appulse.epmd.java.core.mapper.deserializer;
 
-import java.nio.ByteBuffer;
+import io.appulse.utils.Bytes;
 
 /**
  *
@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
  */
 interface Deserializer {
 
-  <T> T deserialize (ByteBuffer buffer, Class<T> type) throws Exception;
+  <T> T deserialize (Bytes buffer, Class<T> type) throws Exception;
 
   boolean isApplicable (Class<?> type);
 }

@@ -17,7 +17,6 @@
 package io.appulse.epmd.java.core.mapper.deserializer;
 
 import static io.appulse.epmd.java.core.model.Tag.UNDEFINED;
-import static io.appulse.epmd.java.core.util.BytesUtil.asInteger;
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 
@@ -26,7 +25,7 @@ import java.util.List;
 
 import io.appulse.epmd.java.core.mapper.Message;
 import io.appulse.epmd.java.core.model.Tag;
-
+import io.appulse.utils.Bytes;
 import lombok.SneakyThrows;
 import lombok.val;
 
@@ -41,7 +40,7 @@ public final class MessageDeserializer {
 
   static {
     DESERIALIZERS = asList(
-        new PojoDeserializer(),
+        new DataDeserializer(),
         new EnumDeserializer()
     );
   }
@@ -49,7 +48,7 @@ public final class MessageDeserializer {
   @SneakyThrows
   public <T> T deserialize (byte[] bytes, Class<T> type) {
     val buffer = ofNullable(bytes)
-        .map(ByteBuffer::wrap)
+        .map(Bytes::wrap)
         .orElseThrow(RuntimeException::new);
 
     val annotation = ofNullable(type)

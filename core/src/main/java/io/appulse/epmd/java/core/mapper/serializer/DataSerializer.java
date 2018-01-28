@@ -14,16 +14,28 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.core.mapper.deserializer.field;
+package io.appulse.epmd.java.core.mapper.serializer;
 
-import io.appulse.epmd.java.core.mapper.FieldDescriptor;
+import io.appulse.epmd.java.core.mapper.DataSerializable;
+import io.appulse.utils.Bytes;
+import lombok.val;
 
 /**
  *
  * @author Artem Labazin
- * @since 0.0.1
+ * @since 0.0.2
  */
-abstract class AbstractFieldDeserializer<T> implements FieldDeserializer<T> {
+class DataSerializer implements Serializer {
 
-  abstract boolean isApplicable (FieldDescriptor descriptor);
+  @Override
+  public byte[] serialize (Object object, Class<?> type) throws Exception {
+    val body = Bytes.allocate();
+    ((DataSerializable) object).write(body);
+    return body.array();
+  }
+
+  @Override
+  public boolean isApplicable (Class<?> type) {
+    return DataSerializable.class.isAssignableFrom(type);
+  }
 }

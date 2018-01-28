@@ -17,21 +17,24 @@
 package io.appulse.epmd.java.core.model.response;
 
 import static io.appulse.epmd.java.core.model.Tag.PORT2_RESPONSE;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static lombok.AccessLevel.PRIVATE;
 
 import java.util.Optional;
 
-import io.appulse.epmd.java.core.mapper.Field;
-import io.appulse.epmd.java.core.mapper.LengthBefore;
 import io.appulse.epmd.java.core.mapper.Message;
+import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.epmd.java.core.model.NodeType;
 import io.appulse.epmd.java.core.model.Protocol;
 import io.appulse.epmd.java.core.model.Version;
+import io.appulse.utils.Bytes;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
@@ -44,28 +47,51 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @Message(value = PORT2_RESPONSE, lengthBytes = 0)
 @FieldDefaults(level = PRIVATE)
-public class NodeInfo {
+public class NodeInfo implements DataSerializable {
 
-  @Field(bytes = 1)
+  @Override
+  public void write (@NonNull Bytes bytes) {
+    if (!ok) {
+      bytes.put1B(1);
+      return;
+    }
+
+    bytes.put1B(0);
+    port.ifPresent(bytes::put2B);
+    type.ifPresent(it -> bytes.put1B(it.getCode()));
+    protocol.ifPresent(it -> bytes.put1B(it.getCode()));
+    high.ifPresent(it -> bytes.put2B(it.getCode()));
+    low.ifPresent(it -> bytes.put2B(it.getCode()));
+    name.ifPresent(it -> {
+      bytes.put2B(it.length());
+      bytes.put(it, ISO_8859_1);
+    });
+  }
+
+  @Override
+  public void read (@NonNull Bytes bytes) {
+    if (bytes.getByte() != 0) {
+      ok = false;
+      return;
+    }
+
+    ok = true;
+    port = of((int) bytes.getShort());
+    type = of(bytes.getByte()).map(NodeType::of);
+  }
+
   boolean ok;
 
-  @Field(bytes = 2)
   Optional<Integer> port;
 
-  @Field(bytes = 1)
   Optional<NodeType> type;
 
-  @Field(bytes = 1)
   Optional<Protocol> protocol;
 
-  @Field(bytes = 2)
   Optional<Version> high;
 
-  @Field(bytes = 2)
   Optional<Version> low;
 
-  @LengthBefore(bytes = 2)
-  @Field
   Optional<String> name;
 
   public NodeInfo () {

@@ -17,16 +17,19 @@
 package io.appulse.epmd.java.core.model.request;
 
 import static io.appulse.epmd.java.core.model.Tag.STOP_REQUEST;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static lombok.AccessLevel.PRIVATE;
 
 import io.appulse.epmd.java.core.mapper.ExpectedResponse;
-import io.appulse.epmd.java.core.mapper.Field;
 import io.appulse.epmd.java.core.mapper.Message;
+import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.epmd.java.core.model.response.StopResult;
+import io.appulse.utils.Bytes;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
@@ -42,8 +45,18 @@ import lombok.experimental.FieldDefaults;
 @Message(STOP_REQUEST)
 @FieldDefaults(level = PRIVATE)
 @ExpectedResponse(StopResult.class)
-public class Stop {
+public class Stop implements DataSerializable {
 
-  @Field
+  @NonNull
   String name;
+
+  @Override
+  public void write (@NonNull Bytes bytes) {
+    bytes.put(name, ISO_8859_1);
+  }
+
+  @Override
+  public void read (@NonNull Bytes bytes) {
+    name = bytes.getString(ISO_8859_1);
+  }
 }

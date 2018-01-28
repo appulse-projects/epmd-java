@@ -19,15 +19,18 @@ package io.appulse.epmd.java.core.model.response;
 import static io.appulse.epmd.java.core.model.Tag.ALIVE2_RESPONSE;
 import static lombok.AccessLevel.PRIVATE;
 
-import io.appulse.epmd.java.core.mapper.Field;
 import io.appulse.epmd.java.core.mapper.Message;
+import io.appulse.epmd.java.core.mapper.DataSerializable;
+import io.appulse.utils.Bytes;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
+import lombok.val;
 
 /**
  *
@@ -39,13 +42,31 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Message(value = ALIVE2_RESPONSE, lengthBytes = 0)
+@Message(value = ALIVE2_RESPONSE)
 @FieldDefaults(level = PRIVATE)
-public class RegistrationResult {
+public class RegistrationResult implements DataSerializable {
 
-  @Field(bytes = 1)
   boolean ok;
 
-  @Field(bytes = 2)
   int creation;
+
+  @Override
+  public void write (@NonNull Bytes bytes) {
+    if (!ok) {
+      bytes.put1B(1);
+      return;
+    }
+
+    bytes.put1B(0);
+    bytes.put2B(creation);
+  }
+
+  @Override
+  public void read (@NonNull Bytes bytes) {
+    ok = bytes.getByte() == 0;
+
+    if (ok) {
+      creation = bytes.getInt();
+    }
+  }
 }

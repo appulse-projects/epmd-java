@@ -17,7 +17,6 @@
 package io.appulse.epmd.java.core.model.response;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static lombok.AccessLevel.PRIVATE;
@@ -25,20 +24,20 @@ import static lombok.AccessLevel.PRIVATE;
 import java.util.List;
 import java.util.stream.Stream;
 
-import io.appulse.epmd.java.core.mapper.Field;
-import io.appulse.epmd.java.core.mapper.FieldDescriptor;
 import io.appulse.epmd.java.core.mapper.Message;
-import io.appulse.epmd.java.core.mapper.deserializer.field.FieldDeserializer;
-import io.appulse.epmd.java.core.mapper.serializer.field.FieldSerializer;
+import io.appulse.epmd.java.core.mapper.DataSerializable;
+import io.appulse.utils.Bytes;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Singular;
 import lombok.ToString;
 import lombok.Value;
 import lombok.experimental.FieldDefaults;
+import lombok.val;
 
 /**
  *
@@ -52,60 +51,60 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = PRIVATE)
-public class EpmdInfo {
+public class EpmdInfo implements DataSerializable {
 
-  @Field(bytes = 4)
-  int port;
+  @NonNull
+  Integer port;
 
+  @NonNull
   @Singular
-  @Field(serializer = NodeDescriptionFieldSerializer.class, deserializer = NodeDescriptionFieldDeserializer.class)
   List<NodeDescription> nodes;
+
+  @Override
+  public void write (@NonNull Bytes bytes) {
+    bytes.put(port);
+
+    if (nodes.isEmpty()) {
+      bytes.put(new byte[0]);
+      return;
+    }
+
+    val string = nodes.stream()
+        .map(it -> String.format("name %s at port %d", it.getName(), it.getPort()))
+        .collect(joining("\n"));
+
+    bytes.put(string, ISO_8859_1);
+  }
+
+  @Override
+  public void read (@NonNull Bytes bytes) {
+    port = bytes.getInt();
+    val string = bytes.getString(ISO_8859_1);
+
+    nodes = Stream.of(string.split("\\n"))
+        .map(String::trim)
+        .filter(it -> !it.isEmpty())
+        .map(it -> Stream.of(it.split("\\s+"))
+            .map(String::trim)
+            .filter(token -> !token.isEmpty())
+            .toArray(String[]::new)
+        )
+        .map(it -> NodeDescription.builder()
+            .name(it[1])
+            .port(Integer.parseInt(it[4]))
+            .build()
+        )
+        .collect(toList());
+  }
 
   @Value
   @Builder
-  @ToString
   public static class NodeDescription {
 
+    @NonNull
     String name;
 
-    int port;
-  }
-
-  public static final class NodeDescriptionFieldSerializer implements FieldSerializer<List<NodeDescription>> {
-
-    @Override
-    public byte[] write (List<NodeDescription> value) {
-      if (value == null || value.isEmpty()) {
-        return new byte[0];
-      }
-      return value.stream()
-          .map(it -> String.format("name %s at port %d", it.getName(), it.getPort()))
-          .collect(joining("\n"))
-          .getBytes(ISO_8859_1);
-    }
-  }
-
-  public static final class NodeDescriptionFieldDeserializer implements FieldDeserializer<List<NodeDescription>> {
-
-    @Override
-    public List<NodeDescription> read (byte[] bytes, FieldDescriptor descriptor) {
-      if (bytes == null || bytes.length == 0) {
-        return emptyList();
-      }
-      return Stream.of(new String(bytes, ISO_8859_1).split("\\n"))
-          .map(String::trim)
-          .filter(it -> !it.isEmpty())
-          .map(it -> Stream.of(it.split("\\s+"))
-              .map(String::trim)
-              .filter(token -> !token.isEmpty())
-              .toArray(String[]::new)
-          )
-          .map(it -> NodeDescription.builder()
-              .name(it[1])
-              .port(Integer.parseInt(it[4]))
-              .build()
-          )
-          .collect(toList());
-    }
+    @NonNull
+    Integer port;
   }
 }

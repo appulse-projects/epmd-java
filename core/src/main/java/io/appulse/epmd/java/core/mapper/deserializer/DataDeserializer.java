@@ -14,32 +14,27 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.core.mapper.serializer.field;
+package io.appulse.epmd.java.core.mapper.deserializer;
 
-import java.util.Optional;
-
-import lombok.val;
+import io.appulse.epmd.java.core.mapper.DataSerializable;
+import io.appulse.utils.Bytes;
 
 /**
  *
  * @author Artem Labazin
  * @since 0.0.1
  */
-public final class OptionalFieldSerializer extends AbstractFieldSerializer<Optional<?>> {
+class DataDeserializer implements Deserializer {
 
   @Override
-  public byte[] write (Optional<?> optional) {
-    if (!optional.isPresent()) {
-      return new byte[0];
-    }
-
-    val subValue = optional.get();
-    return FieldSerializerCache.get(GuessMeFieldSerializer.class)
-        .write(subValue);
+  public <T> T deserialize (Bytes bytes, Class<T> type) throws Exception {
+    T result = type.newInstance();
+    ((DataSerializable) result).read(bytes);
+    return result;
   }
 
   @Override
-  boolean isApplicable (Object value) {
-    return value instanceof Optional;
+  public boolean isApplicable (Class<?> type) {
+    return DataSerializable.class.isAssignableFrom(type);
   }
 }

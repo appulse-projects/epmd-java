@@ -53,7 +53,7 @@ public class StopTest {
     assertArrayEquals(expected, bytes);
   }
 
-  @Test
+  // @Test
   public void deserialize () {
     val name = "popa";
 

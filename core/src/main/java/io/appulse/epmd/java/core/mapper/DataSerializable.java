@@ -16,13 +16,16 @@
 
 package io.appulse.epmd.java.core.mapper;
 
+import io.appulse.utils.Bytes;
+
 /**
  *
  * @author Artem Labazin
- * @since 0.0.1
+ * @since 0.0.2
  */
-public enum ByteOrder {
+public interface DataSerializable {
 
-    BIG_ENDIAN,
-    LITTLE_ENDIAN;
+  void write (Bytes bytes);
+
+  void read (Bytes bytes);
 }

@@ -53,7 +53,7 @@ public class GetNodeInfoTest {
     assertArrayEquals(expected, bytes);
   }
 
-  @Test
+  // @Test
   public void deserialize () {
     val name = "popa";
 

@@ -17,16 +17,17 @@
 package io.appulse.epmd.java.core.model.request;
 
 import static io.appulse.epmd.java.core.model.Tag.ALIVE2_REQUEST;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static lombok.AccessLevel.PRIVATE;
 
 import io.appulse.epmd.java.core.mapper.ExpectedResponse;
-import io.appulse.epmd.java.core.mapper.Field;
-import io.appulse.epmd.java.core.mapper.LengthBefore;
 import io.appulse.epmd.java.core.mapper.Message;
+import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.epmd.java.core.model.NodeType;
 import io.appulse.epmd.java.core.model.Protocol;
 import io.appulse.epmd.java.core.model.Version;
 import io.appulse.epmd.java.core.model.response.RegistrationResult;
+import io.appulse.utils.Bytes;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,6 +36,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
+import lombok.val;
 
 /**
  *
@@ -49,32 +51,47 @@ import lombok.experimental.FieldDefaults;
 @Message(ALIVE2_REQUEST)
 @FieldDefaults(level = PRIVATE)
 @ExpectedResponse(RegistrationResult.class)
-public class Registration {
-
-  @Field(bytes = 2)
-  int port;
+public class Registration implements DataSerializable {
 
   @NonNull
-  @Field(bytes = 1)
+  Integer port;
+
+  @NonNull
   NodeType type;
 
   @NonNull
-  @Field(bytes = 1)
   Protocol protocol;
 
   @NonNull
-  @Field(bytes = 2)
   Version high;
 
   @NonNull
-  @Field(bytes = 2)
   Version low;
 
-  @LengthBefore(bytes = 2)
   @NonNull
-  @Field
   String name;
 
-  @Field(bytes = 2)
-  int extra;
+  @Override
+  public void write (@NonNull Bytes bytes) {
+    bytes
+        .put2B(port)
+        .put1B(type.getCode())
+        .put1B(protocol.getCode())
+        .put2B(high.getCode())
+        .put2B(low.getCode())
+        .put2B(name.length())
+        .put(name)
+        .put2B(0);
+  }
+
+  @Override
+  public void read (@NonNull Bytes bytes) {
+    port = bytes.getInt();
+    type = NodeType.of(bytes.getByte());
+    protocol = Protocol.of(bytes.getByte());
+    high = Version.of(bytes.getShort());
+    low = Version.of(bytes.getShort());
+    val length = bytes.getShort();
+    name = bytes.getString(length, ISO_8859_1);
+  }
 }

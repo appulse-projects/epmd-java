@@ -50,7 +50,7 @@ public class KillResultTest {
     assertArrayEquals(bytes, result);
   }
 
-  @Test
+  // @Test
   public void deserialize () {
     val value = KillResult.OK;
 

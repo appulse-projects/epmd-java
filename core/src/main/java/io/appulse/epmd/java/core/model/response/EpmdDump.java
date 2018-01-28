@@ -17,7 +17,6 @@
 package io.appulse.epmd.java.core.model.response;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static lombok.AccessLevel.PRIVATE;
@@ -25,20 +24,20 @@ import static lombok.AccessLevel.PRIVATE;
 import java.util.List;
 import java.util.stream.Stream;
 
-import io.appulse.epmd.java.core.mapper.Field;
-import io.appulse.epmd.java.core.mapper.FieldDescriptor;
 import io.appulse.epmd.java.core.mapper.Message;
-import io.appulse.epmd.java.core.mapper.deserializer.field.FieldDeserializer;
-import io.appulse.epmd.java.core.mapper.serializer.field.FieldSerializer;
+import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump.Status;
+import io.appulse.utils.Bytes;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Singular;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
+import lombok.val;
 
 /**
  *
@@ -52,14 +51,62 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = PRIVATE)
-public class EpmdDump {
+public class EpmdDump implements DataSerializable {
 
-  @Field(bytes = 4)
-  int port;
+  @NonNull
+  Integer port;
 
+  @NonNull
   @Singular
-  @Field(serializer = NodeDumpFieldSerializer.class, deserializer = NodeDumpFieldDeserializer.class)
   List<NodeDump> nodes;
+
+  @Override
+  public void write (@NonNull Bytes bytes) {
+    bytes.put(port);
+
+    if (nodes.isEmpty()) {
+      bytes.put(new byte[0]);
+      return;
+    }
+
+    val string = nodes.stream()
+          .map(it -> String.format(
+              "%s name\t<%s> at port %d, fd = %d",
+              it.getStatus(), it.getName(), it.getPort(), it.getFileDescriptor())
+          )
+          .collect(joining("\n"));
+
+    bytes.put(string, ISO_8859_1);
+  }
+
+  @Override
+  public void read (@NonNull Bytes bytes) {
+    port = bytes.getInt();
+    val string = bytes.getString(ISO_8859_1);
+
+    nodes = Stream.of(string.split("\\n"))
+          .map(String::trim)
+          .filter(it -> !it.isEmpty())
+          .map(it -> Stream.of(it.split("\\s+"))
+              .map(String::trim)
+              .filter(token -> !token.isEmpty())
+              .toArray(String[]::new)
+          )
+          .map(it -> new NodeDump(
+              Status.of(it[0]),
+              it[2].substring(1, it[2].length() - 1),
+              Integer.parseInt(it[5].substring(0, it[5].length() - 1)),
+              Integer.parseInt(it[8])
+          ))
+          //                    .map(it -> NodeDump.builder()
+          //                            .status(Status.of(it[0]))
+          //                            .name(it[2].substring(1, it[2].length() - 1))
+          //                            .port(Integer.parseInt(it[5].substring(0, it[5].length() - 1)))
+          //                            .fileDescriptor(Integer.parseInt(it[8]))
+          //                            .build()
+          //                    )
+          .collect(toList());
+  }
 
   public static final class NodeDump {
 
@@ -123,56 +170,6 @@ public class EpmdDump {
             .findAny()
             .orElse(UNDEFINED);
       }
-    }
-  }
-
-  public static final class NodeDumpFieldSerializer implements FieldSerializer<List<NodeDump>> {
-
-    @Override
-    public byte[] write (List<NodeDump> value) {
-      if (value == null || value.isEmpty()) {
-        return new byte[0];
-      }
-      return value.stream()
-          .map(it -> String.format(
-              "%s name\t<%s> at port %d, fd = %d",
-              it.getStatus(), it.getName(), it.getPort(), it.getFileDescriptor())
-          )
-          .collect(joining("\n"))
-          .getBytes(ISO_8859_1);
-    }
-  }
-
-  public static final class NodeDumpFieldDeserializer implements FieldDeserializer<List<NodeDump>> {
-
-    @Override
-    public List<NodeDump> read (byte[] bytes, FieldDescriptor descriptor) {
-      if (bytes == null || bytes.length == 0) {
-        return emptyList();
-      }
-      // log.error("STR: {}", new String(bytes, ISO_8859_1));
-      return Stream.of(new String(bytes, ISO_8859_1).split("\\n"))
-          .map(String::trim)
-          .filter(it -> !it.isEmpty())
-          .map(it -> Stream.of(it.split("\\s+"))
-              .map(String::trim)
-              .filter(token -> !token.isEmpty())
-              .toArray(String[]::new)
-          )
-          .map(it -> new NodeDump(
-              Status.of(it[0]),
-              it[2].substring(1, it[2].length() - 1),
-              Integer.parseInt(it[5].substring(0, it[5].length() - 1)),
-              Integer.parseInt(it[8])
-          ))
-          //                    .map(it -> NodeDump.builder()
-          //                            .status(Status.of(it[0]))
-          //                            .name(it[2].substring(1, it[2].length() - 1))
-          //                            .port(Integer.parseInt(it[5].substring(0, it[5].length() - 1)))
-          //                            .fileDescriptor(Integer.parseInt(it[8]))
-          //                            .build()
-          //                    )
-          .collect(toList());
     }
   }
 }

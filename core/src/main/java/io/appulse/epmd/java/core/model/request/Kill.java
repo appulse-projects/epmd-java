@@ -20,9 +20,10 @@ import static io.appulse.epmd.java.core.model.Tag.KILL_REQUEST;
 
 import io.appulse.epmd.java.core.mapper.ExpectedResponse;
 import io.appulse.epmd.java.core.mapper.Message;
+import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.epmd.java.core.model.response.KillResult;
+import io.appulse.utils.Bytes;
 
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
@@ -31,9 +32,17 @@ import lombok.ToString;
  * @since 0.0.1
  */
 @ToString
-@NoArgsConstructor
 @Message(KILL_REQUEST)
 @ExpectedResponse(KillResult.class)
-public class Kill {
+public class Kill implements DataSerializable {
 
+  @Override
+  public void write (Bytes bytes) {
+    // nothing
+  }
+
+  @Override
+  public void read (Bytes bytes) {
+    // nothing
+  }
 }

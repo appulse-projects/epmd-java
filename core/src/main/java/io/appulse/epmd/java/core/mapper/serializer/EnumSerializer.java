@@ -16,12 +16,10 @@
 
 package io.appulse.epmd.java.core.mapper.serializer;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static lombok.AccessLevel.PRIVATE;
 
-import io.appulse.epmd.java.core.mapper.serializer.field.EnumFieldSerializer;
-import io.appulse.epmd.java.core.mapper.serializer.field.FieldSerializerCache;
-
-import lombok.Getter;
+import lombok.val;
 import lombok.experimental.FieldDefaults;
 
 /**
@@ -32,20 +30,14 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 class EnumSerializer implements Serializer {
 
-  @Getter(lazy = true, value = PRIVATE)
-  EnumFieldSerializer enumFieldSerializer = createEnumFieldSerializer();
-
   @Override
   public byte[] serialize (Object object, Class<?> type) throws Exception {
-    return getEnumFieldSerializer().serialize(object);
+    val string = ((Enum<?>) object).name();
+    return string.getBytes(ISO_8859_1);
   }
 
   @Override
   public boolean isApplicable (Class<?> type) {
     return type.isEnum();
-  }
-
-  private EnumFieldSerializer createEnumFieldSerializer () {
-    return FieldSerializerCache.get(EnumFieldSerializer.class);
   }
 }
