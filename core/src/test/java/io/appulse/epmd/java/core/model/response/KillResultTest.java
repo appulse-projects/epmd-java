@@ -17,14 +17,11 @@
 package io.appulse.epmd.java.core.model.response;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.nio.ByteBuffer;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
 import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
+import io.appulse.utils.Bytes;
 
 import lombok.val;
 import org.junit.Test;
@@ -40,26 +37,23 @@ public class KillResultTest {
   public void serialize () {
     val value = KillResult.OK;
 
-    val bytes = ByteBuffer.allocate(value.name().getBytes(ISO_8859_1).length)
-        .put(value.name().getBytes(ISO_8859_1))
+    val bytes = Bytes.allocate()
+        .put(value.name(), ISO_8859_1)
         .array();
 
-    val result = new MessageSerializer().serialize(value);
-
-    assertNotNull(result);
-    assertArrayEquals(bytes, result);
+    assertThat(new MessageSerializer().serialize(value))
+        .isEqualTo(bytes);
   }
 
-  // @Test
+  @Test
   public void deserialize () {
     val value = KillResult.OK;
 
-    val bytes = ByteBuffer.allocate(value.name().getBytes(ISO_8859_1).length)
-        .put(value.name().getBytes(ISO_8859_1))
+    val bytes = Bytes.allocate()
+        .put(value.name(), ISO_8859_1)
         .array();
 
-    val result = new MessageDeserializer().deserialize(bytes, KillResult.class);
-    assertNotNull(result);
-    assertEquals(value, result);
+    assertThat(new MessageDeserializer().deserialize(bytes, KillResult.class))
+        .isEqualTo(value);
   }
 }

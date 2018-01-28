@@ -24,8 +24,8 @@ import static lombok.AccessLevel.PRIVATE;
 import java.util.List;
 import java.util.stream.Stream;
 
-import io.appulse.epmd.java.core.mapper.Message;
 import io.appulse.epmd.java.core.mapper.DataSerializable;
+import io.appulse.epmd.java.core.mapper.Message;
 import io.appulse.utils.Bytes;
 
 import lombok.AllArgsConstructor;

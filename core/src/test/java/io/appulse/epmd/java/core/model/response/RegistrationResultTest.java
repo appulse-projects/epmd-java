@@ -16,12 +16,8 @@
 
 package io.appulse.epmd.java.core.model.response;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static io.appulse.epmd.java.core.model.Tag.ALIVE2_RESPONSE;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.nio.ByteBuffer;
 
 import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
 import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
@@ -40,7 +36,7 @@ public class RegistrationResultTest {
   public void serialize () {
     val expected = Bytes.allocate()
         .put2B(4)
-        .put1B(121)
+        .put1B(ALIVE2_RESPONSE.getCode())
         .put1B(0)
         .put2B(42)
         .array();
@@ -54,18 +50,24 @@ public class RegistrationResultTest {
         .isEqualTo(expected);
   }
 
-//   @Test
+  @Test
   public void deserialize () {
-    val bytes = ByteBuffer.allocate(Byte.BYTES + 3)
-        .put((byte) 121)
-        .put((byte) 0)
-        .putShort((short) 42)
+    val bytes = Bytes.allocate()
+        .put2B(4)
+        .put1B(ALIVE2_RESPONSE.getCode())
+        .put1B(0)
+        .put2B(42)
         .array();
 
     val response = new MessageDeserializer().deserialize(bytes, RegistrationResult.class);
 
-    assertNotNull(response);
-    assertEquals(true, response.isOk());
-    assertEquals(42, response.getCreation());
+    assertThat(response)
+        .isNotNull();
+
+    assertThat(response.isOk())
+        .isTrue();
+
+    assertThat(response.getCreation())
+        .isEqualTo(42);
   }
 }

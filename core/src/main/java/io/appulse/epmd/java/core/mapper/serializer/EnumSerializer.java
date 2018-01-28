@@ -19,8 +19,8 @@ package io.appulse.epmd.java.core.mapper.serializer;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static lombok.AccessLevel.PRIVATE;
 
-import lombok.val;
 import lombok.experimental.FieldDefaults;
+import lombok.val;
 
 /**
  *

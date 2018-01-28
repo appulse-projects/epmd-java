@@ -20,9 +20,9 @@ import static io.appulse.epmd.java.core.model.Tag.ALIVE2_REQUEST;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static lombok.AccessLevel.PRIVATE;
 
+import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.epmd.java.core.mapper.ExpectedResponse;
 import io.appulse.epmd.java.core.mapper.Message;
-import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.epmd.java.core.model.NodeType;
 import io.appulse.epmd.java.core.model.Protocol;
 import io.appulse.epmd.java.core.model.Version;
@@ -53,8 +53,7 @@ import lombok.val;
 @ExpectedResponse(RegistrationResult.class)
 public class Registration implements DataSerializable {
 
-  @NonNull
-  Integer port;
+  int port;
 
   @NonNull
   NodeType type;
@@ -86,7 +85,7 @@ public class Registration implements DataSerializable {
 
   @Override
   public void read (@NonNull Bytes bytes) {
-    port = bytes.getInt();
+    port = bytes.getShort();
     type = NodeType.of(bytes.getByte());
     protocol = Protocol.of(bytes.getByte());
     high = Version.of(bytes.getShort());

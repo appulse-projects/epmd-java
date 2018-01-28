@@ -17,15 +17,16 @@
 package io.appulse.epmd.java.core.mapper.deserializer;
 
 import static io.appulse.epmd.java.core.model.Tag.UNDEFINED;
+import static io.appulse.utils.BytesUtil.asInteger;
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
 import io.appulse.epmd.java.core.mapper.Message;
 import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.utils.Bytes;
+
 import lombok.SneakyThrows;
 import lombok.val;
 
@@ -55,10 +56,11 @@ public final class MessageDeserializer {
         .map(it -> it.getAnnotation(Message.class))
         .orElseThrow(RuntimeException::new);
 
-    if (annotation.lengthBytes() > 0 && asInteger(buffer, annotation.lengthBytes()) != buffer.remaining()) {
+    val lengthBytes = annotation.lengthBytes();
+    if (lengthBytes > 0 && asInteger(buffer.getBytes(lengthBytes)) != buffer.remaining()) {
       throw new RuntimeException();
     }
-    if (annotation.value() != UNDEFINED && annotation.value() != Tag.of(buffer.get())) {
+    if (annotation.value() != UNDEFINED && annotation.value() != Tag.of(buffer.getByte())) {
       throw new RuntimeException();
     }
 

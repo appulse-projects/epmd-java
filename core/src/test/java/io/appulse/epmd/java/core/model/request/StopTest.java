@@ -16,14 +16,12 @@
 
 package io.appulse.epmd.java.core.model.request;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.nio.ByteBuffer;
+import static io.appulse.epmd.java.core.model.Tag.STOP_REQUEST;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
 import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
+import io.appulse.utils.Bytes;
 
 import lombok.val;
 import org.junit.Test;
@@ -38,34 +36,28 @@ public class StopTest {
   @Test
   public void serialize () {
     val name = "popa";
-
-    val expected = ByteBuffer.allocate(Short.BYTES + Byte.BYTES + name.getBytes().length)
-        .putShort((short) (Byte.BYTES + name.getBytes().length))
-        .put((byte) 115)
-        .put(name.getBytes())
+    val expected = Bytes.allocate()
+        .put2B(1 + name.getBytes().length)
+        .put1B(STOP_REQUEST.getCode())
+        .put(name)
         .array();
 
     val request = new Stop(name);
-
-    val bytes = new MessageSerializer().serialize(request);
-
-    assertNotNull(bytes);
-    assertArrayEquals(expected, bytes);
+    assertThat(new MessageSerializer().serialize(request))
+        .isEqualTo(expected);
   }
 
-  // @Test
+  @Test
   public void deserialize () {
     val name = "popa";
-
-    val bytes = ByteBuffer.allocate(Short.BYTES + Byte.BYTES + name.getBytes().length)
-        .putShort((short) (Byte.BYTES + name.getBytes().length))
-        .put((byte) 115)
-        .put(name.getBytes())
+    val bytes = Bytes.allocate()
+        .put2B(1 + name.getBytes().length)
+        .put1B(STOP_REQUEST.getCode())
+        .put(name)
         .array();
 
     val response = new MessageDeserializer().deserialize(bytes, Stop.class);
-
-    assertNotNull(response);
-    assertEquals(name, response.getName());
+    assertThat(response.getName())
+        .isEqualTo(name);
   }
 }

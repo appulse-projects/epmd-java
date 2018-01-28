@@ -17,18 +17,15 @@
 package io.appulse.epmd.java.core.model.response;
 
 import static io.appulse.epmd.java.core.model.NodeType.R4_HIDDEN;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static io.appulse.epmd.java.core.model.Protocol.UDP;
 import static io.appulse.epmd.java.core.model.Version.R4;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.nio.ByteBuffer;
+import static io.appulse.epmd.java.core.model.Tag.PORT2_RESPONSE;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
 import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
+import io.appulse.utils.Bytes;
 
 import lombok.val;
 import org.junit.Test;
@@ -42,35 +39,32 @@ public class NodeInfoTest {
 
   @Test
   public void serializeNok () {
-    val expected = ByteBuffer.allocate(Byte.BYTES + 1)
-        .put((byte) 119)
-        .put((byte) 1)
+    val expected = Bytes.allocate()
+        .put1B(PORT2_RESPONSE.getCode())
+        .put1B(1)
         .array();
 
     val request = NodeInfo.builder()
         .ok(false)
         .build();
 
-    val bytes = new MessageSerializer().serialize(request);
-
-    assertNotNull(bytes);
-    assertArrayEquals(expected, bytes);
+    assertThat(new MessageSerializer().serialize(request))
+        .isEqualTo(expected);
   }
 
   @Test
   public void serializeOk () {
     val name = "popa";
-
-    val expected = ByteBuffer.allocate(Byte.BYTES + 11 + name.getBytes().length)
-        .put((byte) 119)
-        .put((byte) 0)
-        .putShort((short) 8080)
-        .put((byte) 104)
-        .put((byte) 1)
-        .putShort((short) 1)
-        .putShort((short) 1)
-        .putShort((short) name.getBytes().length)
-        .put(name.getBytes())
+    val expected = Bytes.allocate()
+        .put1B(PORT2_RESPONSE.getCode())
+        .put1B(0)
+        .put2B(8080)
+        .put1B(104)
+        .put1B(1)
+        .put2B(1)
+        .put2B(1)
+        .put2B(name.getBytes().length)
+        .put(name)
         .array();
 
     val request = NodeInfo.builder()
@@ -83,68 +77,77 @@ public class NodeInfoTest {
         .name(name)
         .build();
 
-    val bytes = new MessageSerializer().serialize(request);
-
-    assertNotNull(bytes);
-    assertArrayEquals(expected, bytes);
+    assertThat(new MessageSerializer().serialize(request))
+        .isEqualTo(expected);
   }
 
-//   @Test
+  @Test
   public void deserializeNok () {
-    val bytes = ByteBuffer.allocate(Byte.BYTES + 1)
-        .put((byte) 119)
-        .put((byte) 1)
+    val bytes = Bytes.allocate()
+        .put1B(PORT2_RESPONSE.getCode())
+        .put1B(1)
         .array();
 
     val response = new MessageDeserializer().deserialize(bytes, NodeInfo.class);
 
-    assertNotNull(response);
-    assertEquals(Boolean.FALSE, response.isOk());
-    assertFalse(response.getPort().isPresent());
-    assertFalse(response.getType().isPresent());
-    assertFalse(response.getProtocol().isPresent());
-    assertFalse(response.getHigh().isPresent());
-    assertFalse(response.getLow().isPresent());
-    assertFalse(response.getName().isPresent());
+    assertThat(response).isNotNull();
+    assertThat(response.isOk()).isFalse();
+
+    assertThat(response.getPort())
+        .isNotPresent();
+
+    assertThat(response.getType())
+        .isNotPresent();
+
+    assertThat(response.getProtocol())
+        .isNotPresent();
+
+    assertThat(response.getHigh())
+        .isNotPresent();
+
+    assertThat(response.getLow())
+        .isNotPresent();
+
+    assertThat(response.getName())
+        .isNotPresent();
   }
 
-//   @Test
+  @Test
   public void deserializeOk () {
     val name = "popa";
-
-    val bytes = ByteBuffer.allocate(Byte.BYTES + 11 + name.getBytes().length)
-        .put((byte) 119)
-        .put((byte) 0)
-        .putShort((short) 8080)
-        .put((byte) 104)
-        .put((byte) 1)
-        .putShort((short) 1)
-        .putShort((short) 1)
-        .putShort((short) name.getBytes().length)
-        .put(name.getBytes())
+    val bytes = Bytes.allocate()
+        .put1B(PORT2_RESPONSE.getCode())
+        .put1B(0)
+        .put2B(8080)
+        .put1B(104)
+        .put1B(1)
+        .put2B(1)
+        .put2B(1)
+        .put2B(name.getBytes().length)
+        .put(name, ISO_8859_1)
         .array();
 
     val response = new MessageDeserializer().deserialize(bytes, NodeInfo.class);
 
-    assertNotNull(response);
-    assertEquals(true, response.isOk());
+    assertThat(response).isNotNull();
+    assertThat(response.isOk()).isTrue();
 
-    assertTrue(response.getPort().isPresent());
-    assertEquals(8080, (int) response.getPort().get());
+    assertThat(response.getPort())
+        .hasValue(8080);
 
-    assertTrue(response.getType().isPresent());
-    assertEquals(R4_HIDDEN, response.getType().get());
+    assertThat(response.getType())
+        .hasValue(R4_HIDDEN);
 
-    assertTrue(response.getProtocol().isPresent());
-    assertEquals(UDP, response.getProtocol().get());
+    assertThat(response.getProtocol())
+        .hasValue(UDP);
 
-    assertTrue(response.getHigh().isPresent());
-    assertEquals(R4, response.getHigh().get());
+    assertThat(response.getHigh())
+        .hasValue(R4);
 
-    assertTrue(response.getLow().isPresent());
-    assertEquals(R4, response.getLow().get());
+    assertThat(response.getLow())
+        .hasValue(R4);
 
-    assertTrue(response.getName().isPresent());
-    assertEquals(name, response.getName().get());
+    assertThat(response.getName())
+        .hasValue(name);
   }
 }

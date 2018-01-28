@@ -17,18 +17,13 @@
 package io.appulse.epmd.java.core.model.response;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.nio.ByteBuffer;
 
 import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
 import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
 import io.appulse.epmd.java.core.model.response.EpmdInfo.NodeDescription;
+import io.appulse.utils.Bytes;
 
 import lombok.val;
 import org.junit.Test;
@@ -42,18 +37,16 @@ public class EpmdInfoTest {
 
   @Test
   public void serializeEmpty () {
-    val expected = ByteBuffer.allocate(Integer.BYTES)
-        .putInt(8080)
+    val expected = Bytes.allocate()
+        .put4B(8080)
         .array();
 
     val request = EpmdInfo.builder()
         .port(8080)
         .build();
 
-    val bytes = new MessageSerializer().serialize(request);
-
-    assertNotNull(bytes);
-    assertArrayEquals(expected, bytes);
+    assertThat(new MessageSerializer().serialize(request))
+        .isEqualTo(expected);
   }
 
   @Test
@@ -62,9 +55,9 @@ public class EpmdInfoTest {
               "name popa2 at port 5678\n" +
               "name popa3 at port 9000";
 
-    val expected = ByteBuffer.allocate(Integer.BYTES + str.getBytes(ISO_8859_1).length)
-        .putInt(8080)
-        .put(str.getBytes(ISO_8859_1))
+    val expected = Bytes.allocate()
+        .put4B(8080)
+        .put(str, ISO_8859_1)
         .array();
 
     val request = EpmdInfo.builder()
@@ -86,59 +79,51 @@ public class EpmdInfoTest {
         )
         .build();
 
-    val bytes = new MessageSerializer().serialize(request);
-
-    assertNotNull(bytes);
-    assertArrayEquals(expected, bytes);
+    assertThat(new MessageSerializer().serialize(request))
+        .isEqualTo(expected);
   }
 
-//   @Test
+  @Test
   public void deserializeEmpty () {
-    val bytes = ByteBuffer.allocate(Integer.BYTES)
-        .putInt(8080)
+    val bytes = Bytes.allocate()
+        .put4B(8080)
         .array();
 
     val response = new MessageDeserializer().deserialize(bytes, EpmdInfo.class);
 
-    assertNotNull(response);
+    assertThat(response)
+        .isNotNull();
 
-    assertThat(response.getPort()).isEqualTo(8080);
+    assertThat(response.getPort())
+        .isEqualTo(8080);
 
-    assertNotNull(response.getNodes());
-    assertTrue(response.getNodes().isEmpty());
+    assertThat(response.getNodes())
+        .isEmpty();
   }
 
-//   @Test
+  @Test
   public void deserializeNotEmpty () {
     val str = "name popa1 at port 1234\n" +
               "name popa2 at port 5678\n" +
               "name popa3 at port 9000";
 
-    val bytes = ByteBuffer.allocate(Integer.BYTES + str.getBytes(ISO_8859_1).length)
-        .putInt(8080)
-        .put(str.getBytes(ISO_8859_1))
+    val bytes = Bytes.allocate()
+        .put4B(8080)
+        .put(str, ISO_8859_1)
         .array();
 
     val response = new MessageDeserializer().deserialize(bytes, EpmdInfo.class);
 
-    assertNotNull(response);
+    assertThat(response)
+        .isNotNull();
 
-    assertThat(response.getPort()).isEqualTo(8080);
+    assertThat(response.getPort())
+        .isEqualTo(8080);
 
-    assertNotNull(response.getNodes());
-    assertFalse(response.getNodes().isEmpty());
-    assertEquals(3, response.getNodes().size());
-
-    val node1 = response.getNodes().get(0);
-    assertEquals("popa1", node1.getName());
-    assertThat(node1.getPort()).isEqualTo(1234);
-
-    val node2 = response.getNodes().get(1);
-    assertEquals("popa2", node2.getName());
-    assertThat(node2.getPort()).isEqualTo(5678);
-
-    val node3 = response.getNodes().get(2);
-    assertEquals("popa3", node3.getName());
-    assertThat(node3.getPort()).isEqualTo(9000);
+    assertThat(response.getNodes())
+        .extracting("name", "port")
+        .contains(tuple("popa1", 1234),
+                  tuple("popa2", 5678),
+                  tuple("popa3", 9000));
   }
 }

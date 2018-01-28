@@ -18,9 +18,9 @@ package io.appulse.epmd.java.core.model.request;
 
 import static io.appulse.epmd.java.core.model.Tag.NAMES_REQUEST;
 
+import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.epmd.java.core.mapper.ExpectedResponse;
 import io.appulse.epmd.java.core.mapper.Message;
-import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.epmd.java.core.model.response.EpmdInfo;
 import io.appulse.utils.Bytes;
 

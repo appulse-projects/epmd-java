@@ -18,6 +18,7 @@ package io.appulse.epmd.java.core.mapper.serializer;
 
 import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.utils.Bytes;
+
 import lombok.val;
 
 /**

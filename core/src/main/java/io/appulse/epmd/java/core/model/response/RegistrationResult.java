@@ -19,8 +19,8 @@ package io.appulse.epmd.java.core.model.response;
 import static io.appulse.epmd.java.core.model.Tag.ALIVE2_RESPONSE;
 import static lombok.AccessLevel.PRIVATE;
 
-import io.appulse.epmd.java.core.mapper.Message;
 import io.appulse.epmd.java.core.mapper.DataSerializable;
+import io.appulse.epmd.java.core.mapper.Message;
 import io.appulse.utils.Bytes;
 
 import lombok.AllArgsConstructor;
@@ -30,7 +30,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
-import lombok.val;
 
 /**
  *
@@ -64,9 +63,8 @@ public class RegistrationResult implements DataSerializable {
   @Override
   public void read (@NonNull Bytes bytes) {
     ok = bytes.getByte() == 0;
-
     if (ok) {
-      creation = bytes.getInt();
+      creation = bytes.getShort();
     }
   }
 }

@@ -25,8 +25,8 @@ import static lombok.AccessLevel.PRIVATE;
 
 import java.util.Optional;
 
-import io.appulse.epmd.java.core.mapper.Message;
 import io.appulse.epmd.java.core.mapper.DataSerializable;
+import io.appulse.epmd.java.core.mapper.Message;
 import io.appulse.epmd.java.core.model.NodeType;
 import io.appulse.epmd.java.core.model.Protocol;
 import io.appulse.epmd.java.core.model.Version;
@@ -37,6 +37,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
+import lombok.val;
 
 /**
  *
@@ -78,6 +79,12 @@ public class NodeInfo implements DataSerializable {
     ok = true;
     port = of((int) bytes.getShort());
     type = of(bytes.getByte()).map(NodeType::of);
+    protocol = of(bytes.getByte()).map(Protocol::of);
+    high = of(bytes.getShort()).map(Version::of);
+    low = of(bytes.getShort()).map(Version::of);
+
+    val length = bytes.getShort();
+    name = of(bytes.getString(length, ISO_8859_1));
   }
 
   boolean ok;

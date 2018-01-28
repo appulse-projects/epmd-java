@@ -16,12 +16,11 @@
 
 package io.appulse.epmd.java.core.mapper.deserializer;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.Arrays.asList;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 import java.util.Collections;
 import java.util.HashSet;

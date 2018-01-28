@@ -16,18 +16,15 @@
 
 package io.appulse.epmd.java.core.model.request;
 
+import static io.appulse.epmd.java.core.model.Tag.ALIVE2_REQUEST;
+import static org.assertj.core.api.Assertions.assertThat;
 import static io.appulse.epmd.java.core.model.NodeType.R3_HIDDEN;
 import static io.appulse.epmd.java.core.model.Protocol.SCTP;
 import static io.appulse.epmd.java.core.model.Version.R6;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.nio.ByteBuffer;
 
 import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
 import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
+import io.appulse.utils.Bytes;
 
 import lombok.val;
 import org.junit.Test;
@@ -42,18 +39,17 @@ public class RegistrationTest {
   @Test
   public void serialize () {
     val name = "popa";
-
-    val expected = ByteBuffer.allocate(Short.BYTES + (13 + name.getBytes().length))
-        .putShort((short) (13 + name.getBytes().length))
-        .put((byte) 120)
-        .putShort((short) 8080)
-        .put(R3_HIDDEN.getCode())
-        .put(SCTP.getCode())
-        .putShort(R6.getCode())
-        .putShort(R6.getCode())
-        .putShort((short) name.getBytes().length)
-        .put(name.getBytes())
-        .putShort((short) 0)
+    val expected = Bytes.allocate()
+        .put2B(13 + name.getBytes().length)
+        .put1B(ALIVE2_REQUEST.getCode())
+        .put2B(8080)
+        .put1B(R3_HIDDEN.getCode())
+        .put1B(SCTP.getCode())
+        .put2B(R6.getCode())
+        .put2B(R6.getCode())
+        .put2B(name.getBytes().length)
+        .put(name)
+        .put2B(0)
         .array();
 
     val request = Registration.builder()
@@ -65,37 +61,47 @@ public class RegistrationTest {
         .name("popa")
         .build();
 
-    val bytes = new MessageSerializer().serialize(request);
-
-    assertNotNull(bytes);
-    assertArrayEquals(expected, bytes);
+    assertThat(new MessageSerializer().serialize(request))
+        .isEqualTo(expected);
   }
 
-  // @Test
+  @Test
   public void deserialize () {
     val name = "popa";
-
-    val bytes = ByteBuffer.allocate(Short.BYTES + (13 + name.getBytes().length))
-        .putShort((short) (13 + name.getBytes().length))
-        .put((byte) 120)
-        .putShort((short) 8080)
-        .put(R3_HIDDEN.getCode())
-        .put(SCTP.getCode())
-        .putShort(R6.getCode())
-        .putShort(R6.getCode())
-        .putShort((short) name.getBytes().length)
-        .put(name.getBytes())
-        .putShort((short) 0)
+    val bytes = Bytes.allocate()
+        .put2B(13 + name.getBytes().length)
+        .put1B(ALIVE2_REQUEST.getCode())
+        .put2B(8080)
+        .put1B(R3_HIDDEN.getCode())
+        .put1B(SCTP.getCode())
+        .put2B(R6.getCode())
+        .put2B(R6.getCode())
+        .put2B(name.getBytes().length)
+        .put(name)
+        .put2B(0)
         .array();
 
     val response = new MessageDeserializer().deserialize(bytes, Registration.class);
 
-    assertNotNull(response);
-    assertThat(response.getPort()).isEqualTo(8080);
-    assertEquals(R3_HIDDEN, response.getType());
-    assertEquals(SCTP, response.getProtocol());
-    assertEquals(R6, response.getHigh());
-    assertEquals(R6, response.getLow());
-    assertEquals(name, response.getName());
+    assertThat(response)
+        .isNotNull();
+
+    assertThat(response.getPort())
+        .isEqualTo(8080);
+
+    assertThat(response.getType())
+        .isEqualTo(R3_HIDDEN);
+
+    assertThat(response.getProtocol())
+        .isEqualTo(SCTP);
+
+    assertThat(response.getHigh())
+        .isEqualTo(R6);
+
+    assertThat(response.getLow())
+        .isEqualTo(R6);
+
+    assertThat(response.getName())
+        .isEqualTo(name);
   }
 }

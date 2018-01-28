@@ -20,9 +20,9 @@ import static io.appulse.epmd.java.core.model.Tag.PORT_PLEASE2_REQUEST;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static lombok.AccessLevel.PRIVATE;
 
+import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.epmd.java.core.mapper.ExpectedResponse;
 import io.appulse.epmd.java.core.mapper.Message;
-import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.epmd.java.core.model.response.NodeInfo;
 import io.appulse.utils.Bytes;
 

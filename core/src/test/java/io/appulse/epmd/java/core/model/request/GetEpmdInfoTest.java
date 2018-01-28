@@ -16,14 +16,12 @@
 
 package io.appulse.epmd.java.core.model.request;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.nio.ByteBuffer;
+import static io.appulse.epmd.java.core.model.Tag.NAMES_REQUEST;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
 import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
+import io.appulse.utils.Bytes;
 
 import lombok.val;
 import org.junit.Test;
@@ -37,29 +35,25 @@ public class GetEpmdInfoTest {
 
   @Test
   public void serialize () {
-    val expected = ByteBuffer.allocate(Short.BYTES + Byte.BYTES)
-        .putShort((short) Byte.BYTES)
-        .put((byte) 110)
+    val expected = Bytes.allocate()
+        .put2B(1)
+        .put1B(NAMES_REQUEST.getCode())
         .array();
 
     val request = new GetEpmdInfo();
-
-    val bytes = new MessageSerializer().serialize(request);
-
-    assertNotNull(bytes);
-    assertArrayEquals(expected, bytes);
+    assertThat(new MessageSerializer().serialize(request))
+        .isEqualTo(expected);
   }
 
-  // @Test
+  @Test
   public void deserialize () {
-    val bytes = ByteBuffer.allocate(Short.BYTES + Byte.BYTES)
-        .putShort((short) Byte.BYTES)
-        .put((byte) 110)
+    val bytes = Bytes.allocate()
+        .put2B(1)
+        .put1B(NAMES_REQUEST.getCode())
         .array();
 
-    val response = new MessageDeserializer().deserialize(bytes, GetEpmdInfo.class);
-
-    assertNotNull(response);
-    assertTrue(response instanceof GetEpmdInfo);
+    assertThat(new MessageDeserializer().deserialize(bytes, GetEpmdInfo.class))
+        .isNotNull()
+        .isInstanceOf(GetEpmdInfo.class);
   }
 }
