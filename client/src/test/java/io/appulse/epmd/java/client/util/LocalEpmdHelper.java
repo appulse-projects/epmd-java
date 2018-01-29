@@ -29,7 +29,7 @@ import lombok.val;
 /**
  *
  * @author Artem Labazin
- * @since 0.2.1
+ * @since 0.2.2
  */
 public final class LocalEpmdHelper {
 

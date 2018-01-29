@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add EPMD server.
 - Add more unit and integration tests.
 
-## [0.2.1](https://github.com/appulse-projects/epmd-java/releases/tag/0.2.1) - 2018-01-29
+## [0.2.2](https://github.com/appulse-projects/epmd-java/releases/tag/0.2.2) - 2018-01-29
 
 ### Added
 

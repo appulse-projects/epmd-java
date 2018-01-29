@@ -44,7 +44,7 @@ import org.testcontainers.containers.output.OutputFrame;
 /**
  *
  * @author Artem Labazin
- * @since 0.2.1
+ * @since 0.2.2
  */
 @Slf4j
 @FieldDefaults(level = PRIVATE)

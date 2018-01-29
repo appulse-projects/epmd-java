@@ -22,7 +22,7 @@ import org.junit.runner.Description;
 /**
  *
  * @author Artem Labazin
- * @since 0.2.1
+ * @since 0.2.2
  */
 public class TestNamePrinter extends TestWatcher {
 

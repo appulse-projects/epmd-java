@@ -19,7 +19,7 @@ package io.appulse.epmd.java.client.exception;
 /**
  *
  * @author Artem Labazin
- * @since 0.2.1
+ * @since 0.2.2
  */
 public class EpmdRegistrationException extends RuntimeException  {
 
