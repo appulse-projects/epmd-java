@@ -34,9 +34,9 @@ deploy:
     - "core/target/core-$project_version.jar"
     - "core/target/core-$project_version-javadoc.jar"
     - "core/target/core-$project_version-sources.jar"
-    - "client/target/core-$project_version.jar"
-    - "client/target/core-$project_version-javadoc.jar"
-    - "client/target/core-$project_version-sources.jar"
+    - "client/target/client-$project_version.jar"
+    - "client/target/client-$project_version-javadoc.jar"
+    - "client/target/client-$project_version-sources.jar"
   skip_cleanup: true
   on:
     tags: true
