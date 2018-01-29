@@ -73,8 +73,8 @@ public final class LocalEpmdHelper {
     if (!isRunning()) {
       return;
     }
-    val pid = getEpmdPid();
-    val builder = new ProcessBuilder("kill", "-9", Integer.toString(pid));
+    val pids = getEpmdPids();
+    val builder = new ProcessBuilder("kill", "-9", pids);
     val process = builder.start();
     if (!process.waitFor(1, MINUTES)) {
       process.destroy();
@@ -98,7 +98,7 @@ public final class LocalEpmdHelper {
   }
 
   @SneakyThrows
-  private static int getEpmdPid () {
+  private static String getEpmdPids () {
     val builder = new ProcessBuilder("pgrep", "-f", "epmd");
     val process = builder.start();
     if (!process.waitFor(1, MINUTES)) {
@@ -114,10 +114,10 @@ public final class LocalEpmdHelper {
     try (val reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
       String line;
       while ((line = reader.readLine()) != null) {
-        result.append(line).append('\n');
+        result.append(line).append(' ');
       }
     }
-    return Integer.parseInt(result.toString().trim());
+    return result.toString().trim();
   }
 
   private LocalEpmdHelper () {
