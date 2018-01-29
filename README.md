@@ -7,6 +7,7 @@ This is the set of projects, which implementing EPMD server and client.
 
 - [Core description](./core/README.md)
 - [Client description](./client/README.md)
+- [Server description](./server/README.md)
 
 ## Development
 
