@@ -78,11 +78,11 @@ public final class LocalEpmdHelper {
     val process = builder.start();
     if (!process.waitFor(1, MINUTES)) {
       process.destroy();
-      throw new RuntimeException("Killing local EPMD is too long, pid: " + pid);
+      throw new RuntimeException("Killing local EPMD is too long, pid: " + pids);
     }
     if (process.exitValue() != 0) {
       process.destroy();
-      throw new RuntimeException("Couldn't kill local EPMD with PID " + pid);
+      throw new RuntimeException("Couldn't kill local EPMD with PID " + pids);
     }
   }
 
