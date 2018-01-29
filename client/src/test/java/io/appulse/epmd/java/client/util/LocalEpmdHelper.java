@@ -25,19 +25,17 @@ import java.io.InputStreamReader;
 
 import lombok.SneakyThrows;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Artem Labazin
  * @since 0.2.1
  */
-@Slf4j
 public final class LocalEpmdHelper {
 
   @SneakyThrows
   public static boolean exists () {
-    val builder = new ProcessBuilder("which", "epmd");
+    val builder = new ProcessBuilder("epmd", "--help");
     Process process;
     try {
       process = builder.start();
@@ -48,7 +46,7 @@ public final class LocalEpmdHelper {
       process.destroy();
       return false;
     }
-    return process.exitValue() == 0;
+    return process.exitValue() != 127;
   }
 
   @SneakyThrows
