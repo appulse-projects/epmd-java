@@ -25,12 +25,14 @@ import java.io.InputStreamReader;
 
 import lombok.SneakyThrows;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Artem Labazin
  * @since 0.2.1
  */
+@Slf4j
 public final class LocalEpmdHelper {
 
   @SneakyThrows
@@ -80,15 +82,15 @@ public final class LocalEpmdHelper {
       process.destroy();
       throw new RuntimeException("Killing local EPMD is too long, pid: " + pids);
     }
-    // if (process.exitValue() != 0) {
-    //   process.destroy();
-    //   throw new RuntimeException("Couldn't kill local EPMD with PID " + pids);
-    // }
+    if (process.exitValue() != 0) {
+      process.destroy();
+      throw new RuntimeException("Couldn't kill local EPMD with PID " + pids);
+    }
   }
 
   @SneakyThrows
   public static boolean isRunning () {
-    val builder = new ProcessBuilder("pgrep", "-f", "epmd");
+    val builder = new ProcessBuilder("epmd", "-names");
     val process = builder.start();
     if (!process.waitFor(1, MINUTES)) {
       process.destroy();

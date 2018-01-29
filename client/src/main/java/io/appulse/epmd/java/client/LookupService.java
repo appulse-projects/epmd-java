@@ -19,7 +19,6 @@ package io.appulse.epmd.java.client;
 import static java.util.Optional.ofNullable;
 import static lombok.AccessLevel.PRIVATE;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Map;
 import java.util.Optional;
@@ -62,8 +61,6 @@ class LookupService {
       val request = new GetNodeInfo(key.getNode());
       try (val connection = new Connection(key.getAddress(), key.getPort())) {
         return connection.send(request, NodeInfo.class);
-      } catch (IOException ex) {
-        return null;
       }
     };
   }
@@ -96,11 +93,15 @@ class LookupService {
     val tokens = node.split("@", 2);
     val shortName = tokens[0];
 
-    log.debug("Looking up node {} at {}", shortName, address);
+    log.debug("Looking up node '{}' at '{}'", shortName, address);
 
     val descriptor = new NodeDescriptor(shortName, address, port);
     val nodeInfo = CACHE.compute(descriptor, COMPUTE);
     return ofNullable(nodeInfo);
+  }
+
+  void clearCache () {
+    CACHE.clear();
   }
 
   @Value

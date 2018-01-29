@@ -20,7 +20,6 @@ import static io.appulse.epmd.java.core.model.response.KillResult.OK;
 import static lombok.AccessLevel.PRIVATE;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
 
@@ -100,7 +99,6 @@ public final class EpmdClient implements Closeable {
     return register(request);
   }
 
-  @SneakyThrows
   public int register (@NonNull Registration request) {
     log.debug("Registering: {}", request.getName());
     val connection = getLocalConnection();
@@ -122,7 +120,6 @@ public final class EpmdClient implements Closeable {
     return response.getCreation();
   }
 
-  @SneakyThrows
   public List<EpmdDump.NodeDump> dumpAll () {
     try (val connection = new Connection(address, port)) {
       val dump = connection.send(new GetEpmdDump(), EpmdDump.class);
@@ -139,7 +136,7 @@ public final class EpmdClient implements Closeable {
     try (val connection = new Connection(address, port)) {
       val result = connection.send(new Kill(), KillResult.class);
       return result == OK;
-    } catch (IOException ex) {
+    } catch (RuntimeException ex) {
       return false;
     } finally {
       close();
@@ -160,6 +157,10 @@ public final class EpmdClient implements Closeable {
       connection.close();
       log.debug("EPMD client was closed");
     }
+  }
+
+  public void clearCaches () {
+    lookupService.clearCache();
   }
 
   @Override

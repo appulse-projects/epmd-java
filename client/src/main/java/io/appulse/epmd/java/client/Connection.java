@@ -67,24 +67,32 @@ class Connection implements Closeable {
 
   Socket socket = new Socket();
 
-  @SneakyThrows
-  public void send (@NonNull Object request) {
+  public void send (@NonNull Object request) throws EpmdConnectionException {
     log.debug("Sending: {}", request);
 
     val bytes = SERIALIZER.serialize(request);
 
     connect();
 
-    socket.getOutputStream().write(bytes);
-    socket.getOutputStream().flush();
+    try {
+      socket.getOutputStream().write(bytes);
+      socket.getOutputStream().flush();
+    } catch (IOException ex) {
+      throw new EpmdConnectionException(ex);
+    }
 
     log.debug("Message {} was sent", request);
   }
 
-  public <T> T send (@NonNull Object request, @NonNull Class<T> responseType) throws IOException {
+  public <T> T send (@NonNull Object request, @NonNull Class<T> responseType) throws EpmdConnectionException {
     send(request);
 
-    val messageBytes = read(responseType);
+    byte[] messageBytes;
+    try {
+      messageBytes = read(responseType);
+    } catch (IOException ex) {
+      throw new EpmdConnectionException(ex);
+    }
 
     log.debug("Received bytes:\n{}", messageBytes);
     val result = DESERIALIZER.deserialize(messageBytes, responseType);

@@ -22,6 +22,7 @@ import static io.appulse.epmd.java.core.model.Version.R6;
 import static io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump.Status.ACTIVE;
 import static lombok.AccessLevel.PRIVATE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.appulse.epmd.java.client.exception.EpmdConnectionException;
 import io.appulse.epmd.java.client.util.CheckLocalEpmdExists;
@@ -63,6 +64,7 @@ public class LocalEpmdClientTest {
   @After
   public void after () {
     if (client != null) {
+      client.clearCaches();
       client.close();
       client = null;
     }
@@ -101,14 +103,18 @@ public class LocalEpmdClientTest {
     });
   }
 
-  @Test(expected = EpmdConnectionException.class)
-  public void registerBroken () {
+  @Test
+  public void connectionBroken () {
     val creation = client.register("register", 8971, R3_ERLANG, TCP, R6, R6);
     assertThat(creation).isNotEqualTo(0);
 
     LocalEpmdHelper.kill();
 
-    client.lookup("register");
+    assertThat(LocalEpmdHelper.isRunning())
+        .isFalse();
+
+    assertThatExceptionOfType(EpmdConnectionException.class)
+        .isThrownBy(() -> client.lookup("register"));
   }
 
   @Test
