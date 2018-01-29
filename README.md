@@ -5,7 +5,8 @@
 
 This is the set of projects, which implementing EPMD server and client.
 
-- [Core description](./core/README.md);
+- [Core description](./core/README.md)
+- [Client description](./client/README.md)
 
 ## Development
 
@@ -31,19 +32,20 @@ For building routine automation, I am using [maven](https://maven.apache.org).
 To build the project, do the following:
 
 ```bash
-$> mvn clean package
+$> mvn clean compile
 ...
 [INFO] ------------------------------------------------------------------------
 [INFO] Reactor Summary:
 [INFO]
-[INFO] [EPMD] Parent ...................................... SUCCESS [  1.174 s]
-[INFO] [EPMD] Core ........................................ SUCCESS [ 22.003 s]
+[INFO] [EPMD] Parent ...................................... SUCCESS [  0.091 s]
+[INFO] [EPMD] Core ........................................ SUCCESS [ 11.966 s]
+[INFO] [EPMD] Client ...................................... SUCCESS [  5.504 s]
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 23.966 s
-[INFO] Finished at: 2018-01-26T13:58:14+03:00
-[INFO] Final Memory: 48M/622M
+[INFO] Total time: 18.277 s
+[INFO] Finished at: 2018-01-29T10:23:34+03:00
+[INFO] Final Memory: 49M/584M
 [INFO] ------------------------------------------------------------------------
 ```
 

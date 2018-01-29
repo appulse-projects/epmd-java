@@ -114,5 +114,4 @@ log*.txt*
 .vscode/
 
 # Secure incomplete sub-projects
-client/
 server/

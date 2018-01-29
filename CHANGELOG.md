@@ -9,14 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-- Add EPMD client.
 - Add EPMD server.
 - Add more unit and integration tests.
 
-## [0.1.0](https://github.com/appulse-projects/epmd-java/releases/tag/0.1.0) - 2018-01-29
+## [0.2.1](https://github.com/appulse-projects/epmd-java/releases/tag/0.2.1) - 2018-01-29
 
 ### Added
 
+- Add EPMD client.
 - Serialization/Deserialization exceptions in `Core`.
 
 ### Changed
