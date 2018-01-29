@@ -80,10 +80,10 @@ public final class LocalEpmdHelper {
       process.destroy();
       throw new RuntimeException("Killing local EPMD is too long, pid: " + pids);
     }
-    if (process.exitValue() != 0) {
-      process.destroy();
-      throw new RuntimeException("Couldn't kill local EPMD with PID " + pids);
-    }
+    // if (process.exitValue() != 0) {
+    //   process.destroy();
+    //   throw new RuntimeException("Couldn't kill local EPMD with PID " + pids);
+    // }
   }
 
   @SneakyThrows
