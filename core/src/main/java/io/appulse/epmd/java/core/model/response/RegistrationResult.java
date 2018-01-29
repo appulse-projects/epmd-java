@@ -41,7 +41,7 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Message(value = ALIVE2_RESPONSE)
+@Message(value = ALIVE2_RESPONSE, lengthBytes = 0)
 @FieldDefaults(level = PRIVATE)
 public class RegistrationResult implements DataSerializable {
 

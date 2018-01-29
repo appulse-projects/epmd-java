@@ -24,6 +24,10 @@ import static java.util.Optional.ofNullable;
 import java.util.List;
 
 import io.appulse.epmd.java.core.mapper.Message;
+import io.appulse.epmd.java.core.mapper.deserializer.exception.InvalidReceivedMessageLengthException;
+import io.appulse.epmd.java.core.mapper.deserializer.exception.InvalidReceivedMessageTagException;
+import io.appulse.epmd.java.core.mapper.deserializer.exception.NoApplicableDeserializerException;
+import io.appulse.epmd.java.core.mapper.exception.MessageAnnotationMissingException;
 import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.utils.Bytes;
 
@@ -50,24 +54,34 @@ public final class MessageDeserializer {
   public <T> T deserialize (byte[] bytes, Class<T> type) {
     val buffer = ofNullable(bytes)
         .map(Bytes::wrap)
-        .orElseThrow(RuntimeException::new);
+        .orElseThrow(NullPointerException::new);
 
     val annotation = ofNullable(type)
         .map(it -> it.getAnnotation(Message.class))
-        .orElseThrow(RuntimeException::new);
+        .orElseThrow(MessageAnnotationMissingException::new);
 
-    val lengthBytes = annotation.lengthBytes();
-    if (lengthBytes > 0 && asInteger(buffer.getBytes(lengthBytes)) != buffer.remaining()) {
-      throw new RuntimeException();
+    if (annotation.lengthBytes() > 0) {
+      val receivedMessageLength = asInteger(buffer.getBytes(annotation.lengthBytes()));
+      if (receivedMessageLength != buffer.remaining()) {
+        val message = String.format("Expected length is %d - %d bytes, but actual length is %d bytes.",
+                                    annotation.lengthBytes(), receivedMessageLength, buffer.remaining());
+        throw new InvalidReceivedMessageLengthException(message);
+      }
     }
-    if (annotation.value() != UNDEFINED && annotation.value() != Tag.of(buffer.getByte())) {
-      throw new RuntimeException();
+
+    if (annotation.value() != UNDEFINED) {
+      val tag = Tag.of(buffer.getByte());
+      if (annotation.value() != tag) {
+        val message = String.format("Expected tag is: %s, but actual tag is: %s",
+                                    annotation.value(), tag);
+        throw new InvalidReceivedMessageTagException(message);
+      }
     }
 
     return DESERIALIZERS.stream()
         .filter(it -> it.isApplicable(type))
         .findAny()
-        .orElseThrow(RuntimeException::new)
+        .orElseThrow(NoApplicableDeserializerException::new)
         .deserialize(buffer, type);
   }
 }

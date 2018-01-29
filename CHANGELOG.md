@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add EPMD server.
 - Add more unit and integration tests.
 
+## [0.1.0](https://github.com/appulse-projects/epmd-java/releases/tag/0.1.0) - 2018-01-29
+
+### Added
+
+- Serialization/Deserialization exceptions in `Core`.
+
+### Changed
+
+- Fixed `RegistrationResult` length (it doesn't have this by spec).
+
 ## [0.0.2](https://github.com/appulse-projects/epmd-java/releases/tag/0.0.2) - 2018-01-28
 
 ### Changed

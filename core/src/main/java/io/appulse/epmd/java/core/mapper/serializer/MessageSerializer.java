@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.appulse.epmd.java.core.mapper.Message;
+import io.appulse.epmd.java.core.mapper.exception.MessageAnnotationMissingException;
+import io.appulse.epmd.java.core.mapper.serializer.exception.NoApplicableSerializerException;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -51,16 +53,16 @@ public final class MessageSerializer {
   public byte[] serialize (Object obj) {
     Class<?> type = ofNullable(obj)
         .map(Object::getClass)
-        .orElseThrow(RuntimeException::new);
+        .orElseThrow(NullPointerException::new);
 
     val annotation = ofNullable(type)
         .map(it -> it.getAnnotation(Message.class))
-        .orElseThrow(RuntimeException::new);
+        .orElseThrow(MessageAnnotationMissingException::new);
 
     val body = SERIALIZERS.stream()
         .filter(it -> it.isApplicable(type))
         .findAny()
-        .orElseThrow(RuntimeException::new)
+        .orElseThrow(NoApplicableSerializerException::new)
         .serialize(obj, type);
 
     val length = annotation.value() == UNDEFINED

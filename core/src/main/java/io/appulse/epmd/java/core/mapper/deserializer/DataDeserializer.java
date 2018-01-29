@@ -17,6 +17,7 @@
 package io.appulse.epmd.java.core.mapper.deserializer;
 
 import io.appulse.epmd.java.core.mapper.DataSerializable;
+import io.appulse.epmd.java.core.mapper.deserializer.exception.DeserializationException;
 import io.appulse.utils.Bytes;
 
 /**
@@ -27,8 +28,13 @@ import io.appulse.utils.Bytes;
 class DataDeserializer implements Deserializer {
 
   @Override
-  public <T> T deserialize (Bytes bytes, Class<T> type) throws Exception {
-    T result = type.newInstance();
+  public <T> T deserialize (Bytes bytes, Class<T> type) throws DeserializationException {
+    T result;
+    try {
+      result = type.newInstance();
+    } catch (IllegalAccessException | InstantiationException ex) {
+      throw new DeserializationException(ex);
+    }
     ((DataSerializable) result).read(bytes);
     return result;
   }

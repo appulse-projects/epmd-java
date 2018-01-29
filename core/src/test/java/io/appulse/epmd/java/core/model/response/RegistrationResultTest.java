@@ -35,7 +35,6 @@ public class RegistrationResultTest {
   @Test
   public void serialize () {
     val expected = Bytes.allocate()
-        .put2B(4)
         .put1B(ALIVE2_RESPONSE.getCode())
         .put1B(0)
         .put2B(42)
@@ -53,7 +52,6 @@ public class RegistrationResultTest {
   @Test
   public void deserialize () {
     val bytes = Bytes.allocate()
-        .put2B(4)
         .put1B(ALIVE2_RESPONSE.getCode())
         .put1B(0)
         .put2B(42)

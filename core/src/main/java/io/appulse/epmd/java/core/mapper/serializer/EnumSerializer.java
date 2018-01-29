@@ -19,6 +19,8 @@ package io.appulse.epmd.java.core.mapper.serializer;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static lombok.AccessLevel.PRIVATE;
 
+import io.appulse.epmd.java.core.mapper.serializer.exception.SerializationException;
+
 import lombok.experimental.FieldDefaults;
 import lombok.val;
 
@@ -31,7 +33,7 @@ import lombok.val;
 class EnumSerializer implements Serializer {
 
   @Override
-  public byte[] serialize (Object object, Class<?> type) throws Exception {
+  public byte[] serialize (Object object, Class<?> type) throws SerializationException {
     val string = ((Enum<?>) object).name();
     return string.getBytes(ISO_8859_1);
   }

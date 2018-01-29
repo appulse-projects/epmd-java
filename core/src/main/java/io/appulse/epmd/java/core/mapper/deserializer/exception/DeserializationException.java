@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.core.mapper.serializer;
-
-import io.appulse.epmd.java.core.mapper.DataSerializable;
-import io.appulse.epmd.java.core.mapper.serializer.exception.SerializationException;
-import io.appulse.utils.Bytes;
-
-import lombok.val;
+package io.appulse.epmd.java.core.mapper.deserializer.exception;
 
 /**
  *
  * @author Artem Labazin
- * @since 0.0.2
+ * @since 0.1.0
  */
-class DataSerializer implements Serializer {
+public class DeserializationException extends RuntimeException {
 
-  @Override
-  public byte[] serialize (Object object, Class<?> type) throws SerializationException {
-    val body = Bytes.allocate();
-    ((DataSerializable) object).write(body);
-    return body.array();
+  private static final long serialVersionUID = -6918027649527350593L;
+
+  public DeserializationException () {
+    super();
   }
 
-  @Override
-  public boolean isApplicable (Class<?> type) {
-    return DataSerializable.class.isAssignableFrom(type);
+  public DeserializationException (String message) {
+    super(message);
+  }
+
+  public DeserializationException (String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public DeserializationException (Throwable cause) {
+    super(cause);
   }
 }

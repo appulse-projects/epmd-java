@@ -18,19 +18,21 @@ package io.appulse.epmd.java.core.mapper.deserializer;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.Arrays.asList;
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import io.appulse.epmd.java.core.mapper.deserializer.exception.DeserializationException;
+import io.appulse.epmd.java.core.mapper.deserializer.exception.EnumUnknownValueException;
 import io.appulse.utils.Bytes;
-
-import lombok.val;
 
 /**
  *
@@ -57,20 +59,42 @@ class EnumDeserializer implements Deserializer {
 
   @Override
   @SuppressWarnings("unchecked")
-  public <T> T deserialize (Bytes bytes, Class<T> type) throws Exception {
-    val string = bytes.getString(ISO_8859_1);
+  public <T> T deserialize (Bytes bytes, Class<T> type) throws DeserializationException {
+    String string = bytes.getString(ISO_8859_1);
+    T[] constants = type.getEnumConstants();
 
-    val constants = type.getEnumConstants();
-    Optional<Object> constant = Stream.of(constants)
-        .map(it -> (Enum<?>) it)
-        .filter(it -> it.name().equals(string))
-        .findAny()
-        .map(it -> (Object) it);
-
+    Optional<Object> constant = findConstant(constants, string);
     if (constant.isPresent()) {
       return (T) constant.get();
     }
 
+    Optional<Object> methodResult = getByMethod(type, string);
+    if (methodResult.isPresent()) {
+      return (T) methodResult.get();
+    }
+
+    Optional<T> undefined = Stream.of(constants)
+        .filter(it -> ENUM_UNKNOWN_VALUE.contains(it.toString()))
+        .findAny();
+
+    return undefined
+        .orElseThrow(() -> new EnumUnknownValueException(string));
+  }
+
+  @Override
+  public boolean isApplicable (Class<?> type) {
+    return type.isEnum();
+  }
+
+  private Optional<Object> findConstant (Object[] constants, String string) {
+    return Stream.of(constants)
+        .map(it -> (Enum<?>) it)
+        .filter(it -> it.name().equals(string))
+        .findAny()
+        .map(it -> (Object) it);
+  }
+
+  private Optional<Object> getByMethod (Class<?> type, String string) {
     Optional<Method> optional = Stream.of(type.getDeclaredMethods())
         .filter(it -> Modifier.isStatic(it.getModifiers()))
         .filter(it -> Modifier.isPublic(it.getModifiers()))
@@ -80,21 +104,17 @@ class EnumDeserializer implements Deserializer {
         .filter(it -> ENUM_CREATE_METHODS_NAMES.contains(it.getName()))
         .findAny();
 
-    if (optional.isPresent()) {
-      Method method = optional.get();
-      return (T) method.invoke(null, string);
+    if (!optional.isPresent()) {
+      return empty();
     }
 
-    Optional<T> undefined = Stream.of(constants)
-        .filter(it -> ENUM_UNKNOWN_VALUE.contains(it.toString()))
-        .findAny();
-
-    return undefined
-        .orElseThrow(() -> new RuntimeException("Unknown enum value " + string));
-  }
-
-  @Override
-  public boolean isApplicable (Class<?> type) {
-    return type.isEnum();
+    Method method = optional.get();
+    Object result = null;
+    try {
+      result = method.invoke(null, string);
+    } catch (IllegalAccessException | InvocationTargetException ex) {
+      throw new DeserializationException(ex);
+    }
+    return ofNullable(result);
   }
 }

@@ -16,6 +16,8 @@
 
 package io.appulse.epmd.java.core.mapper.serializer;
 
+import io.appulse.epmd.java.core.mapper.serializer.exception.SerializationException;
+
 /**
  *
  * @author Artem Labazin
@@ -23,7 +25,7 @@ package io.appulse.epmd.java.core.mapper.serializer;
  */
 interface Serializer {
 
-  byte[] serialize (Object object, Class<?> type) throws Exception;
+  byte[] serialize (Object object, Class<?> type) throws SerializationException;
 
   boolean isApplicable (Class<?> type);
 }
