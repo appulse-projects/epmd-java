@@ -105,16 +105,21 @@ public class LocalEpmdClientTest {
 
   @Test
   public void connectionBroken () {
-    val creation = client.register("register", 8971, R3_ERLANG, TCP, R6, R6);
-    assertThat(creation).isNotEqualTo(0);
-
     LocalEpmdHelper.kill();
 
     assertThat(LocalEpmdHelper.isRunning())
         .isFalse();
 
     assertThatExceptionOfType(EpmdConnectionException.class)
-        .isThrownBy(() -> client.lookup("register"));
+        .isThrownBy(() -> client.lookup("popa"));
+  }
+
+  @Test
+  public void dumpEmpty () {
+    val nodes = client.dumpAll();
+    assertThat(nodes)
+        .isNotNull()
+        .isEmpty();
   }
 
   @Test
