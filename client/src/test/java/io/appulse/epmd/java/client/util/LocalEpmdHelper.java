@@ -35,7 +35,7 @@ public final class LocalEpmdHelper {
 
   @SneakyThrows
   public static boolean exists () {
-    val builder = new ProcessBuilder("epmd", "--help");
+    val builder = new ProcessBuilder("which", "epmd");
     Process process;
     try {
       process = builder.start();
@@ -46,7 +46,7 @@ public final class LocalEpmdHelper {
       process.destroy();
       return false;
     }
-    return process.exitValue() != 127;
+    return process.exitValue() == 0;
   }
 
   @SneakyThrows
