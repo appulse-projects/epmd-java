@@ -19,20 +19,19 @@ package io.appulse.epmd.java.server.command.kill;
 import static java.util.Optional.ofNullable;
 import static lombok.AccessLevel.PRIVATE;
 
+import io.appulse.epmd.java.client.EpmdClient;
 import io.appulse.epmd.java.server.cli.CommonOptions;
 import io.appulse.epmd.java.server.command.AbstractCommandExecutor;
 import io.appulse.epmd.java.server.command.CommandOptions;
 
 import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Artem Labazin
  * @since 0.3.0
  */
-@Slf4j
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class KillCommandExecutor extends AbstractCommandExecutor {
 
@@ -48,7 +47,13 @@ public class KillCommandExecutor extends AbstractCommandExecutor {
 
   @Override
   public void execute () {
-    log.debug("Options: {}", options);
-    log.info("Kill command was executed");
+    boolean killed = false;
+    try (EpmdClient client = new EpmdClient(getPort())) {
+      killed = client.kill();
+    }
+
+    if (killed) {
+      Runtime.getRuntime().exit(1);
+    }
   }
 }
