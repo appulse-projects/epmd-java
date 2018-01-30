@@ -19,20 +19,21 @@ package io.appulse.epmd.java.server.command.names;
 import static java.util.Optional.ofNullable;
 import static lombok.AccessLevel.PRIVATE;
 
+import io.appulse.epmd.java.client.EpmdClient;
+import io.appulse.epmd.java.core.model.response.EpmdInfo.NodeDescription;
 import io.appulse.epmd.java.server.cli.CommonOptions;
 import io.appulse.epmd.java.server.command.AbstractCommandExecutor;
 import io.appulse.epmd.java.server.command.CommandOptions;
 
 import lombok.NonNull;
+import lombok.val;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Artem Labazin
  * @since 0.3.0
  */
-@Slf4j
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class NamesCommandExecutor extends AbstractCommandExecutor {
 
@@ -48,7 +49,11 @@ public class NamesCommandExecutor extends AbstractCommandExecutor {
 
   @Override
   public void execute () {
-    log.debug("Options: {}", options);
-    log.info("Names command was executed");
+    try (val client = new EpmdClient(getPort())) {
+      client.getNodes()
+          .stream()
+          .map(NodeDescription::getName)
+          .forEach(System.out::println);
+    }
   }
 }
