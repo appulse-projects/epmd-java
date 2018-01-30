@@ -16,7 +16,6 @@
 
 package io.appulse.epmd.java.server.command.names;
 
-import static java.util.Optional.ofNullable;
 import static lombok.AccessLevel.PRIVATE;
 
 import io.appulse.epmd.java.client.EpmdClient;
@@ -25,9 +24,8 @@ import io.appulse.epmd.java.server.cli.CommonOptions;
 import io.appulse.epmd.java.server.command.AbstractCommandExecutor;
 import io.appulse.epmd.java.server.command.CommandOptions;
 
-import lombok.NonNull;
-import lombok.val;
 import lombok.experimental.FieldDefaults;
+import lombok.val;
 
 /**
  *
@@ -37,14 +35,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class NamesCommandExecutor extends AbstractCommandExecutor {
 
-  NamesCommandOptions options;
-
-  public NamesCommandExecutor (CommonOptions commonOptions, @NonNull CommandOptions options) {
+  public NamesCommandExecutor (CommonOptions commonOptions, CommandOptions options) {
     super(commonOptions);
-    this.options = ofNullable(options)
-        .filter(it -> it instanceof NamesCommandOptions)
-        .map(it -> (NamesCommandOptions) it)
-        .orElse(new NamesCommandOptions());
+    assert options != null;
   }
 
   @Override
