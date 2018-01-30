@@ -30,6 +30,7 @@ import io.appulse.epmd.java.core.model.Version;
 import io.appulse.epmd.java.core.model.request.GetEpmdDump;
 import io.appulse.epmd.java.core.model.request.Kill;
 import io.appulse.epmd.java.core.model.request.Registration;
+import io.appulse.epmd.java.core.model.request.Stop;
 import io.appulse.epmd.java.core.model.response.EpmdDump;
 import io.appulse.epmd.java.core.model.response.KillResult;
 import io.appulse.epmd.java.core.model.response.RegistrationResult;
@@ -124,6 +125,12 @@ public final class EpmdClient implements Closeable {
     try (val connection = new Connection(address, port)) {
       val dump = connection.send(new GetEpmdDump(), EpmdDump.class);
       return dump.getNodes();
+    }
+  }
+
+  public void stop (@NonNull String node) {
+    try (val connection = new Connection(address, port)) {
+      connection.send(new Stop(node));
     }
   }
 

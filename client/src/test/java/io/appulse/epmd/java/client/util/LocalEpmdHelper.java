@@ -55,7 +55,7 @@ public final class LocalEpmdHelper {
       kill();
     }
 
-    val builder = new ProcessBuilder("epmd", "-daemon");
+    val builder = new ProcessBuilder("epmd", "-daemon", "-relaxed_command_check");
     val process = builder.start();
     if (!process.waitFor(1, MINUTES)) {
       process.destroy();

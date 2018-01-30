@@ -21,6 +21,8 @@ import io.appulse.epmd.java.server.command.CommandOptions;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+
+import lombok.Getter;
 import lombok.ToString;
 
 /**
@@ -28,6 +30,7 @@ import lombok.ToString;
  * @author Artem Labazin
  * @since 0.3.0
  */
+@Getter
 @ToString
 @Parameters(
     commandNames = "stop",

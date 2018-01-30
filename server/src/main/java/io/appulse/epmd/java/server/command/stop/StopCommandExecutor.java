@@ -19,6 +19,7 @@ package io.appulse.epmd.java.server.command.stop;
 import static java.util.Optional.ofNullable;
 import static lombok.AccessLevel.PRIVATE;
 
+import io.appulse.epmd.java.client.EpmdClient;
 import io.appulse.epmd.java.server.cli.CommonOptions;
 import io.appulse.epmd.java.server.command.AbstractCommandExecutor;
 import io.appulse.epmd.java.server.command.CommandOptions;
@@ -48,7 +49,9 @@ public class StopCommandExecutor extends AbstractCommandExecutor {
 
   @Override
   public void execute () {
-    log.debug("Options: {}", options);
-    log.info("Stop command was executed");
+    try (EpmdClient client = new EpmdClient(getPort())) {
+      client.stop(options.getName());
+    }
+    log.info("Node '{}' was stopped", options.getName());
   }
 }
