@@ -26,6 +26,7 @@ import io.appulse.epmd.java.server.command.names.NamesCommandOptions;
 import io.appulse.epmd.java.server.command.server.ServerCommandOptions;
 import io.appulse.epmd.java.server.command.stop.StopCommandOptions;
 
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.val;
 
@@ -48,7 +49,7 @@ public interface CommandOptions {
   Class<? extends CommandExecutor> getCommandExecutorClass ();
 
   @SneakyThrows
-  default CommandExecutor getComandExecutor (CommonOptions commonOptions) {
+  default CommandExecutor getComandExecutor (@NonNull CommonOptions commonOptions) {
     val type = getCommandExecutorClass();
     val constructor = type.getConstructor(CommonOptions.class, CommandOptions.class);
     return constructor.newInstance(commonOptions, this);

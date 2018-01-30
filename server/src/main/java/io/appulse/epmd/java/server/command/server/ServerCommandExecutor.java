@@ -16,7 +16,7 @@
 
 package io.appulse.epmd.java.server.command.server;
 
-import static java.util.Optional.ofNullable;
+import static java.util.Optional.of;
 import static lombok.AccessLevel.PRIVATE;
 
 import java.io.Closeable;
@@ -29,6 +29,7 @@ import io.appulse.epmd.java.server.cli.CommonOptions;
 import io.appulse.epmd.java.server.command.AbstractCommandExecutor;
 import io.appulse.epmd.java.server.command.CommandOptions;
 
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -50,9 +51,9 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
   Context context;
 
   @SneakyThrows
-  public ServerCommandExecutor (CommonOptions commonOptions, CommandOptions options) {
+  public ServerCommandExecutor (CommonOptions commonOptions, @NonNull CommandOptions options) {
     super(commonOptions);
-    val serverOptions = ofNullable(options)
+    val serverOptions = of(options)
         .filter(it -> it instanceof ServerCommandOptions)
         .map(it -> (ServerCommandOptions) it)
         .orElse(new ServerCommandOptions());

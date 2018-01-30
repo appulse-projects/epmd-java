@@ -23,6 +23,7 @@ import io.appulse.epmd.java.server.cli.CommonOptions;
 import io.appulse.epmd.java.server.command.AbstractCommandExecutor;
 import io.appulse.epmd.java.server.command.CommandOptions;
 
+import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,7 +38,7 @@ public class StopCommandExecutor extends AbstractCommandExecutor {
 
   StopCommandOptions options;
 
-  public StopCommandExecutor (CommonOptions commonOptions, CommandOptions options) {
+  public StopCommandExecutor (CommonOptions commonOptions, @NonNull CommandOptions options) {
     super(commonOptions);
     this.options = ofNullable(options)
         .filter(it -> it instanceof StopCommandOptions)

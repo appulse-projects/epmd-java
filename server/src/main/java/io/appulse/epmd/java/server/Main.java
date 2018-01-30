@@ -18,6 +18,8 @@ package io.appulse.epmd.java.server;
 
 import io.appulse.epmd.java.server.cli.CommandLineParser;
 
+import lombok.NonNull;
+
 /**
  *
  * @author Artem Labazin
@@ -25,7 +27,7 @@ import io.appulse.epmd.java.server.cli.CommandLineParser;
  */
 public final class Main {
 
-  public static void main (String[] args) {
+  public static void main (@NonNull String[] args) {
     try {
       CommandLineParser.parse(args)
           .execute();

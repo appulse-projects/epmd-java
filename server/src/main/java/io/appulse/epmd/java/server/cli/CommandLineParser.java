@@ -29,6 +29,7 @@ import io.appulse.epmd.java.server.command.CommandOptions;
 
 import ch.qos.logback.classic.Logger;
 import com.beust.jcommander.JCommander;
+import lombok.NonNull;
 import lombok.val;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class CommandLineParser {
 
-  public static CommandExecutor parse (String[] args) {
+  public static CommandExecutor parse (@NonNull String[] args) {
     CommonOptions commonOptions = new CommonOptions();
     JCommander commander = buildJCommander(commonOptions);
     try {
@@ -60,7 +61,7 @@ public final class CommandLineParser {
         .orElseThrow(RuntimeException::new);
   }
 
-  private static JCommander buildJCommander (CommonOptions commonOptions) {
+  private static JCommander buildJCommander (@NonNull CommonOptions commonOptions) {
     val bundle = ResourceBundle.getBundle("cli");
     val programName = "java -jar " + getProgramName();
 
@@ -87,7 +88,7 @@ public final class CommandLineParser {
            : "epmd.jar";
   }
 
-  private static String getParsedCommand (JCommander commander, CommonOptions commonOptions) {
+  private static String getParsedCommand (@NonNull JCommander commander, @NonNull CommonOptions commonOptions) {
     if (commonOptions.isHelp()) {
       System.out.println("\nSee the Erlang epmd manual page for info about the usage.\n");
       commander.usage();
