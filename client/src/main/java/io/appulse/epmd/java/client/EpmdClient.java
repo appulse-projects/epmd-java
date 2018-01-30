@@ -100,23 +100,23 @@ public final class EpmdClient implements Closeable {
   }
 
   public int register (@NonNull Registration request) {
-    log.debug("Registering: {}", request.getName());
+    log.debug("Registering: '{}'", request.getName());
     val connection = getLocalConnection();
 
     RegistrationResult response;
     try {
       response = connection.send(request, RegistrationResult.class);
     } catch (Exception ex) {
-      log.error("{} wasn't registered successfully", request.getName());
+      log.error("'{}' wasn't registered successfully", request.getName());
       throw new EpmdRegistrationException(ex);
     }
 
     if (!response.isOk()) {
-      log.error("{} wasn't registered successfully", request.getName());
+      log.error("'{}' wasn't registered successfully", request.getName());
       throw new EpmdRegistrationException();
     }
 
-    log.info("{} was registered successfully", request.getName());
+    log.info("'{}' was registered successfully", request.getName());
     return response.getCreation();
   }
 
@@ -194,7 +194,7 @@ public final class EpmdClient implements Closeable {
       } catch (NumberFormatException | SecurityException ex) {
         throw new RuntimeException(ex);
       }
-      log.debug("Default EPMD port is: {}", port);
+      log.debug("Default EPMD port is: '{}'", port);
       return port;
     }
   }

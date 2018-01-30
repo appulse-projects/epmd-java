@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.appulse.epmd.java.client.exception.EpmdConnectionException;
+import io.appulse.epmd.java.client.exception.EpmdRegistrationException;
 import io.appulse.epmd.java.client.util.CheckLocalEpmdExists;
 import io.appulse.epmd.java.client.util.LocalEpmdHelper;
 import io.appulse.epmd.java.client.util.TestNamePrinter;
@@ -103,15 +104,20 @@ public class LocalEpmdClientTest {
     });
   }
 
-//   @Test
+  @Test
+  public void invalidRegistration () {
+    try (EpmdClient client2 = new EpmdClient(8091)) {
+      assertThatExceptionOfType(EpmdRegistrationException.class)
+          .isThrownBy(() -> client2.register("popa", 8971, R3_ERLANG, TCP, R6, R6));
+    }
+  }
+
+  @Test
   public void connectionBroken () {
-    LocalEpmdHelper.kill();
-
-    assertThat(LocalEpmdHelper.isRunning())
-        .isFalse();
-
-    assertThatExceptionOfType(EpmdConnectionException.class)
-        .isThrownBy(() -> client.lookup("popa"));
+    try (EpmdClient client2 = new EpmdClient(8091)) {
+      assertThatExceptionOfType(EpmdConnectionException.class)
+          .isThrownBy(() -> client2.lookup("popa"));
+    }
   }
 
   @Test
