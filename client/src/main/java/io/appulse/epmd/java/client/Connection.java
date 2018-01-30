@@ -19,7 +19,6 @@ package io.appulse.epmd.java.client;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static lombok.AccessLevel.PRIVATE;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -30,6 +29,7 @@ import io.appulse.epmd.java.client.exception.EpmdConnectionException;
 import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
 import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
 import io.appulse.epmd.java.core.model.response.RegistrationResult;
+import io.appulse.utils.StreamReader;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -89,8 +89,10 @@ class Connection implements Closeable {
 
     byte[] messageBytes;
     try {
-      messageBytes = read(responseType);
-    } catch (IOException ex) {
+      messageBytes = responseType == RegistrationResult.class
+                     ? StreamReader.read(socket, 4)
+                     : StreamReader.read(socket);
+    } catch (Exception ex) {
       throw new EpmdConnectionException(ex);
     }
 
@@ -137,23 +139,5 @@ class Connection implements Closeable {
     }
 
     log.debug("EPMD connection to {}:{} was established", address, port);
-  }
-
-  private byte[] read (Class<?> responseType) throws IOException {
-    val outputStream = new ByteArrayOutputStream(32);
-    val buffer = new byte[32];
-
-    while (true) {
-      val length = socket.getInputStream().read(buffer);
-      if (length == -1) {
-        break;
-      }
-      outputStream.write(buffer, 0, length);
-      if (responseType == RegistrationResult.class) {
-        break;
-      }
-    }
-
-    return outputStream.toByteArray();
   }
 }
