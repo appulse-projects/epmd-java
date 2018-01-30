@@ -21,7 +21,6 @@ import static lombok.AccessLevel.PRIVATE;
 
 import java.io.Closeable;
 import java.net.ServerSocket;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,41 +43,48 @@ import lombok.val;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class ServerCommandExecutor extends AbstractCommandExecutor implements Closeable {
 
-  ServerCommandOptions options;
-
   ServerSocket serverSocket;
 
   ExecutorService executor;
 
-  Map<String, Node> nodes;
+  Context context;
 
   @SneakyThrows
   public ServerCommandExecutor (CommonOptions commonOptions, CommandOptions options) {
     super(commonOptions);
-    this.options = ofNullable(options)
+    val serverOptions = ofNullable(options)
         .filter(it -> it instanceof ServerCommandOptions)
         .map(it -> (ServerCommandOptions) it)
         .orElse(new ServerCommandOptions());
 
     serverSocket = new ServerSocket(getPort());
+
     executor = Executors.newCachedThreadPool();
-    nodes = new ConcurrentHashMap<>();
+
+    context = Context.builder()
+        .nodes(new ConcurrentHashMap<>())
+        .commonOptions(commonOptions)
+        .serverOptions(serverOptions)
+        .build();
   }
 
   @Override
   @SneakyThrows
   public void execute () {
-    log.debug("{}", options);
+    log.debug("{}", context);
     log.info("Server command was executed");
 
     try {
-      while (getPort() < 1) {
+      while (true) {
         val socket = serverSocket.accept();
-        if (options.getAddresses().contains(socket.getInetAddress())) {
+        if (context.getAddresses().contains(socket.getInetAddress())) {
           socket.close();
           continue;
         }
-        val handler = new ServerHandler(socket, nodes);
+        if (isDebug()) {
+          System.out.println();
+        }
+        val handler = new ServerWorker(socket, context);
         executor.execute(handler);
       }
     } finally {
@@ -93,6 +99,6 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
     if (!executor.isShutdown()) {
       executor.shutdown();
     }
-    nodes.clear();
+    context.getNodes().clear();
   }
 }

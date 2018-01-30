@@ -14,48 +14,27 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.server.command.server;
+package io.appulse.epmd.java.server.command.server.handler;
 
-import java.net.Socket;
+import static io.appulse.epmd.java.core.model.Tag.KILL_REQUEST;
+import static io.appulse.epmd.java.core.model.response.KillResult.OK;
 
-import io.appulse.epmd.java.core.model.NodeType;
-import io.appulse.epmd.java.core.model.Protocol;
-import io.appulse.epmd.java.core.model.Version;
+import io.appulse.epmd.java.core.model.Tag;
+import io.appulse.epmd.java.server.command.server.Request;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.NonNull;
-import lombok.Value;
 
-/**
- *
- * @author Artem Labazin
- * @since 0.3.0
- */
-@Value
-@Builder
-@EqualsAndHashCode(exclude = "socket")
-public class Node {
+class StopRequestHandler implements RequestHandler {
 
-  @NonNull
-  String name;
+  @Override
+  public void handle (@NonNull Request request) {
+    request.getContext().getNodes().clear();
+    request.respondAndClose(OK);
+    Runtime.getRuntime().exit(1);
+  }
 
-  int port;
-
-  @NonNull
-  NodeType type;
-
-  @NonNull
-  Protocol protocol;
-
-  @NonNull
-  Version high;
-
-  @NonNull
-  Version low;
-
-  int creation;
-
-  @NonNull
-  Socket socket;
+  @Override
+  public Tag getTag () {
+    return KILL_REQUEST;
+  }
 }

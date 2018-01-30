@@ -16,46 +16,31 @@
 
 package io.appulse.epmd.java.server.command.server;
 
-import java.net.Socket;
+import static lombok.AccessLevel.PRIVATE;
 
-import io.appulse.epmd.java.core.model.NodeType;
-import io.appulse.epmd.java.core.model.Protocol;
-import io.appulse.epmd.java.core.model.Version;
+import java.util.Map;
+
+import io.appulse.epmd.java.server.cli.CommonOptions;
 
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NonNull;
-import lombok.Value;
+import lombok.experimental.Delegate;
+import lombok.experimental.FieldDefaults;
 
-/**
- *
- * @author Artem Labazin
- * @since 0.3.0
- */
-@Value
+@Getter
 @Builder
-@EqualsAndHashCode(exclude = "socket")
-public class Node {
+@FieldDefaults(level = PRIVATE, makeFinal = true)
+public class Context {
 
   @NonNull
-  String name;
-
-  int port;
+  Map<String, Node> nodes;
 
   @NonNull
-  NodeType type;
+  @Delegate
+  CommonOptions commonOptions;
 
   @NonNull
-  Protocol protocol;
-
-  @NonNull
-  Version high;
-
-  @NonNull
-  Version low;
-
-  int creation;
-
-  @NonNull
-  Socket socket;
+  @Delegate
+  ServerCommandOptions serverOptions;
 }
