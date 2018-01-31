@@ -23,11 +23,13 @@ import java.net.Socket;
 
 import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.epmd.java.server.command.server.handler.RequestHandler;
+import io.appulse.utils.Bytes;
 import io.appulse.utils.StreamReader;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 /**
@@ -35,6 +37,7 @@ import lombok.val;
  * @author Artem Labazin
  * @since 0.3.0
  */
+@Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 class ServerWorker implements Runnable {
@@ -47,22 +50,31 @@ class ServerWorker implements Runnable {
 
   @Override
   public void run () {
-    val bytes = StreamReader.readBytes(socket);
+    log.debug("Start server worker");
 
-    val length = bytes.getShort();
-    if (length != bytes.remaining()) {
-      throw new IllegalArgumentException();
-    }
+    val length = StreamReader.readBytes(socket, Short.BYTES).getShort();
+    log.debug("Incoming message length is: {}", length);
 
-    val tag = Tag.of(bytes.getByte());
+    val body = StreamReader.read(socket, length);
+    log.debug("Readed message body ({} bytes)", body.length);
+
+    val bytes = Bytes.allocate(Short.BYTES + length)
+        .put2B(length)
+        .put(body);
+
+    val tag = Tag.of(bytes.getByte(2));
     if (tag == UNDEFINED) {
+      log.error("Undefined incoming message tag");
       throw new IllegalArgumentException();
     }
+    log.debug("Incoming message tag: {}", tag);
 
     val handler = RequestHandler.ALL.get(tag);
     if (handler == null) {
+      log.error("There is no handler for tag {}", tag);
       throw new IllegalArgumentException();
     }
+    log.debug("Request's handler: {}", handler);
 
     val request = Request.builder()
         .context(context)
@@ -70,6 +82,10 @@ class ServerWorker implements Runnable {
         .payload(bytes.position(0))
         .build();
 
+    log.debug("Incoming request: {}", request);
+
     handler.handle(request);
+
+    log.debug("End server worker");
   }
 }

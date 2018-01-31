@@ -20,6 +20,7 @@ import static java.util.Optional.of;
 import static lombok.AccessLevel.PRIVATE;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -32,6 +33,7 @@ import io.appulse.epmd.java.server.command.CommandOptions;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -49,6 +51,9 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
   ExecutorService executor;
 
   Context context;
+
+  @NonFinal
+  volatile boolean closed;
 
   @SneakyThrows
   public ServerCommandExecutor (CommonOptions commonOptions, @NonNull CommandOptions options) {
@@ -72,19 +77,23 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
   @Override
   @SneakyThrows
   public void execute () {
-    log.debug("{}", context);
-    log.info("Server command was executed");
-
+    log.debug("Server before start context: {}", context);
     try {
       while (true) {
+        log.debug("Waiting new connection");
+
         val socket = serverSocket.accept();
+        log.debug("New connection was accepted");
+
         if (context.getAddresses().contains(socket.getInetAddress())) {
           socket.close();
           continue;
         }
+
         if (isDebug()) {
           System.out.println();
         }
+
         val handler = new ServerWorker(socket, context);
         executor.execute(handler);
       }
@@ -96,10 +105,25 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
   @Override
   @SneakyThrows
   public void close () {
-    serverSocket.close();
+    if (closed) {
+      return;
+    }
+    closed = true;
+
+    log.debug("Closing server...");
+
+    try {
+      serverSocket.close();
+    } catch (IOException ex) {
+    }
+    log.debug("Server socket was closed");
+
     if (!executor.isShutdown()) {
       executor.shutdown();
     }
+
     context.getNodes().clear();
+
+    log.info("Server was closed");
   }
 }

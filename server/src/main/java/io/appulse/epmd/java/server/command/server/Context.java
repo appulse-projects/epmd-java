@@ -16,21 +16,17 @@
 
 package io.appulse.epmd.java.server.command.server;
 
-import static lombok.AccessLevel.PRIVATE;
-
 import java.util.Map;
 
 import io.appulse.epmd.java.server.cli.CommonOptions;
 
 import lombok.Builder;
-import lombok.Getter;
 import lombok.NonNull;
+import lombok.Value;
 import lombok.experimental.Delegate;
-import lombok.experimental.FieldDefaults;
 
-@Getter
+@Value
 @Builder
-@FieldDefaults(level = PRIVATE, makeFinal = true)
 public class Context {
 
   @NonNull

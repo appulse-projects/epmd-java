@@ -85,6 +85,7 @@ public final class EpmdClient implements Closeable {
     nodesLocatorService = new NodesLocatorService(address, port);
     this.address = address;
     this.port = port;
+    log.debug("Instantiated EPMD client to '{}:{}'", address, port);
   }
 
   public int register (String name, int nodePort, NodeType type, Protocol protocol, Version low, Version high) {

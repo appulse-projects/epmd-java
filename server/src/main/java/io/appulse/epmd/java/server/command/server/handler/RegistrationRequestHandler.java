@@ -27,32 +27,20 @@ import io.appulse.epmd.java.server.command.server.Node;
 import io.appulse.epmd.java.server.command.server.Request;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+@Slf4j
 class RegistrationRequestHandler implements RequestHandler {
 
   AtomicInteger count = new AtomicInteger(0);
 
   @Override
   public void handle (@NonNull Request request) {
-    val registration = request.parse(Registration.class);
+    Registration registration = request.parse(Registration.class);
+    log.info("Registering {} node...", registration.getName());
 
-    val node = request.getContext().getNodes()
-        .compute(registration.getName(), (key, value) -> {
-          if (value != null) {
-            return null;
-          }
-          return Node.builder()
-              .name(registration.getName())
-              .port(registration.getPort())
-              .type(registration.getType())
-              .protocol(registration.getProtocol())
-              .high(registration.getHigh())
-              .low(registration.getLow())
-              .creation(count.incrementAndGet())
-              .socket(request.getSocket())
-              .build();
-        });
+    val node = register(request, registration);
     val response = RegistrationResult.builder()
         .ok(node != null)
         .creation(node != null
@@ -70,5 +58,24 @@ class RegistrationRequestHandler implements RequestHandler {
   @Override
   public Tag getTag () {
     return ALIVE2_REQUEST;
+  }
+
+  private Node register (Request request, Registration registration) {
+    return request.getContext().getNodes()
+        .compute(registration.getName(), (key, value) -> {
+          if (value != null) {
+            return null;
+          }
+          return Node.builder()
+              .name(registration.getName())
+              .port(registration.getPort())
+              .type(registration.getType())
+              .protocol(registration.getProtocol())
+              .high(registration.getHigh())
+              .low(registration.getLow())
+              .creation(count.incrementAndGet())
+              .socket(request.getSocket())
+              .build();
+        });
   }
 }

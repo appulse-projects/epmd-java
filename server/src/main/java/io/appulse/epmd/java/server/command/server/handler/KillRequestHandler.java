@@ -28,6 +28,11 @@ class KillRequestHandler implements RequestHandler {
 
   @Override
   public void handle (@NonNull Request request) {
+    if (!request.getContext().getServerOptions().isChecks()) {
+      request.closeConnection();
+      return;
+    }
+
     request.getContext().getNodes().clear();
     request.respondAndClose(OK);
     Runtime.getRuntime().exit(1);

@@ -11,11 +11,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add more unit and integration tests.
 
-## [0.3.0](https://github.com/appulse-projects/epmd-java/releases/tag/0.3.0) - 2018-01-29
+## [0.3.0](https://github.com/appulse-projects/epmd-java/releases/tag/0.3.0) - 2018-01-31
 
 ### Added
 
 - EPMD server sub-project.
+- Server test.
+
+### Changed
+
+- [Core]: registration result returns creation 0 in case of failure.
+- [Client]: set connection read timeout (connection_timeout * 2).
 
 ## [0.2.2](https://github.com/appulse-projects/epmd-java/releases/tag/0.2.2) - 2018-01-29
 

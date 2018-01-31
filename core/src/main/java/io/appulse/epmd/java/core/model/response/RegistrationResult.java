@@ -51,12 +51,11 @@ public class RegistrationResult implements DataSerializable {
 
   @Override
   public void write (@NonNull Bytes bytes) {
-    if (!ok) {
+    if (ok) {
+      bytes.put1B(0);
+    } else {
       bytes.put1B(1);
-      return;
     }
-
-    bytes.put1B(0);
     bytes.put2B(creation);
   }
 

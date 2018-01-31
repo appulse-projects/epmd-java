@@ -16,25 +16,40 @@
 
 package io.appulse.epmd.java.server.command.server.handler;
 
-import static io.appulse.epmd.java.core.model.Tag.KILL_REQUEST;
-import static io.appulse.epmd.java.core.model.response.KillResult.OK;
+import static io.appulse.epmd.java.core.model.Tag.STOP_REQUEST;
+import static io.appulse.epmd.java.core.model.response.StopResult.NOEXIST;
+import static io.appulse.epmd.java.core.model.response.StopResult.STOPPED;
 
 import io.appulse.epmd.java.core.model.Tag;
+import io.appulse.epmd.java.core.model.request.Stop;
 import io.appulse.epmd.java.server.command.server.Request;
 
 import lombok.NonNull;
+import lombok.val;
 
 class StopRequestHandler implements RequestHandler {
 
   @Override
   public void handle (@NonNull Request request) {
-    request.getContext().getNodes().clear();
-    request.respondAndClose(OK);
-    Runtime.getRuntime().exit(1);
+    if (!request.getContext().getServerOptions().isChecks()) {
+      request.closeConnection();
+      return;
+    }
+
+    val stop = request.parse(Stop.class);
+    val result = request.getContext()
+        .getNodes()
+        .remove(stop.getName());
+
+    val response = result == null
+                   ? NOEXIST
+                   : STOPPED;
+
+    request.respondAndClose(response);
   }
 
   @Override
   public Tag getTag () {
-    return KILL_REQUEST;
+    return STOP_REQUEST;
   }
 }

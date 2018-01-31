@@ -27,9 +27,9 @@ import io.appulse.epmd.java.server.command.CommandOptions;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import lombok.Getter;
+
+import lombok.Data;
 import lombok.SneakyThrows;
-import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
 /**
@@ -37,8 +37,7 @@ import lombok.experimental.FieldDefaults;
  * @author Artem Labazin
  * @since 0.3.0
  */
-@Getter
-@ToString
+@Data
 @Parameters(
     commandNames = "server",
     commandDescriptionKey = "server.description"

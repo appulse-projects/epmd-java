@@ -19,8 +19,7 @@ package io.appulse.epmd.java.server.cli;
 import static lombok.AccessLevel.PRIVATE;
 
 import com.beust.jcommander.Parameter;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 /**
@@ -29,8 +28,7 @@ import lombok.experimental.FieldDefaults;
  * @author Artem Labazin
  * @since 0.3.0
  */
-@Getter
-@ToString
+@Data
 @FieldDefaults(level = PRIVATE)
 public class CommonOptions {
 

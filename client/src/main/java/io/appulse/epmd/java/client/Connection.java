@@ -50,12 +50,15 @@ class Connection implements Closeable {
 
   private static final int CONNECT_TIMEOUT;
 
+  private static final int READ_TIMEOUT;
+
   private static final MessageSerializer SERIALIZER;
 
   private static final MessageDeserializer DESERIALIZER;
 
   static {
     CONNECT_TIMEOUT = (int) SECONDS.toMillis(5);
+    READ_TIMEOUT = CONNECT_TIMEOUT * 2;
     SERIALIZER = new MessageSerializer();
     DESERIALIZER = new MessageDeserializer();
   }
@@ -131,6 +134,7 @@ class Connection implements Closeable {
     try {
       socket.setTcpNoDelay(true);
       socket.connect(socketAddress, CONNECT_TIMEOUT);
+      socket.setSoTimeout(READ_TIMEOUT);
     } catch (IOException ex) {
       val message = String.format("Couldn't connect to EPMD server (%s:%d), maybe it is down",
                                   address.toString(), port);
