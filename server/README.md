@@ -4,6 +4,10 @@
 
 ## Usage
 
+### As application
+
+**TODO**
+
 ### As library
 
 Include the dependency to your project's pom.xml file:

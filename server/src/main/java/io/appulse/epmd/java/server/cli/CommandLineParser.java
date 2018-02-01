@@ -22,7 +22,6 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toSet;
 import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -86,26 +85,11 @@ public final class CommandLineParser {
   }
 
   private static JCommander buildJCommander (@NonNull CommonOptions commonOptions) {
-    val programName = "java -jar " + getProgramName();
-
     val builder = JCommander.newBuilder()
-        .programName(programName)
         .addObject(commonOptions);
 
     CommandOptions.ALL.forEach(builder::addCommand);
     return builder.build();
-  }
-
-  private static String getProgramName () {
-    val name = new File(CommandLineParser.class.getProtectionDomain()
-            .getCodeSource()
-            .getLocation()
-            .getPath())
-            .getName();
-
-    return name.contains(".jar")
-           ? name
-           : "epmd.jar";
   }
 
   @SneakyThrows

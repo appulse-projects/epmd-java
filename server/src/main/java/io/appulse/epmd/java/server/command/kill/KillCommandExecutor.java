@@ -26,12 +26,14 @@ import io.appulse.epmd.java.server.command.CommandOptions;
 
 import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Artem Labazin
  * @since 0.3.0
  */
+@Slf4j
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class KillCommandExecutor extends AbstractCommandExecutor {
 
@@ -51,9 +53,6 @@ public class KillCommandExecutor extends AbstractCommandExecutor {
     try (EpmdClient client = new EpmdClient(getPort())) {
       killed = client.kill();
     }
-
-    if (killed) {
-      Runtime.getRuntime().exit(1);
-    }
+    log.info("EPMD was killed: {}", killed);
   }
 }
