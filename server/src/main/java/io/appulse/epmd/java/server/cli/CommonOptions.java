@@ -26,7 +26,7 @@ import lombok.experimental.FieldDefaults;
  * Common parsed program's options holder.
  *
  * @author Artem Labazin
- * @since 0.3.1
+ * @since 0.3.2
  */
 @Data
 @FieldDefaults(level = PRIVATE)

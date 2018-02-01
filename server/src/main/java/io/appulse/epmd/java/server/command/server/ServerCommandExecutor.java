@@ -40,7 +40,7 @@ import lombok.val;
 /**
  *
  * @author Artem Labazin
- * @since 0.3.1
+ * @since 0.3.2
  */
 @Slf4j
 @FieldDefaults(level = PRIVATE, makeFinal = true)

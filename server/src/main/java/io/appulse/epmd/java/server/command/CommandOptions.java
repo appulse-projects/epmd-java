@@ -34,7 +34,7 @@ import lombok.val;
 /**
  *
  * @author Artem Labazin
- * @since 0.3.1
+ * @since 0.3.2
  */
 public interface CommandOptions {
 

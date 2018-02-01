@@ -24,7 +24,7 @@ limitations under the License.
 
   <groupId>io.appulse</groupId>
   <artifactId>epmd-java</artifactId>
-  <version>0.3.1</version>
+  <version>0.3.2</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -68,7 +68,7 @@ limitations under the License.
     <url>https://github.com/appulse-projects/epmd-java</url>
     <connection>scm:git:https://github.com/appulse-projects/epmd-java.git</connection>
     <developerConnection>scm:git:https://github.com/appulse-projects/epmd-java.git</developerConnection>
-    <tag>0.3.1</tag>
+    <tag>0.3.2</tag>
   </scm>
 
   <distributionManagement>

@@ -25,7 +25,7 @@ import lombok.ToString;
 /**
  *
  * @author Artem Labazin
- * @since 0.3.1
+ * @since 0.3.2
  */
 @ToString
 @Parameters(commandNames = "-kill")
