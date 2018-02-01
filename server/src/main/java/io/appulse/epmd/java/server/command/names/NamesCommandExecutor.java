@@ -30,7 +30,7 @@ import lombok.val;
 /**
  *
  * @author Artem Labazin
- * @since 0.3.0
+ * @since 0.3.1
  */
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class NamesCommandExecutor extends AbstractCommandExecutor {

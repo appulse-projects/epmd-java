@@ -28,7 +28,7 @@ import lombok.experimental.FieldDefaults;
 /**
  *
  * @author Artem Labazin
- * @since 0.3.0
+ * @since 0.3.1
  */
 @Getter(PROTECTED)
 @FieldDefaults(level = PRIVATE, makeFinal = true)

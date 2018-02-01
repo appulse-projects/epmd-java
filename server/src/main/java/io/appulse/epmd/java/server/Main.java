@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  *
  * @author Artem Labazin
- * @since 0.3.0
+ * @since 0.3.1
  */
 @Slf4j
 public final class Main {

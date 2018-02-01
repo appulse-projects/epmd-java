@@ -19,7 +19,7 @@ package io.appulse.epmd.java.server.command;
 /**
  *
  * @author Artem Labazin
- * @since 0.3.0
+ * @since 0.3.1
  */
 public interface CommandExecutor {
 

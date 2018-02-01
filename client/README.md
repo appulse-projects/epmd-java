@@ -14,7 +14,7 @@ Include the dependency to your project's pom.xml file:
     <dependency>
         <groupId>io.appulse.epmd.java</groupId>
         <artifactId>client</artifactId>
-        <version>0.3.0</version>
+        <version>0.3.1</version>
     </dependency>
     ...
 </dependencies>
@@ -23,7 +23,7 @@ Include the dependency to your project's pom.xml file:
 or Gradle:
 
 ```groovy
-compile 'io.appulse.epmd.java:client:0.3.0'
+compile 'io.appulse.epmd.java:client:0.3.1'
 ```
 
 ### Create client
