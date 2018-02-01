@@ -37,9 +37,9 @@ deploy:
     - "client/target/client-$project_version.jar"
     - "client/target/client-$project_version-javadoc.jar"
     - "client/target/client-$project_version-sources.jar"
-    - "server/target/server-$project_version.jar"
-    - "server/target/server-$project_version-javadoc.jar"
-    - "server/target/server-$project_version-sources.jar"
+    - "server/target/epmd-$project_version.jar"
+    - "server/target/epmd-$project_version-javadoc.jar"
+    - "server/target/epmd-$project_version-sources.jar"
   skip_cleanup: true
   on:
     tags: true
