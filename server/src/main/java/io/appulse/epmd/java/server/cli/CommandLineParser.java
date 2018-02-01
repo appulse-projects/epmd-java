@@ -19,17 +19,22 @@ package io.appulse.epmd.java.server.cli;
 import static ch.qos.logback.classic.Level.DEBUG;
 import static ch.qos.logback.classic.Level.INFO;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toSet;
 import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 import java.io.File;
-import java.util.ResourceBundle;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import io.appulse.epmd.java.server.command.CommandExecutor;
 import io.appulse.epmd.java.server.command.CommandOptions;
+import io.appulse.utils.ResourceUtils;
 
 import ch.qos.logback.classic.Logger;
 import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameters;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import lombok.val;
 import org.slf4j.LoggerFactory;
 
@@ -41,13 +46,15 @@ import org.slf4j.LoggerFactory;
 public final class CommandLineParser {
 
   public static CommandExecutor parse (@NonNull String[] args) {
+    val newArgs = setDefaultCommandIfNeed(args);
+
     CommonOptions commonOptions = new CommonOptions();
     JCommander commander = buildJCommander(commonOptions);
     try {
-      commander.parse(args);
+      commander.parse(newArgs);
     } catch (RuntimeException ex) {
-      System.err.format("%nParsing arguments failed.%n%s%n%n", ex.getMessage());
-      commander.usage();
+      System.err.format("%nParsing arguments failed: %s%n%n", ex.getMessage());
+      printUsage();
       throw ex;
     }
 
@@ -61,18 +68,31 @@ public final class CommandLineParser {
         .orElseThrow(RuntimeException::new);
   }
 
+  private static String[] setDefaultCommandIfNeed (String[] args) {
+    val commands = CommandOptions.ALL.stream()
+        .map(Object::getClass)
+        .map(it -> it.getAnnotation(Parameters.class))
+        .map(Parameters::commandNames)
+        .map(it -> it[0])
+        .collect(toSet());
+
+    if (Stream.of(args).anyMatch(commands::contains)) {
+      return args;
+    }
+
+    val result = Arrays.copyOf(args, args.length + 1);
+    result[args.length] = "-server";
+    return result;
+  }
+
   private static JCommander buildJCommander (@NonNull CommonOptions commonOptions) {
-    val bundle = ResourceBundle.getBundle("cli");
     val programName = "java -jar " + getProgramName();
 
     val builder = JCommander.newBuilder()
         .programName(programName)
-        .resourceBundle(bundle)
         .addObject(commonOptions);
 
-    CommandOptions.all()
-        .forEach(builder::addCommand);
-
+    CommandOptions.ALL.forEach(builder::addCommand);
     return builder.build();
   }
 
@@ -88,10 +108,10 @@ public final class CommandLineParser {
            : "epmd.jar";
   }
 
+  @SneakyThrows
   private static String getParsedCommand (@NonNull JCommander commander, @NonNull CommonOptions commonOptions) {
     if (commonOptions.isHelp()) {
-      System.out.println("\nSee the Erlang epmd manual page for info about the usage.\n");
-      commander.usage();
+      printUsage();
       Runtime.getRuntime().exit(0);
     }
 
@@ -105,10 +125,17 @@ public final class CommandLineParser {
     val command = commander.getParsedCommand();
     if (command == null || command.isEmpty()) {
       System.out.println("\nEPMD command doesn't set\n");
-      commander.usage();
+      printUsage();
       Runtime.getRuntime().exit(1);
     }
     return command;
+  }
+
+  private static void printUsage () {
+    val usage = ResourceUtils.getResource("/usage.txt")
+        .orElseThrow(RuntimeException::new);
+
+    System.out.println(usage);
   }
 
   private CommandLineParser () {

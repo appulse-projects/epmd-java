@@ -41,14 +41,12 @@ public class CommonOptions {
 
   @Parameter(
       names = "-port",
-      arity = 1,
-      descriptionKey = "common.port"
+      arity = 1
   )
   int port = 4369;
 
   @Parameter(
-      names = { "-d", "-debug" },
-      descriptionKey = "common.debug"
+      names = { "-d", "-debug" }
   )
   boolean debug = false;
 }

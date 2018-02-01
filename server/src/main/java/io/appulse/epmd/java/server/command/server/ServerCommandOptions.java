@@ -38,47 +38,26 @@ import lombok.experimental.FieldDefaults;
  * @since 0.3.0
  */
 @Data
-@Parameters(
-    commandNames = "server",
-    commandDescriptionKey = "server.description"
-)
 @FieldDefaults(level = PRIVATE)
+@Parameters(commandNames = "-server")
 public class ServerCommandOptions implements CommandOptions {
 
-  @Parameter(
-      names = "-packet_timeout",
-      descriptionKey = "server.packet_timeout"
-  )
+  @Parameter(names = "-packet_timeout")
   int packetTimeout = 60;
 
-  @Parameter(
-      names = "-delay_accept",
-      descriptionKey = "server.delay_accept"
-  )
+  @Parameter(names = "-delay_accept")
   int delayAccept = 0;
 
-  @Parameter(
-      names = "-delay_write",
-      descriptionKey = "server.delay_write"
-  )
+  @Parameter(names = "-delay_write")
   int delayWrite = 0;
 
-  @Parameter(
-      names = "-address",
-      descriptionKey = "server.address"
-  )
+  @Parameter(names = "-address")
   Set<InetAddress> addresses = getDefaultAddresses();
 
-  @Parameter(
-      names = "-daemon",
-      descriptionKey = "server.daemon"
-  )
+  @Parameter(names = "-daemon")
   boolean daemon = false;
 
-  @Parameter(
-      names = "-relaxed_command_check",
-      descriptionKey = "server.relaxed_command_check"
-  )
+  @Parameter(names = "-relaxed_command_check")
   boolean checks = false;
 
   @SneakyThrows

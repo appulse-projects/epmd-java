@@ -28,10 +28,7 @@ import lombok.ToString;
  * @since 0.3.0
  */
 @ToString
-@Parameters(
-    commandNames = "kill",
-    commandDescriptionKey = "kill.description"
-)
+@Parameters(commandNames = "-kill")
 public class KillCommandOptions implements CommandOptions {
 
   @Override

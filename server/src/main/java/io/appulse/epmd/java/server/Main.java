@@ -19,12 +19,14 @@ package io.appulse.epmd.java.server;
 import io.appulse.epmd.java.server.cli.CommandLineParser;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Artem Labazin
  * @since 0.3.0
  */
+@Slf4j
 public final class Main {
 
   public static void main (@NonNull String[] args) {
@@ -32,7 +34,9 @@ public final class Main {
       CommandLineParser.parse(args)
           .execute();
     } catch (Exception ex) {
-      ex.printStackTrace();
+      if (log.isDebugEnabled()) {
+        ex.printStackTrace();
+      }
       System.exit(1);
     }
   }

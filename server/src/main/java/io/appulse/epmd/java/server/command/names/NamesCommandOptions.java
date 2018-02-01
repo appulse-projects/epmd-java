@@ -28,14 +28,11 @@ import lombok.ToString;
  * @since 0.3.0
  */
 @ToString
-@Parameters(
-    commandNames = "names",
-    commandDescriptionKey = "names.description"
-)
+@Parameters(commandNames = "-names")
 public class NamesCommandOptions implements CommandOptions {
 
   @Override
   public Class<? extends CommandExecutor> getCommandExecutorClass () {
-    return null;
+    return NamesCommandExecutor.class;
   }
 }

@@ -32,17 +32,14 @@ import lombok.ToString;
  */
 @Getter
 @ToString
-@Parameters(
-    commandNames = "stop",
-    commandDescriptionKey = "stop.description"
-)
+@Parameters(commandNames = "-stop")
 public class StopCommandOptions implements CommandOptions {
 
-  @Parameter(description = "Name")
+  @Parameter
   String name;
 
   @Override
   public Class<? extends CommandExecutor> getCommandExecutorClass () {
-    return null;
+    return StopCommandExecutor.class;
   }
 }

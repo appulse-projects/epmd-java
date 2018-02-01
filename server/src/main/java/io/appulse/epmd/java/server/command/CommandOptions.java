@@ -17,6 +17,7 @@
 package io.appulse.epmd.java.server.command;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
 
 import java.util.List;
 
@@ -37,14 +38,12 @@ import lombok.val;
  */
 public interface CommandOptions {
 
-  static List<CommandOptions> all () {
-    return asList(
-        new KillCommandOptions(),
-        new NamesCommandOptions(),
-        new ServerCommandOptions(),
-        new StopCommandOptions()
-    );
-  }
+  List<CommandOptions> ALL = unmodifiableList(asList(
+      new KillCommandOptions(),
+      new NamesCommandOptions(),
+      new ServerCommandOptions(),
+      new StopCommandOptions()
+  ));
 
   Class<? extends CommandExecutor> getCommandExecutorClass ();
 
