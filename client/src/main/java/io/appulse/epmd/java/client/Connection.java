@@ -19,7 +19,6 @@ package io.appulse.epmd.java.client;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static lombok.AccessLevel.PRIVATE;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -30,6 +29,7 @@ import io.appulse.epmd.java.client.exception.EpmdConnectionException;
 import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
 import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
 import io.appulse.epmd.java.core.model.response.RegistrationResult;
+import io.appulse.utils.SocketUtils;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -50,12 +50,15 @@ class Connection implements Closeable {
 
   private static final int CONNECT_TIMEOUT;
 
+  private static final int READ_TIMEOUT;
+
   private static final MessageSerializer SERIALIZER;
 
   private static final MessageDeserializer DESERIALIZER;
 
   static {
     CONNECT_TIMEOUT = (int) SECONDS.toMillis(5);
+    READ_TIMEOUT = CONNECT_TIMEOUT * 2;
     SERIALIZER = new MessageSerializer();
     DESERIALIZER = new MessageDeserializer();
   }
@@ -89,8 +92,10 @@ class Connection implements Closeable {
 
     byte[] messageBytes;
     try {
-      messageBytes = read(responseType);
-    } catch (IOException ex) {
+      messageBytes = responseType == RegistrationResult.class
+                     ? SocketUtils.read(socket, 4)
+                     : SocketUtils.read(socket);
+    } catch (Exception ex) {
       throw new EpmdConnectionException(ex);
     }
 
@@ -129,6 +134,7 @@ class Connection implements Closeable {
     try {
       socket.setTcpNoDelay(true);
       socket.connect(socketAddress, CONNECT_TIMEOUT);
+      socket.setSoTimeout(READ_TIMEOUT);
     } catch (IOException ex) {
       val message = String.format("Couldn't connect to EPMD server (%s:%d), maybe it is down",
                                   address.toString(), port);
@@ -137,23 +143,5 @@ class Connection implements Closeable {
     }
 
     log.debug("EPMD connection to {}:{} was established", address, port);
-  }
-
-  private byte[] read (Class<?> responseType) throws IOException {
-    val outputStream = new ByteArrayOutputStream(32);
-    val buffer = new byte[32];
-
-    while (true) {
-      val length = socket.getInputStream().read(buffer);
-      if (length == -1) {
-        break;
-      }
-      outputStream.write(buffer, 0, length);
-      if (responseType == RegistrationResult.class) {
-        break;
-      }
-    }
-
-    return outputStream.toByteArray();
   }
 }

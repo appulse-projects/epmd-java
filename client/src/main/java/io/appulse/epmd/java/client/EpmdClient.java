@@ -30,6 +30,7 @@ import io.appulse.epmd.java.core.model.Version;
 import io.appulse.epmd.java.core.model.request.GetEpmdDump;
 import io.appulse.epmd.java.core.model.request.Kill;
 import io.appulse.epmd.java.core.model.request.Registration;
+import io.appulse.epmd.java.core.model.request.Stop;
 import io.appulse.epmd.java.core.model.response.EpmdDump;
 import io.appulse.epmd.java.core.model.response.KillResult;
 import io.appulse.epmd.java.core.model.response.RegistrationResult;
@@ -84,6 +85,7 @@ public final class EpmdClient implements Closeable {
     nodesLocatorService = new NodesLocatorService(address, port);
     this.address = address;
     this.port = port;
+    log.debug("Instantiated EPMD client to '{}:{}'", address, port);
   }
 
   public int register (String name, int nodePort, NodeType type, Protocol protocol, Version low, Version high) {
@@ -100,23 +102,23 @@ public final class EpmdClient implements Closeable {
   }
 
   public int register (@NonNull Registration request) {
-    log.debug("Registering: {}", request.getName());
+    log.debug("Registering: '{}'", request.getName());
     val connection = getLocalConnection();
 
     RegistrationResult response;
     try {
       response = connection.send(request, RegistrationResult.class);
     } catch (Exception ex) {
-      log.error("{} wasn't registered successfully", request.getName());
+      log.error("'{}' wasn't registered successfully", request.getName());
       throw new EpmdRegistrationException(ex);
     }
 
     if (!response.isOk()) {
-      log.error("{} wasn't registered successfully", request.getName());
+      log.error("'{}' wasn't registered successfully", request.getName());
       throw new EpmdRegistrationException();
     }
 
-    log.info("{} was registered successfully", request.getName());
+    log.info("'{}' was registered successfully", request.getName());
     return response.getCreation();
   }
 
@@ -124,6 +126,12 @@ public final class EpmdClient implements Closeable {
     try (val connection = new Connection(address, port)) {
       val dump = connection.send(new GetEpmdDump(), EpmdDump.class);
       return dump.getNodes();
+    }
+  }
+
+  public void stop (@NonNull String node) {
+    try (val connection = new Connection(address, port)) {
+      connection.send(new Stop(node));
     }
   }
 
@@ -194,7 +202,7 @@ public final class EpmdClient implements Closeable {
       } catch (NumberFormatException | SecurityException ex) {
         throw new RuntimeException(ex);
       }
-      log.debug("Default EPMD port is: {}", port);
+      log.debug("Default EPMD port is: '{}'", port);
       return port;
     }
   }

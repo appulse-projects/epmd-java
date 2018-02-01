@@ -112,6 +112,3 @@ nb-configuration.xml
 log*.txt*
 .DS_Store
 .vscode/
-
-# Secure incomplete sub-projects
-server/

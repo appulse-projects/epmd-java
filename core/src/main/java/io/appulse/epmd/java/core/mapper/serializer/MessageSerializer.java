@@ -17,8 +17,8 @@
 package io.appulse.epmd.java.core.mapper.serializer;
 
 import static io.appulse.epmd.java.core.model.Tag.UNDEFINED;
-import static io.appulse.utils.BytesUtil.align;
-import static io.appulse.utils.BytesUtil.asBytes;
+import static io.appulse.utils.BytesUtils.align;
+import static io.appulse.utils.BytesUtils.asBytes;
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 
