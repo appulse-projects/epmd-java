@@ -24,7 +24,7 @@ import java.net.Socket;
 import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.epmd.java.server.command.server.handler.RequestHandler;
 import io.appulse.utils.Bytes;
-import io.appulse.utils.StreamReader;
+import io.appulse.utils.SocketUtils;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -52,10 +52,10 @@ class ServerWorker implements Runnable {
   public void run () {
     log.debug("Start server worker");
 
-    val length = StreamReader.readBytes(socket, Short.BYTES).getShort();
+    val length = SocketUtils.readBytes(socket, Short.BYTES).getShort();
     log.debug("Incoming message length is: {}", length);
 
-    val body = StreamReader.read(socket, length);
+    val body = SocketUtils.read(socket, length);
     log.debug("Readed message body ({} bytes)", body.length);
 
     val bytes = Bytes.allocate(Short.BYTES + length)

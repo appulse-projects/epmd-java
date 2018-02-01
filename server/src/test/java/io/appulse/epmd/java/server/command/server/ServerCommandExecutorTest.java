@@ -24,22 +24,18 @@ import static io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump.Status.
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import io.appulse.epmd.java.client.EpmdClient;
 import io.appulse.epmd.java.server.cli.CommonOptions;
+import io.appulse.utils.SocketUtils;
 
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-@Slf4j
 public class ServerCommandExecutorTest {
-
-  AtomicInteger port = new AtomicInteger(4000);
 
   EpmdClient client;
 
@@ -49,14 +45,17 @@ public class ServerCommandExecutorTest {
 
   @Before
   public void before () {
+    int port = SocketUtils.findFreePort()
+        .orElseThrow(RuntimeException::new);
+
     val commonOptions = new CommonOptions();
-    commonOptions.setPort(port.incrementAndGet());
+    commonOptions.setPort(port);
     server = new ServerCommandExecutor(commonOptions, new ServerCommandOptions());
 
     executorService = Executors.newSingleThreadExecutor();
     executorService.execute(() -> server.execute());
 
-    client = new EpmdClient(port.get());
+    client = new EpmdClient(port);
   }
 
   @After

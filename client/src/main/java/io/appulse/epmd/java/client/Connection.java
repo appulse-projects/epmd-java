@@ -29,7 +29,7 @@ import io.appulse.epmd.java.client.exception.EpmdConnectionException;
 import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
 import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
 import io.appulse.epmd.java.core.model.response.RegistrationResult;
-import io.appulse.utils.StreamReader;
+import io.appulse.utils.SocketUtils;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -93,8 +93,8 @@ class Connection implements Closeable {
     byte[] messageBytes;
     try {
       messageBytes = responseType == RegistrationResult.class
-                     ? StreamReader.read(socket, 4)
-                     : StreamReader.read(socket);
+                     ? SocketUtils.read(socket, 4)
+                     : SocketUtils.read(socket);
     } catch (Exception ex) {
       throw new EpmdConnectionException(ex);
     }
