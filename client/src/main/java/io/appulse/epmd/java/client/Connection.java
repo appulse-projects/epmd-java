@@ -124,6 +124,10 @@ class Connection implements Closeable {
     return socket.isClosed();
   }
 
+  public boolean isConnected () {
+    return socket.isConnected();
+  }
+
   private void connect () {
     if (socket.isConnected()) {
       log.debug("EPMD connection was already connected");

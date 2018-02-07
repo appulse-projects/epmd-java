@@ -45,7 +45,7 @@ public class ServerCommandExecutorTest {
 
   @Before
   public void before () {
-    int port = SocketUtils.findFreePort()
+    val port = SocketUtils.findFreePort()
         .orElseThrow(RuntimeException::new);
 
     val commonOptions = new CommonOptions();

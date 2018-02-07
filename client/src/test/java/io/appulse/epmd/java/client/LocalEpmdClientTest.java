@@ -74,6 +74,15 @@ public class LocalEpmdClientTest {
   }
 
   @Test
+  public void twoRegisters () throws Exception {
+    val creation = client.register("register", 8971, R3_ERLANG, TCP, R6, R6);
+    assertThat(creation).isNotEqualTo(0);
+
+    assertThatExceptionOfType(EpmdRegistrationException.class)
+          .isThrownBy(() -> client.register("register", 8971, R3_ERLANG, TCP, R6, R6));
+  }
+
+  @Test
   public void register () throws Exception {
     val creation = client.register("register", 8971, R3_ERLANG, TCP, R6, R6);
     assertThat(creation).isNotEqualTo(0);
@@ -178,10 +187,6 @@ public class LocalEpmdClientTest {
   public void kill () {
     assertThat(client.kill())
         .as("EPMD client wasn't killed")
-        .isTrue();
-
-    assertThat(client.isClosed())
-        .as("EPMD client wasn't closed")
         .isTrue();
   }
 }

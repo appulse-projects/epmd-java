@@ -22,6 +22,8 @@ import static lombok.AccessLevel.PRIVATE;
 import java.io.Closeable;
 import java.net.InetAddress;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.appulse.epmd.java.client.exception.EpmdRegistrationException;
 import io.appulse.epmd.java.core.model.NodeType;
@@ -36,7 +38,6 @@ import io.appulse.epmd.java.core.model.response.KillResult;
 import io.appulse.epmd.java.core.model.response.RegistrationResult;
 
 import lombok.Builder;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.experimental.Delegate;
@@ -54,8 +55,7 @@ import lombok.val;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public final class EpmdClient implements Closeable {
 
-  @Getter(lazy = true, value = PRIVATE)
-  Connection localConnection = connect();
+  Map<String, Connection> cache = new ConcurrentHashMap<>();
 
   @Delegate
   LookupService lookupService;
@@ -102,22 +102,29 @@ public final class EpmdClient implements Closeable {
   }
 
   public int register (@NonNull Registration request) {
+    if (cache.containsKey(request.getName()) && cache.get(request.getName()).isConnected()) {
+      log.error("Node with name '{}' already exists");
+      throw new EpmdRegistrationException();
+    }
     log.debug("Registering: '{}'", request.getName());
-    val connection = getLocalConnection();
+    val connection = new Connection(address, port);
 
     RegistrationResult response;
     try {
       response = connection.send(request, RegistrationResult.class);
     } catch (Exception ex) {
+      connection.close();
       log.error("'{}' wasn't registered successfully", request.getName());
       throw new EpmdRegistrationException(ex);
     }
 
     if (!response.isOk()) {
+      connection.close();
       log.error("'{}' wasn't registered successfully", request.getName());
       throw new EpmdRegistrationException();
     }
 
+    cache.put(request.getName(), connection);
     log.info("'{}' was registered successfully", request.getName());
     return response.getCreation();
   }
@@ -151,20 +158,11 @@ public final class EpmdClient implements Closeable {
     }
   }
 
-  public boolean isClosed () {
-    val connection = getLocalConnection();
-    return connection.isClosed();
-  }
-
   @Override
   public void close () {
-    val connection = getLocalConnection();
-    if (connection.isClosed()) {
-      log.debug("EPMD client was already closed");
-    } else {
-      connection.close();
-      log.debug("EPMD client was closed");
-    }
+    cache.values().forEach(Connection::close);
+    cache.clear();
+    log.debug("EPMD client was closed");
   }
 
   public void clearCaches () {
@@ -175,10 +173,6 @@ public final class EpmdClient implements Closeable {
   protected void finalize () throws Throwable {
     close();
     super.finalize();
-  }
-
-  private Connection connect () {
-    return new Connection(address, port);
   }
 
   private static class Default {
