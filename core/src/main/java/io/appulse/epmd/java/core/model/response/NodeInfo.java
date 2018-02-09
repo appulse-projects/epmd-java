@@ -111,7 +111,7 @@ public class NodeInfo implements DataSerializable {
     }
 
     ok = true;
-    port = of((int) bytes.getShort());
+    port = of(bytes.getUnsignedShort());
     type = of(bytes.getByte()).map(NodeType::of);
     protocol = of(bytes.getByte()).map(Protocol::of);
     high = of(bytes.getShort()).map(Version::of);

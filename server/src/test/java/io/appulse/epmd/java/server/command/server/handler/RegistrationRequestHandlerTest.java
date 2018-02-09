@@ -22,7 +22,6 @@ import static io.appulse.epmd.java.core.model.NodeType.R3_ERLANG;
 import static io.appulse.epmd.java.core.model.Protocol.SCTP;
 import static io.appulse.epmd.java.core.model.Version.R3;
 import static io.appulse.epmd.java.core.model.Version.R4;
-import static java.util.stream.Collectors.toList;
 
 import java.io.ByteArrayOutputStream;
 import java.net.Socket;
@@ -78,7 +77,7 @@ public class RegistrationRequestHandlerTest {
     val output = new ByteArrayOutputStream();
     val request = RequestTestUtil.createRequest(registration, output);
 
-    val nodes = IntStream.range(0, 3)
+    IntStream.range(0, 3)
         .boxed()
         .map(it -> Node.builder()
             .name("node-" + it)
@@ -91,8 +90,7 @@ public class RegistrationRequestHandlerTest {
             .socket(new Socket())
             .build()
         )
-        .peek(it -> request.getContext().getNodes().put(it.getName(), it))
-        .collect(toList());
+        .forEach(it -> request.getContext().getNodes().put(it.getName(), it));
 
     val result = RegistrationResult.builder()
         .ok(false)

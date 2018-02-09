@@ -16,7 +16,6 @@
 
 package io.appulse.epmd.java.server.command.kill;
 
-import static java.util.Optional.ofNullable;
 import static lombok.AccessLevel.PRIVATE;
 
 import io.appulse.epmd.java.client.EpmdClient;
@@ -37,14 +36,11 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class KillCommandExecutor extends AbstractCommandExecutor {
 
-  KillCommandOptions options;
-
   public KillCommandExecutor (CommonOptions commonOptions, @NonNull CommandOptions options) {
     super(commonOptions);
-    this.options = ofNullable(options)
-        .filter(it -> it instanceof KillCommandOptions)
-        .map(it -> (KillCommandOptions) it)
-        .orElse(new KillCommandOptions());
+    if (!(options instanceof KillCommandOptions)) {
+      throw new IllegalArgumentException();
+    }
   }
 
   @Override

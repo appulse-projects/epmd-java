@@ -85,7 +85,7 @@ public class Registration implements DataSerializable {
 
   @Override
   public void read (@NonNull Bytes bytes) {
-    port = bytes.getShort();
+    port = bytes.getUnsignedShort();
     type = NodeType.of(bytes.getByte());
     protocol = Protocol.of(bytes.getByte());
     high = Version.of(bytes.getShort());

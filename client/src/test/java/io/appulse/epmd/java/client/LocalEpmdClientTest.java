@@ -84,7 +84,7 @@ public class LocalEpmdClientTest {
 
   @Test
   public void register () throws Exception {
-    val creation = client.register("register", 8971, R3_ERLANG, TCP, R6, R6);
+    val creation = client.register("register", 61_123, R3_ERLANG, TCP, R6, R6);
     assertThat(creation).isNotEqualTo(0);
 
     val optional = client.lookup("register");
@@ -94,7 +94,7 @@ public class LocalEpmdClientTest {
     SoftAssertions.assertSoftly(softly -> {
       softly.assertThat(nodeInfo.getPort())
           .isPresent()
-          .hasValue(8971);
+          .hasValue(61_123);
 
       softly.assertThat(nodeInfo.getType())
           .isPresent()

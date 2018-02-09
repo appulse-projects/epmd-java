@@ -63,7 +63,7 @@ public class RegistrationResult implements DataSerializable {
   public void read (@NonNull Bytes bytes) {
     ok = bytes.getByte() == 0;
     if (ok) {
-      creation = bytes.getShort();
+      creation = bytes.getUnsignedShort();
     }
   }
 }

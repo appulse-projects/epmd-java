@@ -62,7 +62,7 @@ public class EpmdDump implements DataSerializable {
 
   @Override
   public void write (@NonNull Bytes bytes) {
-    bytes.put(port);
+    bytes.put4B(port);
 
     if (nodes.isEmpty()) {
       bytes.put(new byte[0]);
