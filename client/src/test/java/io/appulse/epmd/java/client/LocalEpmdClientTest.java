@@ -144,10 +144,13 @@ public class LocalEpmdClientTest {
     val nodes = client.dumpAll();
     assertThat(nodes)
         .isNotNull()
-        .hasSize(1)
-        .element(0).isNotNull();
+        .isNotEmpty();
 
-    val nodeDump = nodes.get(0);
+    val nodeDump = nodes.stream()
+        .filter(it -> it.getName().equals("dump"))
+        .findFirst()
+        .get();
+
     SoftAssertions.assertSoftly(softly -> {
       softly.assertThat(nodeDump.getName())
           .isEqualTo("dump");
