@@ -19,10 +19,10 @@ package io.appulse.epmd.java.core.mapper.deserializer;
 import static java.util.Arrays.asList;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.appulse.epmd.java.core.mapper.deserializer.exception.NoApplicableDeserializerException;
 import io.appulse.utils.Bytes;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import lombok.NonNull;
 

@@ -25,8 +25,8 @@ import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.epmd.java.core.model.request.Registration;
 import io.appulse.epmd.java.core.model.request.Request;
 import io.appulse.epmd.java.core.model.response.RegistrationResult;
-import io.appulse.epmd.java.server.command.server.ServerState;
 import io.appulse.epmd.java.server.command.server.Node;
+import io.appulse.epmd.java.server.command.server.ServerState;
 
 import io.netty.channel.ChannelHandlerContext;
 import lombok.NonNull;
@@ -86,18 +86,18 @@ class RegistrationRequestHandler implements RequestHandler {
   private Node register (Registration registration, ServerState serverState) {
     return serverState.getNodes()
         .compute(registration.getName(), (key, value) -> {
-               if (value != null) {
-                 return null;
-               }
-               return Node.builder()
-                   .name(registration.getName())
-                   .port(registration.getPort())
-                   .type(registration.getType())
-                   .protocol(registration.getProtocol())
-                   .high(registration.getHigh())
-                   .low(registration.getLow())
-                   .creation(count.incrementAndGet())
-                   .build();
-             });
+          if (value != null) {
+            return null;
+          }
+          return Node.builder()
+              .name(registration.getName())
+              .port(registration.getPort())
+              .type(registration.getType())
+              .protocol(registration.getProtocol())
+              .high(registration.getHigh())
+              .low(registration.getLow())
+              .creation(count.incrementAndGet())
+              .build();
+        });
   }
 }

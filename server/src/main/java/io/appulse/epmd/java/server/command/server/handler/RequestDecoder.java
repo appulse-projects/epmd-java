@@ -30,7 +30,6 @@ import io.appulse.epmd.java.core.model.request.Stop;
 import io.appulse.utils.Bytes;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
 import lombok.NonNull;
@@ -43,7 +42,6 @@ import lombok.val;
  * @since 0.4.0
  */
 @Slf4j
-@Sharable
 public class RequestDecoder extends ReplayingDecoder<Request> {
 
   private static final MessageDeserializer DESERIALIZER;
