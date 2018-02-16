@@ -25,9 +25,14 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.Delegate;
 
+/**
+ *
+ * @author Artem Labazin
+ * @since 0.4.0
+ */
 @Value
 @Builder
-public class Context {
+public class ServerState {
 
   @NonNull
   Map<String, Node> nodes;

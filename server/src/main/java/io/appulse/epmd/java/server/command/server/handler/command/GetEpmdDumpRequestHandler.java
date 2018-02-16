@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.server.command.server.handler;
+package io.appulse.epmd.java.server.command.server.handler.command;
 
 import static io.appulse.epmd.java.core.model.Tag.DUMP_REQUEST;
 import static io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump.Status.ACTIVE;
@@ -25,30 +25,38 @@ import io.appulse.epmd.java.core.model.request.Request;
 import io.appulse.epmd.java.core.model.response.EpmdDump;
 import io.appulse.epmd.java.core.model.response.EpmdDump.EpmdDumpBuilder;
 import io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump;
-import io.appulse.epmd.java.server.command.server.Context;
+import io.appulse.epmd.java.server.command.server.ServerState;
 
 import io.netty.channel.ChannelHandlerContext;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
 /**
  *
  * @author Artem Labazin
  * @since 0.4.0
  */
+@Slf4j
 class GetEpmdDumpRequestHandler implements RequestHandler {
 
   @Override
-  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext requestContext, @NonNull Context serverState) {
-    EpmdDumpBuilder builder = EpmdDump.builder()
-        .port(serverState.getPort());
+  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext context, @NonNull ServerState state) {
+    log.debug("Processing {}", request);
 
-    serverState.getNodes()
+    EpmdDumpBuilder builder = EpmdDump.builder()
+        .port(state.getPort());
+
+    state.getNodes()
         .values()
         .stream()
         .map(it -> new NodeDump(ACTIVE, it.getName(), it.getPort(), -1))
         .forEach(builder::node);
 
-    requestContext.writeAndFlush(builder.build())
+    val response = builder.build();
+
+    log.debug("Response: {}", response);
+    context.writeAndFlush(response)
         .addListener(CLOSE);
   }
 

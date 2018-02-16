@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.server.command.server;
+package io.appulse.epmd.java.server.command.server.handler;
 
 import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
 

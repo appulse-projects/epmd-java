@@ -22,6 +22,7 @@ import java.util.List;
 
 import io.appulse.epmd.java.core.mapper.deserializer.exception.NoApplicableDeserializerException;
 import io.appulse.utils.Bytes;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import lombok.NonNull;
 
@@ -35,11 +36,11 @@ public final class MessageDeserializer {
   private static final List<Deserializer> DESERIALIZERS;
 
   static {
-    DESERIALIZERS = asList(
+    DESERIALIZERS = new CopyOnWriteArrayList<>(asList(
         new RequestDeserializer(),
         new DataDeserializer(),
         new EnumDeserializer()
-    );
+    ));
   }
 
   public <T> T deserialize (@NonNull byte[] bytes, @NonNull Class<T> type) {

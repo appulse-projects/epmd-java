@@ -18,13 +18,13 @@ package io.appulse.epmd.java.core.mapper.deserializer;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.Arrays.asList;
+import static java.util.Collections.synchronizedSet;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -46,12 +46,12 @@ class EnumDeserializer implements Deserializer {
   private static final Set<String> ENUM_UNKNOWN_VALUE;
 
   static {
-    ENUM_CREATE_METHODS_NAMES = Collections.synchronizedSet(new HashSet<>(asList(
+    ENUM_CREATE_METHODS_NAMES = synchronizedSet(new HashSet<>(asList(
         "of",
         "parse",
         "from"
     )));
-    ENUM_UNKNOWN_VALUE = Collections.synchronizedSet(new HashSet<>(asList(
+    ENUM_UNKNOWN_VALUE = synchronizedSet(new HashSet<>(asList(
         "UNDEFINED",
         "UNKNOWN"
     )));

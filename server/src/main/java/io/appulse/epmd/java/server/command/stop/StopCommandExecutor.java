@@ -45,6 +45,8 @@ public class StopCommandExecutor extends AbstractCommandExecutor {
         .filter(it -> it instanceof StopCommandOptions)
         .map(it -> (StopCommandOptions) it)
         .orElse(new StopCommandOptions());
+
+    log.debug("Stop options: {}", options);
   }
 
   @Override

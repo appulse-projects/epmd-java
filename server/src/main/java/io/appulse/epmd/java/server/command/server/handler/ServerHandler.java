@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.server.command.server;
+package io.appulse.epmd.java.server.command.server.handler;
 
 import static lombok.AccessLevel.PRIVATE;
 
 import io.appulse.epmd.java.core.model.request.Request;
-import io.appulse.epmd.java.server.command.server.handler.RequestHandler;
+import io.appulse.epmd.java.server.command.server.ServerState;
+import io.appulse.epmd.java.server.command.server.handler.command.RequestHandler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -40,7 +41,7 @@ import lombok.val;
 public class ServerHandler extends ChannelInboundHandlerAdapter {
 
   @NonNull
-  Context serverContext;
+  ServerState serverState;
 
   @Override
   public void handlerAdded (ChannelHandlerContext ctx) throws Exception {
@@ -59,7 +60,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     }
     log.debug("Request's handler: {}", handler);
 
-    handler.handle(request, context, serverContext);
+    handler.handle(request, context, serverState);
   }
 
   @Override

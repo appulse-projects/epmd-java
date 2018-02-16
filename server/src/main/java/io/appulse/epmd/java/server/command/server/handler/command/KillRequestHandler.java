@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.server.command.server.handler;
+package io.appulse.epmd.java.server.command.server.handler.command;
 
 import static io.appulse.epmd.java.core.model.Tag.KILL_REQUEST;
 import static io.appulse.epmd.java.core.model.response.KillResult.OK;
@@ -22,28 +22,39 @@ import static io.netty.channel.ChannelFutureListener.CLOSE;
 
 import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.epmd.java.core.model.request.Request;
-import io.appulse.epmd.java.server.command.server.Context;
+import io.appulse.epmd.java.server.command.server.ServerState;
 
 import io.netty.channel.ChannelHandlerContext;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Artem Labazin
  * @since 0.4.0
  */
+@Slf4j
 class KillRequestHandler implements RequestHandler {
 
   @Override
-  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext requestContext, @NonNull Context serverState) {
-    if (!serverState.getServerOptions().isChecks()) {
-      requestContext.close();
+  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext context, @NonNull ServerState state) {
+    log.debug("Processing {}", request);
+
+    if (!state.getServerOptions().isChecks()) {
+      log.warn("Option '-relaxed_command_check' is false, but someone trying to kill this EPMD");
+      context.close();
       return;
     }
-    serverState.getNodes().clear();
-    requestContext.writeAndFlush(OK)
+
+    state.getNodes().clear();
+    log.debug("Nodes registry was cleared");
+
+    context.writeAndFlush(OK)
         .addListener(CLOSE)
-        .addListener(future -> Runtime.getRuntime().exit(1));
+        .addListener(future -> {
+          log.debug("Shutting down this EPMD");
+          Runtime.getRuntime().exit(1);
+        });
   }
 
   @Override

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.server.command.server.handler;
+package io.appulse.epmd.java.server.command.server.handler.command;
 
 import static io.appulse.epmd.java.core.model.Tag.ALIVE2_REQUEST;
 import static io.netty.channel.ChannelFutureListener.CLOSE;
@@ -25,7 +25,7 @@ import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.epmd.java.core.model.request.Registration;
 import io.appulse.epmd.java.core.model.request.Request;
 import io.appulse.epmd.java.core.model.response.RegistrationResult;
-import io.appulse.epmd.java.server.command.server.Context;
+import io.appulse.epmd.java.server.command.server.ServerState;
 import io.appulse.epmd.java.server.command.server.Node;
 
 import io.netty.channel.ChannelHandlerContext;
@@ -44,7 +44,7 @@ class RegistrationRequestHandler implements RequestHandler {
   AtomicInteger count = new AtomicInteger(0);
 
   @Override
-  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext requestContext, @NonNull Context serverState) {
+  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext context, @NonNull ServerState state) {
     if (!(request instanceof Registration)) {
       val message = String.format("Invalid request object:%n%s", request);
       log.error(message);
@@ -54,7 +54,9 @@ class RegistrationRequestHandler implements RequestHandler {
     Registration registration = (Registration) request;
     log.info("Registering {} node...", registration.getName());
 
-    val node = register(registration, serverState);
+    val node = register(registration, state);
+    log.debug("Registration result: {}", node);
+
     val response = RegistrationResult.builder()
         .ok(node != null)
         .creation(node != null
@@ -62,13 +64,17 @@ class RegistrationRequestHandler implements RequestHandler {
                   : 0
         )
         .build();
+    log.debug("Response: {}", response);
 
-    val future = requestContext.writeAndFlush(response);
+    val future = context.writeAndFlush(response);
     if (!response.isOk()) {
       future.addListener(CLOSE);
     } else {
-      requestContext.channel().closeFuture()
-          .addListener(f -> log.debug("Node {} was disconnected", node.getName()));
+      context.channel().closeFuture().addListener(f -> {
+        val name = node.getName();
+        state.getNodes().remove(name);
+        log.debug("Node {} was disconnected", name);
+      });
     }
   }
 
@@ -77,21 +83,21 @@ class RegistrationRequestHandler implements RequestHandler {
     return ALIVE2_REQUEST;
   }
 
-  private Node register (Registration registration, Context serverState) {
+  private Node register (Registration registration, ServerState serverState) {
     return serverState.getNodes()
         .compute(registration.getName(), (key, value) -> {
-          if (value != null) {
-            return null;
-          }
-          return Node.builder()
-              .name(registration.getName())
-              .port(registration.getPort())
-              .type(registration.getType())
-              .protocol(registration.getProtocol())
-              .high(registration.getHigh())
-              .low(registration.getLow())
-              .creation(count.incrementAndGet())
-              .build();
-        });
+               if (value != null) {
+                 return null;
+               }
+               return Node.builder()
+                   .name(registration.getName())
+                   .port(registration.getPort())
+                   .type(registration.getType())
+                   .protocol(registration.getProtocol())
+                   .high(registration.getHigh())
+                   .low(registration.getLow())
+                   .creation(count.incrementAndGet())
+                   .build();
+             });
   }
 }

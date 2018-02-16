@@ -28,6 +28,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.appulse.epmd.java.server.cli.CommonOptions;
 import io.appulse.epmd.java.server.command.AbstractCommandExecutor;
 import io.appulse.epmd.java.server.command.CommandOptions;
+import io.appulse.epmd.java.server.command.server.handler.RequestDecoder;
+import io.appulse.epmd.java.server.command.server.handler.ResponseEncoder;
+import io.appulse.epmd.java.server.command.server.handler.ServerHandler;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
@@ -51,7 +54,7 @@ import lombok.val;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class ServerCommandExecutor extends AbstractCommandExecutor implements Closeable {
 
-  Context context;
+  ServerState serverState;
 
   EventLoopGroup bossGroup;
 
@@ -68,7 +71,7 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
         .map(it -> (ServerCommandOptions) it)
         .orElse(new ServerCommandOptions());
 
-    context = Context.builder()
+    serverState = ServerState.builder()
         .nodes(new ConcurrentHashMap<>())
         .commonOptions(commonOptions)
         .serverOptions(serverOptions)
@@ -87,13 +90,13 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
           .channel(NioServerSocketChannel.class)
           .childHandler(new ChannelInitializer<SocketChannel>() {
 
-              @Override
-              public void initChannel (SocketChannel channel) throws Exception {
-                channel.pipeline()
-                    .addLast("decoder", new RequestDecoder())
-                    .addLast("encoder", new ResponseEncoder())
-                    .addLast("handler", new ServerHandler(context));
-              }
+            @Override
+            public void initChannel (SocketChannel channel) throws Exception {
+              channel.pipeline()
+                  .addLast("decoder", new RequestDecoder())
+                  .addLast("encoder", new ResponseEncoder())
+                  .addLast("handler", new ServerHandler(serverState));
+            }
           })
           .option(SO_BACKLOG, 128)
           .childOption(SO_KEEPALIVE, true)
@@ -114,16 +117,17 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
   @SneakyThrows
   public void close () {
     if (closed) {
+      log.debug("Server was already closed");
       return;
     }
     closed = true;
 
-    log.debug("Closing server...");
-
     workerGroup.shutdownGracefully();
     bossGroup.shutdownGracefully();
+    log.debug("Boss and workers groups are closed");
 
-    context.getNodes().clear();
+    serverState.getNodes().clear();
+    log.debug("All nodes are removed");
 
     log.info("Server was closed");
   }

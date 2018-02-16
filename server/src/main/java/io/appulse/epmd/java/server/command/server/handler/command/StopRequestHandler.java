@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.server.command.server.handler;
+package io.appulse.epmd.java.server.command.server.handler.command;
 
-import static io.appulse.epmd.java.core.model.Tag.PORT_PLEASE2_REQUEST;
+import static io.appulse.epmd.java.core.model.Tag.STOP_REQUEST;
+import static io.appulse.epmd.java.core.model.response.StopResult.NOEXIST;
+import static io.appulse.epmd.java.core.model.response.StopResult.STOPPED;
 import static io.netty.channel.ChannelFutureListener.CLOSE;
 
 import io.appulse.epmd.java.core.model.Tag;
-import io.appulse.epmd.java.core.model.request.GetNodeInfo;
 import io.appulse.epmd.java.core.model.request.Request;
-import io.appulse.epmd.java.core.model.response.NodeInfo;
-import io.appulse.epmd.java.server.command.server.Context;
+import io.appulse.epmd.java.core.model.request.Stop;
+import io.appulse.epmd.java.server.command.server.ServerState;
 
 import io.netty.channel.ChannelHandlerContext;
 import lombok.NonNull;
@@ -36,44 +37,40 @@ import lombok.val;
  * @since 0.4.0
  */
 @Slf4j
-class GetNodeInfoRequestHandler implements RequestHandler {
+class StopRequestHandler implements RequestHandler {
 
   @Override
-  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext requestContext, @NonNull Context serverState) {
-    if (!(request instanceof GetNodeInfo)) {
+  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext context, @NonNull ServerState state) {
+    log.debug("Processing {}", request);
+
+    if (!state.getServerOptions().isChecks()) {
+      log.warn("Option '-relaxed_command_check' is false, but someone trying to stop a node");
+      context.close();
+      return;
+    }
+
+    if (!(request instanceof Stop)) {
       val message = String.format("Invalid request object:%n%s", request);
       log.error(message);
       throw new IllegalArgumentException(message);
     }
 
-    val getNodeInfo = (GetNodeInfo) request;
+    val stop = (Stop) request;
+    val result = state.getNodes()
+        .remove(stop.getName());
 
-    val node = serverState.getNodes()
-        .get(getNodeInfo.getName());
+    val response = result == null
+                   ? NOEXIST
+                   : STOPPED;
 
-    NodeInfo info;
-    if (node == null) {
-      info = NodeInfo.builder()
-          .ok(false)
-          .build();
-    } else {
-      info = NodeInfo.builder()
-          .ok(true)
-          .port(node.getPort())
-          .type(node.getType())
-          .protocol(node.getProtocol())
-          .high(node.getHigh())
-          .low(node.getLow())
-          .name(node.getName())
-          .build();
-    }
+    log.debug("Stopping '{}' result is: {}", stop.getName(), response);
 
-    requestContext.writeAndFlush(info)
+    context.writeAndFlush(response)
         .addListener(CLOSE);
   }
 
   @Override
   public Tag getTag () {
-    return PORT_PLEASE2_REQUEST;
+    return STOP_REQUEST;
   }
 }
