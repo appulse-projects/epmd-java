@@ -72,7 +72,7 @@ public class RequestDecoder extends ReplayingDecoder<Request> {
     buf.getBytes(0, body);
     log.debug("Readed message body:\n{}", body);
 
-    val bytes = Bytes.allocate(Short.BYTES + length)
+    Bytes bytes = Bytes.allocate(Short.BYTES + length)
         .put2B(length)
         .put(body);
 

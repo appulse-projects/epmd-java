@@ -45,7 +45,7 @@ class DataDeserializer implements Deserializer {
     if (result instanceof TaggedMessage) {
       val expectedTag = ((TaggedMessage) result).getTag();
       val tag = Tag.of(bytes.getByte());
-      if (expectedTag != tag) {
+      if (!expectedTag.equals(tag)) {
         val message = String.format("Expected tag is: %s, but actual tag is: %s",
                                     expectedTag, tag);
         throw new InvalidReceivedMessageTagException(message);
