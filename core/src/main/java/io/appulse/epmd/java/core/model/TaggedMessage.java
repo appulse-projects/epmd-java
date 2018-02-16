@@ -14,29 +14,16 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.server.command.server;
+package io.appulse.epmd.java.core.model;
 
-import java.util.Map;
+import io.appulse.epmd.java.core.mapper.DataSerializable;
 
-import io.appulse.epmd.java.server.cli.CommonOptions;
+/**
+ *
+ * @author Artem Labazin
+ * @since 0.4.0
+ */
+public interface TaggedMessage extends DataSerializable {
 
-import lombok.Builder;
-import lombok.NonNull;
-import lombok.Value;
-import lombok.experimental.Delegate;
-
-@Value
-@Builder
-public class Context {
-
-  @NonNull
-  Map<String, Node> nodes;
-
-  @NonNull
-  @Delegate
-  CommonOptions commonOptions;
-
-  @NonNull
-  @Delegate
-  ServerCommandOptions serverOptions;
+  Tag getTag ();
 }

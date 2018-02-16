@@ -14,38 +14,59 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.server.command.server.handler;
+package io.appulse.epmd.java.server.command.server.handler.command;
 
 import static io.appulse.epmd.java.core.model.Tag.STOP_REQUEST;
 import static io.appulse.epmd.java.core.model.response.StopResult.NOEXIST;
 import static io.appulse.epmd.java.core.model.response.StopResult.STOPPED;
+import static io.netty.channel.ChannelFutureListener.CLOSE;
 
 import io.appulse.epmd.java.core.model.Tag;
+import io.appulse.epmd.java.core.model.request.Request;
 import io.appulse.epmd.java.core.model.request.Stop;
-import io.appulse.epmd.java.server.command.server.Request;
+import io.appulse.epmd.java.server.command.server.ServerState;
 
+import io.netty.channel.ChannelHandlerContext;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+/**
+ *
+ * @author Artem Labazin
+ * @since 0.4.0
+ */
+@Slf4j
 class StopRequestHandler implements RequestHandler {
 
   @Override
-  public void handle (@NonNull Request request) {
-    if (!request.getContext().getServerOptions().isChecks()) {
-      request.closeConnection();
+  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext context, @NonNull ServerState state) {
+    log.debug("Processing {}", request);
+
+    if (!state.getServerOptions().isChecks()) {
+      log.warn("Option '-relaxed_command_check' is false, but someone trying to stop a node");
+      context.close();
       return;
     }
 
-    val stop = request.parse(Stop.class);
-    val result = request.getContext()
-        .getNodes()
+    if (!(request instanceof Stop)) {
+      val message = String.format("Invalid request object:%n%s", request);
+      log.error(message);
+      throw new IllegalArgumentException(message);
+    }
+
+    val stop = (Stop) request;
+    val result = state.getNodes()
         .remove(stop.getName());
 
     val response = result == null
                    ? NOEXIST
                    : STOPPED;
 
-    request.respondAndClose(response);
+    log.debug("Stopping '{}' result is: {}", stop.getName(), response);
+
+    context.writeAndFlush(response)
+        .addListener(CLOSE);
   }
 
   @Override

@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add more unit and integration tests.
 
+## [0.4.0](https://github.com/appulse-projects/epmd-java/releases/tag/0.4.0) - 2018-02-16
+
+Introducing NIO server.
+
+### Added
+
+- Netty server instead of simple IO-based.
+
+### Changed
+
+- The way of serialization/deserialization of EPMD messages.
+
 ## [0.3.3](https://github.com/appulse-projects/epmd-java/releases/tag/0.3.3) - 2018-02-09
 
 Minor fix, using unsigned numbers where they are needed

@@ -16,23 +16,15 @@
 
 package io.appulse.epmd.java.core.mapper.deserializer;
 
-import static io.appulse.epmd.java.core.model.Tag.UNDEFINED;
-import static io.appulse.utils.BytesUtils.asInteger;
 import static java.util.Arrays.asList;
-import static java.util.Optional.ofNullable;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import io.appulse.epmd.java.core.mapper.Message;
-import io.appulse.epmd.java.core.mapper.deserializer.exception.InvalidReceivedMessageLengthException;
-import io.appulse.epmd.java.core.mapper.deserializer.exception.InvalidReceivedMessageTagException;
 import io.appulse.epmd.java.core.mapper.deserializer.exception.NoApplicableDeserializerException;
-import io.appulse.epmd.java.core.mapper.exception.MessageAnnotationMissingException;
-import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.utils.Bytes;
 
-import lombok.SneakyThrows;
-import lombok.val;
+import lombok.NonNull;
 
 /**
  *
@@ -44,44 +36,22 @@ public final class MessageDeserializer {
   private static final List<Deserializer> DESERIALIZERS;
 
   static {
-    DESERIALIZERS = asList(
+    DESERIALIZERS = new CopyOnWriteArrayList<>(asList(
+        new RequestDeserializer(),
         new DataDeserializer(),
         new EnumDeserializer()
-    );
+    ));
   }
 
-  @SneakyThrows
-  public <T> T deserialize (byte[] bytes, Class<T> type) {
-    val buffer = ofNullable(bytes)
-        .map(Bytes::wrap)
-        .orElseThrow(NullPointerException::new);
+  public <T> T deserialize (@NonNull byte[] bytes, @NonNull Class<T> type) {
+    return deserialize(Bytes.wrap(bytes), type);
+  }
 
-    val annotation = ofNullable(type)
-        .map(it -> it.getAnnotation(Message.class))
-        .orElseThrow(MessageAnnotationMissingException::new);
-
-    if (annotation.lengthBytes() > 0) {
-      val receivedMessageLength = asInteger(buffer.getBytes(annotation.lengthBytes()));
-      if (receivedMessageLength != buffer.remaining()) {
-        val message = String.format("Expected length is %d - %d bytes, but actual length is %d bytes.",
-                                    annotation.lengthBytes(), receivedMessageLength, buffer.remaining());
-        throw new InvalidReceivedMessageLengthException(message);
-      }
-    }
-
-    if (annotation.value() != UNDEFINED) {
-      val tag = Tag.of(buffer.getByte());
-      if (annotation.value() != tag) {
-        val message = String.format("Expected tag is: %s, but actual tag is: %s",
-                                    annotation.value(), tag);
-        throw new InvalidReceivedMessageTagException(message);
-      }
-    }
-
+  public <T> T deserialize (@NonNull Bytes bytes, @NonNull Class<T> type) {
     return DESERIALIZERS.stream()
         .filter(it -> it.isApplicable(type))
         .findAny()
         .orElseThrow(NoApplicableDeserializerException::new)
-        .deserialize(buffer, type);
+        .deserialize(bytes, type);
   }
 }

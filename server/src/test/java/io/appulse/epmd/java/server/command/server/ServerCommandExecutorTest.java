@@ -17,6 +17,7 @@
 package io.appulse.epmd.java.server.command.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static io.appulse.epmd.java.core.model.NodeType.R3_ERLANG;
 import static io.appulse.epmd.java.core.model.Protocol.TCP;
 import static io.appulse.epmd.java.core.model.Version.R6;
@@ -24,18 +25,31 @@ import static io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump.Status.
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import io.appulse.epmd.java.client.EpmdClient;
+import io.appulse.epmd.java.client.exception.EpmdRegistrationException;
 import io.appulse.epmd.java.server.cli.CommonOptions;
+import io.appulse.epmd.java.server.command.server.util.TestNamePrinter;
 import io.appulse.utils.SocketUtils;
 
 import lombok.val;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 
+/**
+ *
+ * @author Artem Labazin
+ * @since 0.4.0
+ */
 public class ServerCommandExecutorTest {
+
+  @Rule
+  public TestRule watcher = new TestNamePrinter();
 
   EpmdClient client;
 
@@ -44,7 +58,7 @@ public class ServerCommandExecutorTest {
   ExecutorService executorService;
 
   @Before
-  public void before () {
+  public void before () throws Exception {
     val port = SocketUtils.findFreePort()
         .orElseThrow(RuntimeException::new);
 
@@ -54,6 +68,8 @@ public class ServerCommandExecutorTest {
 
     executorService = Executors.newSingleThreadExecutor();
     executorService.execute(() -> server.execute());
+
+    TimeUnit.SECONDS.sleep(2);
 
     client = new EpmdClient(port);
   }
@@ -101,6 +117,11 @@ public class ServerCommandExecutorTest {
           .isPresent()
           .hasValue(R6);
     });
+
+    assertThatThrownBy(() -> client.register("register", 8971, R3_ERLANG, TCP, R6, R6))
+        .isInstanceOf(EpmdRegistrationException.class);
+
+    client.stop("register");
   }
 
   @Test

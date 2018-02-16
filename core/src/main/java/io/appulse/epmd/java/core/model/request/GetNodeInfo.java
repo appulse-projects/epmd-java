@@ -20,9 +20,8 @@ import static io.appulse.epmd.java.core.model.Tag.PORT_PLEASE2_REQUEST;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static lombok.AccessLevel.PRIVATE;
 
-import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.epmd.java.core.mapper.ExpectedResponse;
-import io.appulse.epmd.java.core.mapper.Message;
+import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.epmd.java.core.model.response.NodeInfo;
 import io.appulse.utils.Bytes;
 
@@ -40,10 +39,9 @@ import lombok.experimental.FieldDefaults;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Message(PORT_PLEASE2_REQUEST)
 @FieldDefaults(level = PRIVATE)
 @ExpectedResponse(NodeInfo.class)
-public class GetNodeInfo implements DataSerializable {
+public class GetNodeInfo implements Request {
 
   @NonNull
   String name;
@@ -56,5 +54,10 @@ public class GetNodeInfo implements DataSerializable {
   @Override
   public void read (@NonNull Bytes bytes) {
     name = bytes.getString(ISO_8859_1);
+  }
+
+  @Override
+  public Tag getTag () {
+    return PORT_PLEASE2_REQUEST;
   }
 }

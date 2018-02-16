@@ -14,27 +14,39 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.server.command.server.handler;
+package io.appulse.epmd.java.server.command.server.handler.command;
 
 import static io.appulse.epmd.java.core.model.Tag.NAMES_REQUEST;
+import static io.netty.channel.ChannelFutureListener.CLOSE;
 
 import io.appulse.epmd.java.core.model.Tag;
+import io.appulse.epmd.java.core.model.request.Request;
 import io.appulse.epmd.java.core.model.response.EpmdInfo;
 import io.appulse.epmd.java.core.model.response.EpmdInfo.EpmdInfoBuilder;
 import io.appulse.epmd.java.core.model.response.EpmdInfo.NodeDescription;
-import io.appulse.epmd.java.server.command.server.Request;
+import io.appulse.epmd.java.server.command.server.ServerState;
 
+import io.netty.channel.ChannelHandlerContext;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
+/**
+ *
+ * @author Artem Labazin
+ * @since 0.4.0
+ */
+@Slf4j
 class GetEpmdInfoRequestHandler implements RequestHandler {
 
   @Override
-  public void handle (@NonNull Request request) {
-    EpmdInfoBuilder builder = EpmdInfo.builder()
-        .port(request.getContext().getPort());
+  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext context, @NonNull ServerState state) {
+    log.debug("Processing {}", request);
 
-    request.getContext()
-        .getNodes()
+    EpmdInfoBuilder builder = EpmdInfo.builder()
+        .port(state.getPort());
+
+    state.getNodes()
         .values()
         .stream()
         .map(it -> NodeDescription.builder()
@@ -44,7 +56,11 @@ class GetEpmdInfoRequestHandler implements RequestHandler {
         )
         .forEach(builder::node);
 
-    request.respondAndClose(builder.build());
+    val response = builder.build();
+
+    log.debug("Response: {}", response);
+    context.writeAndFlush(response)
+        .addListener(CLOSE);
   }
 
   @Override

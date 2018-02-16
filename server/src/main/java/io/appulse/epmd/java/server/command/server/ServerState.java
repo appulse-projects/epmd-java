@@ -14,38 +14,34 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.core.model.request;
+package io.appulse.epmd.java.server.command.server;
 
-import static io.appulse.epmd.java.core.model.Tag.NAMES_REQUEST;
+import java.util.Map;
 
-import io.appulse.epmd.java.core.mapper.ExpectedResponse;
-import io.appulse.epmd.java.core.model.Tag;
-import io.appulse.epmd.java.core.model.response.EpmdInfo;
-import io.appulse.utils.Bytes;
+import io.appulse.epmd.java.server.cli.CommonOptions;
 
-import lombok.ToString;
+import lombok.Builder;
+import lombok.NonNull;
+import lombok.Value;
+import lombok.experimental.Delegate;
 
 /**
  *
  * @author Artem Labazin
- * @since 0.0.1
+ * @since 0.4.0
  */
-@ToString
-@ExpectedResponse(EpmdInfo.class)
-public class GetEpmdInfo implements Request {
+@Value
+@Builder
+public class ServerState {
 
-  @Override
-  public void write (Bytes bytes) {
-    // nothing
-  }
+  @NonNull
+  Map<String, Node> nodes;
 
-  @Override
-  public void read (Bytes bytes) {
-    // nothing
-  }
+  @NonNull
+  @Delegate
+  CommonOptions commonOptions;
 
-  @Override
-  public Tag getTag () {
-    return NAMES_REQUEST;
-  }
+  @NonNull
+  @Delegate
+  ServerCommandOptions serverOptions;
 }

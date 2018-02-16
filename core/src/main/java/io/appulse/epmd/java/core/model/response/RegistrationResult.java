@@ -19,8 +19,8 @@ package io.appulse.epmd.java.core.model.response;
 import static io.appulse.epmd.java.core.model.Tag.ALIVE2_RESPONSE;
 import static lombok.AccessLevel.PRIVATE;
 
-import io.appulse.epmd.java.core.mapper.DataSerializable;
-import io.appulse.epmd.java.core.mapper.Message;
+import io.appulse.epmd.java.core.model.Tag;
+import io.appulse.epmd.java.core.model.TaggedMessage;
 import io.appulse.utils.Bytes;
 
 import lombok.AllArgsConstructor;
@@ -41,9 +41,8 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Message(value = ALIVE2_RESPONSE, lengthBytes = 0)
 @FieldDefaults(level = PRIVATE)
-public class RegistrationResult implements DataSerializable {
+public class RegistrationResult implements TaggedMessage {
 
   boolean ok;
 
@@ -65,5 +64,10 @@ public class RegistrationResult implements DataSerializable {
     if (ok) {
       creation = bytes.getUnsignedShort();
     }
+  }
+
+  @Override
+  public Tag getTag () {
+    return ALIVE2_RESPONSE;
   }
 }

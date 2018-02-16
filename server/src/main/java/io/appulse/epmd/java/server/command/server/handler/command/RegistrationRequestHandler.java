@@ -14,33 +14,49 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.server.command.server.handler;
+package io.appulse.epmd.java.server.command.server.handler.command;
 
 import static io.appulse.epmd.java.core.model.Tag.ALIVE2_REQUEST;
+import static io.netty.channel.ChannelFutureListener.CLOSE;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.epmd.java.core.model.request.Registration;
+import io.appulse.epmd.java.core.model.request.Request;
 import io.appulse.epmd.java.core.model.response.RegistrationResult;
 import io.appulse.epmd.java.server.command.server.Node;
-import io.appulse.epmd.java.server.command.server.Request;
+import io.appulse.epmd.java.server.command.server.ServerState;
 
+import io.netty.channel.ChannelHandlerContext;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+/**
+ *
+ * @author Artem Labazin
+ * @since 0.4.0
+ */
 @Slf4j
 class RegistrationRequestHandler implements RequestHandler {
 
   AtomicInteger count = new AtomicInteger(0);
 
   @Override
-  public void handle (@NonNull Request request) {
-    Registration registration = request.parse(Registration.class);
+  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext context, @NonNull ServerState state) {
+    if (!(request instanceof Registration)) {
+      val message = String.format("Invalid request object:%n%s", request);
+      log.error(message);
+      throw new IllegalArgumentException(message);
+    }
+
+    Registration registration = (Registration) request;
     log.info("Registering {} node...", registration.getName());
 
-    val node = register(request, registration);
+    val node = register(registration, state);
+    log.debug("Registration result: {}", node);
+
     val response = RegistrationResult.builder()
         .ok(node != null)
         .creation(node != null
@@ -48,10 +64,17 @@ class RegistrationRequestHandler implements RequestHandler {
                   : 0
         )
         .build();
+    log.debug("Response: {}", response);
 
-    request.respond(response);
-    if (node == null) {
-      request.closeConnection();
+    val future = context.writeAndFlush(response);
+    if (!response.isOk()) {
+      future.addListener(CLOSE);
+    } else {
+      context.channel().closeFuture().addListener(f -> {
+        val name = node.getName();
+        state.getNodes().remove(name);
+        log.debug("Node {} was disconnected", name);
+      });
     }
   }
 
@@ -60,8 +83,8 @@ class RegistrationRequestHandler implements RequestHandler {
     return ALIVE2_REQUEST;
   }
 
-  private Node register (Request request, Registration registration) {
-    return request.getContext().getNodes()
+  private Node register (Registration registration, ServerState serverState) {
+    return serverState.getNodes()
         .compute(registration.getName(), (key, value) -> {
           if (value != null) {
             return null;
@@ -74,7 +97,6 @@ class RegistrationRequestHandler implements RequestHandler {
               .high(registration.getHigh())
               .low(registration.getLow())
               .creation(count.incrementAndGet())
-              .socket(request.getSocket())
               .build();
         });
   }

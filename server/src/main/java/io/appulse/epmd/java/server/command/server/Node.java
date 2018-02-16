@@ -16,14 +16,11 @@
 
 package io.appulse.epmd.java.server.command.server;
 
-import java.net.Socket;
-
 import io.appulse.epmd.java.core.model.NodeType;
 import io.appulse.epmd.java.core.model.Protocol;
 import io.appulse.epmd.java.core.model.Version;
 
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -34,7 +31,6 @@ import lombok.Value;
  */
 @Value
 @Builder
-@EqualsAndHashCode(exclude = "socket")
 public class Node {
 
   @NonNull
@@ -55,7 +51,4 @@ public class Node {
   Version low;
 
   int creation;
-
-  @NonNull
-  Socket socket;
 }

@@ -18,8 +18,10 @@ package io.appulse.epmd.java.core.mapper.serializer;
 
 import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.epmd.java.core.mapper.serializer.exception.SerializationException;
+import io.appulse.epmd.java.core.model.TaggedMessage;
 import io.appulse.utils.Bytes;
 
+import lombok.NonNull;
 import lombok.val;
 
 /**
@@ -30,14 +32,18 @@ import lombok.val;
 class DataSerializer implements Serializer {
 
   @Override
-  public byte[] serialize (Object object, Class<?> type) throws SerializationException {
-    val body = Bytes.allocate();
-    ((DataSerializable) object).write(body);
-    return body.array();
+  public byte[] serialize (@NonNull Object object, @NonNull Class<?> type) throws SerializationException {
+    val serializable = (DataSerializable) object;
+    val bytes = serializable instanceof TaggedMessage
+                ? Bytes.allocate().put1B(((TaggedMessage) object).getTag().getCode())
+                : Bytes.allocate();
+
+    serializable.write(bytes);
+    return bytes.array();
   }
 
   @Override
-  public boolean isApplicable (Class<?> type) {
+  public boolean isApplicable (@NonNull Class<?> type) {
     return DataSerializable.class.isAssignableFrom(type);
   }
 }

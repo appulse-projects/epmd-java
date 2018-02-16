@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.server.command.server.handler;
+package io.appulse.epmd.java.server.command.server.handler.command;
 
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toConcurrentMap;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 import io.appulse.epmd.java.core.model.Tag;
-import io.appulse.epmd.java.server.command.server.Request;
+import io.appulse.epmd.java.core.model.request.Request;
+import io.appulse.epmd.java.server.command.server.ServerState;
 
-import lombok.NonNull;
+import io.netty.channel.ChannelHandlerContext;
 
+/**
+ *
+ * @author Artem Labazin
+ * @since 0.4.0
+ */
 public interface RequestHandler {
 
   Map<Tag, RequestHandler> ALL = Stream.of(
@@ -35,9 +41,9 @@ public interface RequestHandler {
       new KillRequestHandler(),
       new RegistrationRequestHandler(),
       new StopRequestHandler()
-  ).collect(toMap(RequestHandler::getTag, it -> it));
+  ).collect(toConcurrentMap(RequestHandler::getTag, it -> it));
 
-  void handle (@NonNull Request request);
+  void handle (Request request, ChannelHandlerContext context, ServerState state);
 
   Tag getTag ();
 }

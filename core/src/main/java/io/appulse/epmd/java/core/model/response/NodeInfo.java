@@ -25,10 +25,10 @@ import static lombok.AccessLevel.PRIVATE;
 
 import java.util.Optional;
 
-import io.appulse.epmd.java.core.mapper.DataSerializable;
-import io.appulse.epmd.java.core.mapper.Message;
 import io.appulse.epmd.java.core.model.NodeType;
 import io.appulse.epmd.java.core.model.Protocol;
+import io.appulse.epmd.java.core.model.Tag;
+import io.appulse.epmd.java.core.model.TaggedMessage;
 import io.appulse.epmd.java.core.model.Version;
 import io.appulse.utils.Bytes;
 
@@ -46,9 +46,8 @@ import lombok.val;
  */
 @Getter
 @ToString
-@Message(value = PORT2_RESPONSE, lengthBytes = 0)
 @FieldDefaults(level = PRIVATE)
-public class NodeInfo implements DataSerializable {
+public class NodeInfo implements TaggedMessage {
 
   boolean ok;
 
@@ -119,5 +118,10 @@ public class NodeInfo implements DataSerializable {
 
     val length = bytes.getShort();
     name = of(bytes.getString(length, ISO_8859_1));
+  }
+
+  @Override
+  public Tag getTag () {
+    return PORT2_RESPONSE;
   }
 }
