@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import io.appulse.epmd.java.core.mapper.DataSerializable;
-import io.appulse.epmd.java.core.mapper.Message;
 import io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump.Status;
 import io.appulse.utils.Bytes;
 
@@ -46,7 +45,6 @@ import lombok.val;
  */
 @Getter
 @Builder
-@Message(lengthBytes = 0)
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor

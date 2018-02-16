@@ -17,32 +17,47 @@
 package io.appulse.epmd.java.server.command.server.handler;
 
 import static io.appulse.epmd.java.core.model.Tag.PORT_PLEASE2_REQUEST;
+import static io.netty.channel.ChannelFutureListener.CLOSE;
 
 import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.epmd.java.core.model.request.GetNodeInfo;
+import io.appulse.epmd.java.core.model.request.Request;
 import io.appulse.epmd.java.core.model.response.NodeInfo;
-import io.appulse.epmd.java.server.command.server.Request;
+import io.appulse.epmd.java.server.command.server.Context;
 
+import io.netty.channel.ChannelHandlerContext;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+/**
+ *
+ * @author Artem Labazin
+ * @since 0.4.0
+ */
+@Slf4j
 class GetNodeInfoRequestHandler implements RequestHandler {
 
   @Override
-  public void handle (@NonNull Request request) {
-    val getNodeInfo = request.parse(GetNodeInfo.class);
+  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext requestContext, @NonNull Context serverState) {
+    if (!(request instanceof GetNodeInfo)) {
+      val message = String.format("Invalid request object:%n%s", request);
+      log.error(message);
+      throw new IllegalArgumentException(message);
+    }
 
-    val node = request.getContext()
-        .getNodes()
+    val getNodeInfo = (GetNodeInfo) request;
+
+    val node = serverState.getNodes()
         .get(getNodeInfo.getName());
 
-    NodeInfo response;
+    NodeInfo info;
     if (node == null) {
-      response = NodeInfo.builder()
+      info = NodeInfo.builder()
           .ok(false)
           .build();
     } else {
-      response = NodeInfo.builder()
+      info = NodeInfo.builder()
           .ok(true)
           .port(node.getPort())
           .type(node.getType())
@@ -53,7 +68,8 @@ class GetNodeInfoRequestHandler implements RequestHandler {
           .build();
     }
 
-    request.respondAndClose(response);
+    requestContext.writeAndFlush(info)
+        .addListener(CLOSE);
   }
 
   @Override

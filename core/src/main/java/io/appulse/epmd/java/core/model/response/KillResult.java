@@ -16,8 +16,6 @@
 
 package io.appulse.epmd.java.core.model.response;
 
-import io.appulse.epmd.java.core.mapper.Message;
-
 import lombok.ToString;
 
 /**
@@ -26,7 +24,6 @@ import lombok.ToString;
  * @since 0.0.1
  */
 @ToString
-@Message(lengthBytes = 0)
 public enum KillResult {
 
   OK,

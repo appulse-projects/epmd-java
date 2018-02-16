@@ -18,24 +18,32 @@ package io.appulse.epmd.java.server.command.server.handler;
 
 import static io.appulse.epmd.java.core.model.Tag.KILL_REQUEST;
 import static io.appulse.epmd.java.core.model.response.KillResult.OK;
+import static io.netty.channel.ChannelFutureListener.CLOSE;
 
 import io.appulse.epmd.java.core.model.Tag;
-import io.appulse.epmd.java.server.command.server.Request;
+import io.appulse.epmd.java.core.model.request.Request;
+import io.appulse.epmd.java.server.command.server.Context;
 
+import io.netty.channel.ChannelHandlerContext;
 import lombok.NonNull;
 
+/**
+ *
+ * @author Artem Labazin
+ * @since 0.4.0
+ */
 class KillRequestHandler implements RequestHandler {
 
   @Override
-  public void handle (@NonNull Request request) {
-    if (!request.getContext().getServerOptions().isChecks()) {
-      request.closeConnection();
+  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext requestContext, @NonNull Context serverState) {
+    if (!serverState.getServerOptions().isChecks()) {
+      requestContext.close();
       return;
     }
-
-    request.getContext().getNodes().clear();
-    request.respondAndClose(OK);
-    Runtime.getRuntime().exit(1);
+    serverState.getNodes().clear();
+    requestContext.writeAndFlush(OK)
+        .addListener(CLOSE)
+        .addListener(future -> Runtime.getRuntime().exit(1));
   }
 
   @Override

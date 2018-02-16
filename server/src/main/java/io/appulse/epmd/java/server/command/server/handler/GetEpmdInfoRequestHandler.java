@@ -17,24 +17,31 @@
 package io.appulse.epmd.java.server.command.server.handler;
 
 import static io.appulse.epmd.java.core.model.Tag.NAMES_REQUEST;
+import static io.netty.channel.ChannelFutureListener.CLOSE;
 
 import io.appulse.epmd.java.core.model.Tag;
+import io.appulse.epmd.java.core.model.request.Request;
 import io.appulse.epmd.java.core.model.response.EpmdInfo;
 import io.appulse.epmd.java.core.model.response.EpmdInfo.EpmdInfoBuilder;
 import io.appulse.epmd.java.core.model.response.EpmdInfo.NodeDescription;
-import io.appulse.epmd.java.server.command.server.Request;
+import io.appulse.epmd.java.server.command.server.Context;
 
+import io.netty.channel.ChannelHandlerContext;
 import lombok.NonNull;
 
+/**
+ *
+ * @author Artem Labazin
+ * @since 0.4.0
+ */
 class GetEpmdInfoRequestHandler implements RequestHandler {
 
   @Override
-  public void handle (@NonNull Request request) {
+  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext requestContext, @NonNull Context serverState) {
     EpmdInfoBuilder builder = EpmdInfo.builder()
-        .port(request.getContext().getPort());
+        .port(serverState.getPort());
 
-    request.getContext()
-        .getNodes()
+    serverState.getNodes()
         .values()
         .stream()
         .map(it -> NodeDescription.builder()
@@ -44,7 +51,8 @@ class GetEpmdInfoRequestHandler implements RequestHandler {
         )
         .forEach(builder::node);
 
-    request.respondAndClose(builder.build());
+    requestContext.writeAndFlush(builder.build())
+        .addListener(CLOSE);
   }
 
   @Override

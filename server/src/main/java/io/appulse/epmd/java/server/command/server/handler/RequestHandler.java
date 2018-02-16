@@ -22,10 +22,16 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import io.appulse.epmd.java.core.model.Tag;
-import io.appulse.epmd.java.server.command.server.Request;
+import io.appulse.epmd.java.core.model.request.Request;
+import io.appulse.epmd.java.server.command.server.Context;
 
-import lombok.NonNull;
+import io.netty.channel.ChannelHandlerContext;
 
+/**
+ *
+ * @author Artem Labazin
+ * @since 0.4.0
+ */
 public interface RequestHandler {
 
   Map<Tag, RequestHandler> ALL = Stream.of(
@@ -37,7 +43,7 @@ public interface RequestHandler {
       new StopRequestHandler()
   ).collect(toMap(RequestHandler::getTag, it -> it));
 
-  void handle (@NonNull Request request);
+  void handle (Request request, ChannelHandlerContext requestContext, Context serverState);
 
   Tag getTag ();
 }

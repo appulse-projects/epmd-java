@@ -16,9 +16,9 @@
 
 package io.appulse.epmd.java.core.mapper.serializer;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
-
 import io.appulse.epmd.java.core.mapper.serializer.exception.SerializationException;
+import io.appulse.epmd.java.core.model.request.Request;
+import io.appulse.utils.Bytes;
 
 import lombok.NonNull;
 import lombok.val;
@@ -26,18 +26,27 @@ import lombok.val;
 /**
  *
  * @author Artem Labazin
- * @since 0.0.1
+ * @since 0.4.0
  */
-class EnumSerializer implements Serializer {
+class RequestSerializer implements Serializer {
 
   @Override
   public byte[] serialize (@NonNull Object object, @NonNull Class<?> type) throws SerializationException {
-    val string = ((Enum<?>) object).name();
-    return string.getBytes(ISO_8859_1);
+    val request = (Request) object;
+
+    val bytes = Bytes.allocate()
+        .put2B(0)
+        .put1B(request.getTag().getCode());
+
+    request.write(bytes);
+
+    return bytes
+        .put2B(0, bytes.limit() - Short.BYTES)
+        .array();
   }
 
   @Override
   public boolean isApplicable (@NonNull Class<?> type) {
-    return type.isEnum();
+    return Request.class.isAssignableFrom(type);
   }
 }

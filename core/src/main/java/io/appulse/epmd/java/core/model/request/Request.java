@@ -16,36 +16,13 @@
 
 package io.appulse.epmd.java.core.model.request;
 
-import static io.appulse.epmd.java.core.model.Tag.NAMES_REQUEST;
-
-import io.appulse.epmd.java.core.mapper.ExpectedResponse;
-import io.appulse.epmd.java.core.model.Tag;
-import io.appulse.epmd.java.core.model.response.EpmdInfo;
-import io.appulse.utils.Bytes;
-
-import lombok.ToString;
+import io.appulse.epmd.java.core.model.TaggedMessage;
 
 /**
  *
  * @author Artem Labazin
- * @since 0.0.1
+ * @since 0.4.0
  */
-@ToString
-@ExpectedResponse(EpmdInfo.class)
-public class GetEpmdInfo implements Request {
+public interface Request extends TaggedMessage {
 
-  @Override
-  public void write (Bytes bytes) {
-    // nothing
-  }
-
-  @Override
-  public void read (Bytes bytes) {
-    // nothing
-  }
-
-  @Override
-  public Tag getTag () {
-    return NAMES_REQUEST;
-  }
 }

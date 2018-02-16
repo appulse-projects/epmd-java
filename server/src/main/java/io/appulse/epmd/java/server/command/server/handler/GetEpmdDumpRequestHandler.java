@@ -18,30 +18,38 @@ package io.appulse.epmd.java.server.command.server.handler;
 
 import static io.appulse.epmd.java.core.model.Tag.DUMP_REQUEST;
 import static io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump.Status.ACTIVE;
+import static io.netty.channel.ChannelFutureListener.CLOSE;
 
 import io.appulse.epmd.java.core.model.Tag;
+import io.appulse.epmd.java.core.model.request.Request;
 import io.appulse.epmd.java.core.model.response.EpmdDump;
 import io.appulse.epmd.java.core.model.response.EpmdDump.EpmdDumpBuilder;
 import io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump;
-import io.appulse.epmd.java.server.command.server.Request;
+import io.appulse.epmd.java.server.command.server.Context;
 
+import io.netty.channel.ChannelHandlerContext;
 import lombok.NonNull;
 
+/**
+ *
+ * @author Artem Labazin
+ * @since 0.4.0
+ */
 class GetEpmdDumpRequestHandler implements RequestHandler {
 
   @Override
-  public void handle (@NonNull Request request) {
+  public void handle (@NonNull Request request, @NonNull ChannelHandlerContext requestContext, @NonNull Context serverState) {
     EpmdDumpBuilder builder = EpmdDump.builder()
-        .port(request.getContext().getPort());
+        .port(serverState.getPort());
 
-    request.getContext()
-        .getNodes()
+    serverState.getNodes()
         .values()
         .stream()
         .map(it -> new NodeDump(ACTIVE, it.getName(), it.getPort(), -1))
         .forEach(builder::node);
 
-    request.respondAndClose(builder.build());
+    requestContext.writeAndFlush(builder.build())
+        .addListener(CLOSE);
   }
 
   @Override

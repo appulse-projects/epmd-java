@@ -14,38 +14,20 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.core.model.request;
+package io.appulse.epmd.java.server.command.server.util;
 
-import static io.appulse.epmd.java.core.model.Tag.NAMES_REQUEST;
-
-import io.appulse.epmd.java.core.mapper.ExpectedResponse;
-import io.appulse.epmd.java.core.model.Tag;
-import io.appulse.epmd.java.core.model.response.EpmdInfo;
-import io.appulse.utils.Bytes;
-
-import lombok.ToString;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 
 /**
  *
  * @author Artem Labazin
- * @since 0.0.1
+ * @since 0.4.0
  */
-@ToString
-@ExpectedResponse(EpmdInfo.class)
-public class GetEpmdInfo implements Request {
+public class TestNamePrinter extends TestWatcher {
 
   @Override
-  public void write (Bytes bytes) {
-    // nothing
-  }
-
-  @Override
-  public void read (Bytes bytes) {
-    // nothing
-  }
-
-  @Override
-  public Tag getTag () {
-    return NAMES_REQUEST;
+  protected void starting (Description description) {
+    System.out.println("\nRUNNING TEST: " + description.getMethodName() + '\n');
   }
 }

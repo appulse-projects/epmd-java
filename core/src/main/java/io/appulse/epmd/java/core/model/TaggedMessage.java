@@ -14,29 +14,16 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.core.mapper;
+package io.appulse.epmd.java.core.model;
 
-import static io.appulse.epmd.java.core.model.Tag.UNDEFINED;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import io.appulse.epmd.java.core.model.Tag;
+import io.appulse.epmd.java.core.mapper.DataSerializable;
 
 /**
  *
  * @author Artem Labazin
- * @since 0.0.1
+ * @since 0.4.0
  */
-@Documented
-@Target(TYPE)
-@Retention(RUNTIME)
-public @interface Message {
+public interface TaggedMessage extends DataSerializable {
 
-  int lengthBytes () default 2;
-
-  Tag value () default UNDEFINED;
+  Tag getTag ();
 }

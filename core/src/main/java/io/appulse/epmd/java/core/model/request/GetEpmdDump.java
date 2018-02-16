@@ -18,9 +18,8 @@ package io.appulse.epmd.java.core.model.request;
 
 import static io.appulse.epmd.java.core.model.Tag.DUMP_REQUEST;
 
-import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.epmd.java.core.mapper.ExpectedResponse;
-import io.appulse.epmd.java.core.mapper.Message;
+import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.epmd.java.core.model.response.EpmdDump;
 import io.appulse.utils.Bytes;
 
@@ -32,9 +31,8 @@ import lombok.ToString;
  * @since 0.0.1
  */
 @ToString
-@Message(DUMP_REQUEST)
 @ExpectedResponse(EpmdDump.class)
-public class GetEpmdDump implements DataSerializable {
+public class GetEpmdDump implements Request {
 
   @Override
   public void write (Bytes bytes) {
@@ -44,5 +42,10 @@ public class GetEpmdDump implements DataSerializable {
   @Override
   public void read (Bytes bytes) {
     // nothing
+  }
+
+  @Override
+  public Tag getTag () {
+    return DUMP_REQUEST;
   }
 }

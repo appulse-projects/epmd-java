@@ -16,20 +16,25 @@
 
 package io.appulse.epmd.java.server.command.server;
 
+import static io.netty.channel.ChannelOption.SO_BACKLOG;
+import static io.netty.channel.ChannelOption.SO_KEEPALIVE;
+import static io.netty.channel.ChannelOption.TCP_NODELAY;
 import static java.util.Optional.of;
 import static lombok.AccessLevel.PRIVATE;
 
 import java.io.Closeable;
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import io.appulse.epmd.java.server.cli.CommonOptions;
 import io.appulse.epmd.java.server.command.AbstractCommandExecutor;
 import io.appulse.epmd.java.server.command.CommandOptions;
 
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
@@ -46,11 +51,11 @@ import lombok.val;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class ServerCommandExecutor extends AbstractCommandExecutor implements Closeable {
 
-  ServerSocket serverSocket;
-
-  ExecutorService executor;
-
   Context context;
+
+  EventLoopGroup bossGroup;
+
+  EventLoopGroup workerGroup;
 
   @NonFinal
   volatile boolean closed;
@@ -63,42 +68,45 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
         .map(it -> (ServerCommandOptions) it)
         .orElse(new ServerCommandOptions());
 
-    serverSocket = new ServerSocket(getPort());
-
-    executor = Executors.newCachedThreadPool();
-
     context = Context.builder()
         .nodes(new ConcurrentHashMap<>())
         .commonOptions(commonOptions)
         .serverOptions(serverOptions)
         .build();
+
+    bossGroup = new NioEventLoopGroup(1);
+    workerGroup = new NioEventLoopGroup(2);
   }
 
   @Override
-  @SneakyThrows
   public void execute () {
-    log.debug("Server before start context: {}", context);
+    log.debug("Starting server on port {}", getPort());
     try {
-      while (true) {
-        log.debug("Waiting new connection");
+      new ServerBootstrap()
+          .group(bossGroup, workerGroup)
+          .channel(NioServerSocketChannel.class)
+          .childHandler(new ChannelInitializer<SocketChannel>() {
 
-        val socket = serverSocket.accept();
-        log.debug("New connection was accepted");
-
-        if (context.getAddresses().contains(socket.getInetAddress())) {
-          socket.close();
-          continue;
-        }
-
-        if (isDebug()) {
-          System.out.println();
-        }
-
-        val handler = new ServerWorker(socket, context);
-        executor.execute(handler);
-      }
+              @Override
+              public void initChannel (SocketChannel channel) throws Exception {
+                channel.pipeline()
+                    .addLast("decoder", new RequestDecoder())
+                    .addLast("encoder", new ResponseEncoder())
+                    .addLast("handler", new ServerHandler(context));
+              }
+          })
+          .option(SO_BACKLOG, 128)
+          .childOption(SO_KEEPALIVE, true)
+          .childOption(TCP_NODELAY, true)
+          .bind(getPort())
+          .sync()
+          // Wait until the server socket is closed.
+          .channel().closeFuture().sync();
+    } catch (InterruptedException ex) {
+      log.error("Server work exception", ex);
     } finally {
-      close();
+      workerGroup.shutdownGracefully();
+      bossGroup.shutdownGracefully();
     }
   }
 
@@ -112,15 +120,8 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
 
     log.debug("Closing server...");
 
-    try {
-      serverSocket.close();
-    } catch (IOException ex) {
-    }
-    log.debug("Server socket was closed");
-
-    if (!executor.isShutdown()) {
-      executor.shutdown();
-    }
+    workerGroup.shutdownGracefully();
+    bossGroup.shutdownGracefully();
 
     context.getNodes().clear();
 
