@@ -175,11 +175,11 @@ public final class EpmdClient implements Closeable {
     super.finalize();
   }
 
-  private static class Default {
+  public static class Default {
 
-    private static final InetAddress ADDRESS = getDefaultInetAddress();
+    public static final InetAddress ADDRESS = getDefaultInetAddress();
 
-    private static final int PORT = getDefaultPort();
+    public static final int PORT = getDefaultPort();
 
     @SneakyThrows
     private static InetAddress getDefaultInetAddress () {

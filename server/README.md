@@ -18,7 +18,7 @@ Include the dependency to your project's pom.xml file:
     <dependency>
         <groupId>io.appulse.epmd.java</groupId>
         <artifactId>server</artifactId>
-        <version>0.4.0</version>
+        <version>0.4.1</version>
     </dependency>
     ...
 </dependencies>
@@ -27,5 +27,5 @@ Include the dependency to your project's pom.xml file:
 or Gradle:
 
 ```groovy
-compile 'io.appulse.epmd.java:server:0.4.0'
+compile 'io.appulse.epmd.java:server:0.4.1'
 ```

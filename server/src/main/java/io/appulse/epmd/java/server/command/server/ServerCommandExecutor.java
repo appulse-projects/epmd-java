@@ -108,8 +108,7 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
     } catch (InterruptedException ex) {
       log.error("Server work exception", ex);
     } finally {
-      workerGroup.shutdownGracefully();
-      bossGroup.shutdownGracefully();
+      close();
     }
   }
 

@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add more unit and integration tests.
 
+## [0.4.1](https://github.com/appulse-projects/epmd-java/releases/tag/0.4.1) - 2018-02-16
+
+Minor bug fixes
+
+### Changed
+
+- EPMD address and port are public now.
+- Lookup cache doesn't cache not found items any more.
+
 ## [0.4.0](https://github.com/appulse-projects/epmd-java/releases/tag/0.4.0) - 2018-02-16
 
 Introducing NIO server.

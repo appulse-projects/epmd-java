@@ -55,12 +55,17 @@ class LookupService {
 
     COMPUTE = (key, value) -> {
       if (value != null) {
+        log.debug("Used cached value {}", value);
         return value;
       }
 
       val request = new GetNodeInfo(key.getNode());
       try (val connection = new Connection(key.getAddress(), key.getPort())) {
-        return connection.send(request, NodeInfo.class);
+        val response = connection.send(request, NodeInfo.class);
+        log.debug("Lookup result is {}", response);
+        return response.isOk()
+               ? response
+               : null;
       }
     };
   }
@@ -93,7 +98,7 @@ class LookupService {
     val tokens = node.split("@", 2);
     val shortName = tokens[0];
 
-    log.debug("Looking up node '{}' at '{}'", shortName, address);
+    log.debug("Looking up node '{}' at '{}:{}'", shortName, address, port);
 
     val descriptor = new NodeDescriptor(shortName, address, port);
     val nodeInfo = CACHE.compute(descriptor, COMPUTE);

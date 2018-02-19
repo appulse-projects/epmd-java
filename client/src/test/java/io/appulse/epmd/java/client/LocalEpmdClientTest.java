@@ -123,6 +123,30 @@ public class LocalEpmdClientTest {
   }
 
   @Test
+  public void lookupAndRegistration () {
+    assertThat(client.register("node-1", 61_111, R3_ERLANG, TCP, R6, R6))
+        .isNotEqualTo(0);
+
+    val optional1 = client.lookup("node-1");
+    assertThat(optional1)
+        .isPresent();
+    assertThat(optional1.get().isOk())
+        .isTrue();
+
+    assertThat(client.lookup("node-2"))
+        .isNotPresent();
+
+    assertThat(client.register("node-2", 61_011, R3_ERLANG, TCP, R6, R6))
+        .isNotEqualTo(0);
+
+    val optional2 = client.lookup("node-2");
+    assertThat(optional2)
+        .isPresent();
+    assertThat(optional2.get().isOk())
+        .isTrue();
+  }
+
+  @Test
   public void connectionBroken () {
     try (EpmdClient client2 = new EpmdClient(8091)) {
       assertThatExceptionOfType(EpmdConnectionException.class)
