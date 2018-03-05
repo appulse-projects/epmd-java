@@ -20,10 +20,7 @@ import static java.util.Optional.ofNullable;
 import static lombok.AccessLevel.PRIVATE;
 
 import java.net.InetAddress;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiFunction;
 
 import io.appulse.epmd.java.core.model.request.GetNodeInfo;
 import io.appulse.epmd.java.core.model.response.NodeInfo;
@@ -31,7 +28,6 @@ import io.appulse.epmd.java.core.model.response.NodeInfo;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.Value;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -45,30 +41,6 @@ import lombok.val;
 @RequiredArgsConstructor
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 class LookupService {
-
-  private static final Map<NodeDescriptor, NodeInfo> CACHE;
-
-  private static final BiFunction<NodeDescriptor, NodeInfo, NodeInfo> COMPUTE;
-
-  static {
-    CACHE = new ConcurrentHashMap<>();
-
-    COMPUTE = (key, value) -> {
-      if (value != null) {
-        log.debug("Used cached value {}", value);
-        return value;
-      }
-
-      val request = new GetNodeInfo(key.getNode());
-      try (val connection = new Connection(key.getAddress(), key.getPort())) {
-        val response = connection.send(request, NodeInfo.class);
-        log.debug("Lookup result is {}", response);
-        return response.isOk()
-               ? response
-               : null;
-      }
-    };
-  }
 
   @NonNull
   InetAddress defaultAddress;
@@ -100,25 +72,12 @@ class LookupService {
 
     log.debug("Looking up node '{}' at '{}:{}'", shortName, address, port);
 
-    val descriptor = new NodeDescriptor(shortName, address, port);
-    val nodeInfo = CACHE.compute(descriptor, COMPUTE);
-    return ofNullable(nodeInfo);
-  }
-
-  void clearCache () {
-    CACHE.clear();
-  }
-
-  @Value
-  private static class NodeDescriptor {
-
-    @NonNull
-    String node;
-
-    @NonNull
-    InetAddress address;
-
-    @NonNull
-    Integer port;
+    val request = new GetNodeInfo(shortName);
+    try (val connection = new Connection(address, port)) {
+      val response = connection.send(request, NodeInfo.class);
+      log.debug("Lookup result is {}", response);
+      return ofNullable(response)
+          .filter(NodeInfo::isOk);
+    }
   }
 }

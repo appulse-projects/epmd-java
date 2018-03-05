@@ -165,10 +165,6 @@ public final class EpmdClient implements Closeable {
     log.debug("EPMD client was closed");
   }
 
-  public void clearCaches () {
-    lookupService.clearCache();
-  }
-
   @Override
   protected void finalize () throws Throwable {
     close();

@@ -66,7 +66,6 @@ public class LocalEpmdClientTest {
   @After
   public void after () {
     if (client != null) {
-      client.clearCaches();
       client.close();
       client = null;
     }

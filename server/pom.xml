@@ -25,7 +25,7 @@ limitations under the License.
   <parent>
     <groupId>io.appulse</groupId>
     <artifactId>epmd-java</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2</version>
   </parent>
 
   <groupId>io.appulse.epmd.java</groupId>
