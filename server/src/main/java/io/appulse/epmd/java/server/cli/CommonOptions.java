@@ -48,5 +48,5 @@ public class CommonOptions {
   @Parameter(
       names = { "-d", "-debug" }
   )
-  boolean debug = false;
+  boolean debug;
 }

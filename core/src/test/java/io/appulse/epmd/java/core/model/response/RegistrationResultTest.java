@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
 import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
 import io.appulse.utils.Bytes;
+
 import lombok.val;
 import org.junit.Test;
 

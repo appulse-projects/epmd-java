@@ -34,6 +34,7 @@ import io.netty.channel.ChannelHandlerContext;
  */
 public interface RequestHandler {
 
+  @SuppressWarnings("PMD.UseConcurrentHashMap") // already use
   Map<Tag, RequestHandler> ALL = Stream.of(
       new GetEpmdDumpRequestHandler(),
       new GetEpmdInfoRequestHandler(),

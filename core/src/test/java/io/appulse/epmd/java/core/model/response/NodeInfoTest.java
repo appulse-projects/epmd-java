@@ -17,10 +17,10 @@
 package io.appulse.epmd.java.core.model.response;
 
 import static io.appulse.epmd.java.core.model.NodeType.R4_HIDDEN;
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static io.appulse.epmd.java.core.model.Protocol.UDP;
-import static io.appulse.epmd.java.core.model.Version.R4;
 import static io.appulse.epmd.java.core.model.Tag.PORT2_RESPONSE;
+import static io.appulse.epmd.java.core.model.Version.R4;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;

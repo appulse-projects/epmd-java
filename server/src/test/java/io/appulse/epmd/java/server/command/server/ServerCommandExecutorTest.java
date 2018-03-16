@@ -16,12 +16,12 @@
 
 package io.appulse.epmd.java.server.command.server;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static io.appulse.epmd.java.core.model.NodeType.R3_ERLANG;
 import static io.appulse.epmd.java.core.model.Protocol.TCP;
 import static io.appulse.epmd.java.core.model.Version.R6;
 import static io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump.Status.ACTIVE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

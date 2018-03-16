@@ -24,6 +24,7 @@ import static lombok.AccessLevel.PRIVATE;
 
 import java.io.Closeable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.appulse.epmd.java.server.cli.CommonOptions;
 import io.appulse.epmd.java.server.command.AbstractCommandExecutor;
@@ -41,7 +42,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -60,8 +60,7 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
 
   EventLoopGroup workerGroup;
 
-  @NonFinal
-  volatile boolean closed;
+  AtomicBoolean closed = new AtomicBoolean(false);
 
   @SneakyThrows
   public ServerCommandExecutor (CommonOptions commonOptions, @NonNull CommandOptions options) {
@@ -115,11 +114,11 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
   @Override
   @SneakyThrows
   public void close () {
-    if (closed) {
+    if (closed.get()) {
       log.debug("Server was already closed");
       return;
     }
-    closed = true;
+    closed.set(true);
 
     workerGroup.shutdownGracefully();
     bossGroup.shutdownGracefully();

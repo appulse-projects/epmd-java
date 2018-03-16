@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
  * @author Artem Labazin
  * @since 0.3.2
  */
+@SuppressWarnings("PMD.SystemPrintln")
 public final class CommandLineParser {
 
   public static CommandExecutor parse (@NonNull String[] args) {

@@ -23,7 +23,6 @@ import static io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump.Status.
 import static lombok.AccessLevel.PRIVATE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump.Status.OLD_OR_UNUSED;
 
 import io.appulse.epmd.java.client.exception.EpmdConnectionException;
 import io.appulse.epmd.java.client.exception.EpmdRegistrationException;
@@ -187,26 +186,6 @@ public class LocalEpmdClientTest {
       softly.assertThat(nodeDump.getStatus())
           .isEqualTo(ACTIVE);
     });
-  }
-
-//   @Test
-  public void stop () {
-    client.register("stopped", 19028, R3_ERLANG, TCP, R6, R6);
-
-    client.stop("stopped");
-
-    val nodes = client.dumpAll();
-    assertThat(nodes)
-        .isNotEmpty();
-
-    val node = nodes.stream()
-        .filter(it -> "stopped".equals(it.getName()))
-        .findFirst()
-        .orElse(null);
-
-    assertThat(node)
-        .isNotNull()
-        .extracting("status").isEqualTo(OLD_OR_UNUSED);
   }
 
   @Test

@@ -190,7 +190,7 @@ public final class EpmdClient implements Closeable {
           port = Integer.parseInt(value);
         }
       } catch (NumberFormatException | SecurityException ex) {
-        throw new RuntimeException(ex);
+        throw new IllegalStateException("Couldn't extract EPMD port", ex);
       }
       log.debug("Default EPMD port is: '{}'", port);
       return port;

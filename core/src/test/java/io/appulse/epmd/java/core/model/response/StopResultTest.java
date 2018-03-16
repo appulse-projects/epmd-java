@@ -16,8 +16,8 @@
 
 package io.appulse.epmd.java.core.model.response;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
 import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;

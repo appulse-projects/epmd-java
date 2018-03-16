@@ -16,11 +16,11 @@
 
 package io.appulse.epmd.java.core.model.request;
 
-import static io.appulse.epmd.java.core.model.Tag.ALIVE2_REQUEST;
-import static org.assertj.core.api.Assertions.assertThat;
 import static io.appulse.epmd.java.core.model.NodeType.R3_HIDDEN;
 import static io.appulse.epmd.java.core.model.Protocol.SCTP;
+import static io.appulse.epmd.java.core.model.Tag.ALIVE2_REQUEST;
 import static io.appulse.epmd.java.core.model.Version.R6;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
 import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;

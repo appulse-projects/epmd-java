@@ -46,19 +46,19 @@ public class ServerCommandOptions implements CommandOptions {
   int packetTimeout = 60;
 
   @Parameter(names = "-delay_accept")
-  int delayAccept = 0;
+  int delayAccept;
 
   @Parameter(names = "-delay_write")
-  int delayWrite = 0;
+  int delayWrite;
 
   @Parameter(names = "-address")
   Set<InetAddress> addresses = getDefaultAddresses();
 
   @Parameter(names = "-daemon")
-  boolean daemon = false;
+  boolean daemon;
 
   @Parameter(names = "-relaxed_command_check")
-  boolean checks = false;
+  boolean checks;
 
   @SneakyThrows
   private static Set<InetAddress> getDefaultAddresses () {

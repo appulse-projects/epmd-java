@@ -59,22 +59,22 @@ class RegistrationRequestHandler implements RequestHandler {
 
     val response = RegistrationResult.builder()
         .ok(node != null)
-        .creation(node != null
-                  ? node.getCreation()
-                  : 0
+        .creation(node == null
+                  ? 0
+                  : node.getCreation()
         )
         .build();
     log.debug("Response: {}", response);
 
     val future = context.writeAndFlush(response);
-    if (!response.isOk()) {
-      future.addListener(CLOSE);
-    } else {
+    if (response.isOk()) {
       context.channel().closeFuture().addListener(f -> {
         val name = node.getName();
         state.getNodes().remove(name);
         log.debug("Node {} was disconnected", name);
       });
+    } else {
+      future.addListener(CLOSE);
     }
   }
 
