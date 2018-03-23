@@ -28,7 +28,7 @@ import io.appulse.epmd.java.client.exception.EpmdConnectionException;
 import io.appulse.epmd.java.client.exception.EpmdRegistrationException;
 import io.appulse.epmd.java.client.util.CheckLocalEpmdExists;
 import io.appulse.epmd.java.client.util.LocalEpmdHelper;
-import io.appulse.epmd.java.client.util.TestNamePrinter;
+import io.appulse.utils.test.TestMethodNamePrinter;
 
 import lombok.experimental.FieldDefaults;
 import lombok.val;
@@ -52,7 +52,7 @@ public class LocalEpmdClientTest {
   public static CheckLocalEpmdExists localEpmdExists = new CheckLocalEpmdExists();
 
   @Rule
-  public TestRule watcher = new TestNamePrinter();
+  public TestRule watcher = new TestMethodNamePrinter();
 
   EpmdClient client;
 

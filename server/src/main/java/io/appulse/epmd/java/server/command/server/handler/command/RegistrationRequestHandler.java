@@ -19,8 +19,6 @@ package io.appulse.epmd.java.server.command.server.handler.command;
 import static io.appulse.epmd.java.core.model.Tag.ALIVE2_REQUEST;
 import static io.netty.channel.ChannelFutureListener.CLOSE;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.epmd.java.core.model.request.Registration;
 import io.appulse.epmd.java.core.model.request.Request;
@@ -40,8 +38,6 @@ import lombok.val;
  */
 @Slf4j
 class RegistrationRequestHandler implements RequestHandler {
-
-  AtomicInteger count = new AtomicInteger(0);
 
   @Override
   public void handle (@NonNull Request request, @NonNull ChannelHandlerContext context, @NonNull ServerState state) {
@@ -84,20 +80,17 @@ class RegistrationRequestHandler implements RequestHandler {
   }
 
   private Node register (Registration registration, ServerState serverState) {
+    val creation = (int) System.currentTimeMillis() % 3 + 1;
     return serverState.getNodes()
-        .compute(registration.getName(), (key, value) -> {
-          if (value != null) {
-            return null;
-          }
-          return Node.builder()
-              .name(registration.getName())
-              .port(registration.getPort())
-              .type(registration.getType())
-              .protocol(registration.getProtocol())
-              .high(registration.getHigh())
-              .low(registration.getLow())
-              .creation(count.incrementAndGet())
-              .build();
-        });
+        .computeIfAbsent(registration.getName(), key -> Node.builder()
+            .name(registration.getName())
+            .port(registration.getPort())
+            .type(registration.getType())
+            .protocol(registration.getProtocol())
+            .high(registration.getHigh())
+            .low(registration.getLow())
+            .creation(creation)
+            .build()
+        );
   }
 }

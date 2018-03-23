@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 
-import io.appulse.epmd.java.client.util.TestNamePrinter;
+import io.appulse.utils.test.TestMethodNamePrinter;
 
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
@@ -66,7 +66,7 @@ public class RemoteEpmdClientTest {
       });
 
   @Rule
-  public TestRule watcher = new TestNamePrinter();
+  public TestRule watcher = new TestMethodNamePrinter();
 
   EpmdClient client;
 

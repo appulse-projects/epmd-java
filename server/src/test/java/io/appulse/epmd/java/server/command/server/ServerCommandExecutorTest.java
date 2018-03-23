@@ -24,14 +24,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import io.appulse.epmd.java.client.EpmdClient;
 import io.appulse.epmd.java.client.exception.EpmdRegistrationException;
 import io.appulse.epmd.java.server.cli.CommonOptions;
-import io.appulse.epmd.java.server.command.server.util.TestNamePrinter;
 import io.appulse.utils.SocketUtils;
+import io.appulse.utils.test.TestMethodNamePrinter;
+import io.appulse.utils.threads.AppulseExecutors;
 
 import lombok.val;
 import org.assertj.core.api.SoftAssertions;
@@ -49,13 +50,15 @@ import org.junit.rules.TestRule;
 public class ServerCommandExecutorTest {
 
   @Rule
-  public TestRule watcher = new TestNamePrinter();
+  public TestRule watcher = new TestMethodNamePrinter();
+
+  ExecutorService executorService = AppulseExecutors.newSingleThreadExecutor().build();
 
   EpmdClient client;
 
   ServerCommandExecutor server;
 
-  ExecutorService executorService;
+  Future<?> future;
 
   @Before
   public void before () throws Exception {
@@ -66,10 +69,9 @@ public class ServerCommandExecutorTest {
     commonOptions.setPort(port);
     server = new ServerCommandExecutor(commonOptions, new ServerCommandOptions());
 
-    executorService = Executors.newSingleThreadExecutor();
-    executorService.execute(() -> server.execute());
+    future = executorService.submit(server::execute);
 
-    TimeUnit.SECONDS.sleep(2);
+    TimeUnit.SECONDS.sleep(1);
 
     client = new EpmdClient(port);
   }
@@ -78,8 +80,7 @@ public class ServerCommandExecutorTest {
   public void after () {
     client.close();
     server.close();
-    executorService.shutdownNow();
-    executorService = null;
+    future.cancel(true);
   }
 
   @Test

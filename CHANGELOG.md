@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add more unit and integration tests.
 
+## [1.0.1](https://github.com/appulse-projects/epmd-java/releases/tag/1.0.1) - 2018-03-23
+
+Small refactoring.
+
+### Changed
+
+- Server generates `creation` from 1 to 3 now.
+- Small bug fixes.
+- Updated dependencies.
+
 ## [1.0.0](https://github.com/appulse-projects/epmd-java/releases/tag/1.0.0) - 2018-03-16
 
 Code style refactoring.
