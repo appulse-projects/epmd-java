@@ -26,11 +26,6 @@ import io.appulse.utils.Bytes;
 import lombok.val;
 import org.junit.Test;
 
-/**
- *
- * @author Artem Labazin
- * @since 0.0.1
- */
 public class KillTest {
 
   @Test

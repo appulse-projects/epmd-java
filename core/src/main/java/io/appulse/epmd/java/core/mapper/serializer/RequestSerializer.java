@@ -24,9 +24,11 @@ import lombok.NonNull;
 import lombok.val;
 
 /**
+ * Implementation for serializing POJOs
+ * which implements {@link Request} interface.
  *
- * @author Artem Labazin
  * @since 0.4.0
+ * @author Artem Labazin
  */
 class RequestSerializer implements Serializer {
 

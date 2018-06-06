@@ -19,9 +19,10 @@ package io.appulse.epmd.java.core.model.request;
 import io.appulse.epmd.java.core.model.TaggedMessage;
 
 /**
+ * Marker interface for request objects, which should be serialized.
  *
- * @author Artem Labazin
  * @since 0.4.0
+ * @author Artem Labazin
  */
 public interface Request extends TaggedMessage {
 

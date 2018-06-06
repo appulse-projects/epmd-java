@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add more unit and integration tests.
 
+## [1.0.2](https://github.com/appulse-projects/epmd-java/releases/tag/1.0.2) - 2018-06-06
+
+Code refactoring.
+
+### Added
+
+- JavaDoc comments.
+- `README.md` content.
+
 ## [1.0.1](https://github.com/appulse-projects/epmd-java/releases/tag/1.0.1) - 2018-03-23
 
 Small refactoring.

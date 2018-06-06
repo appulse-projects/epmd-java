@@ -28,13 +28,21 @@ import lombok.experimental.FieldDefaults;
 import lombok.val;
 
 /**
+ * Getting all EPMD nodes names command executor.
  *
- * @author Artem Labazin
  * @since 0.3.2
+ * @author Artem Labazin
  */
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class NamesCommandExecutor extends AbstractCommandExecutor {
 
+  /**
+   * Constructor.
+   *
+   * @param commonOptions common command options for all commands
+   *
+   * @param options specific command options
+   */
   public NamesCommandExecutor (CommonOptions commonOptions, CommandOptions options) {
     super(commonOptions);
     assert options != null;

@@ -28,12 +28,16 @@ import io.appulse.epmd.java.server.command.server.ServerState;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
+ * Request handler API.
  *
- * @author Artem Labazin
  * @since 0.4.0
+ * @author Artem Labazin
  */
 public interface RequestHandler {
 
+  /**
+   * All known request handlers.
+   */
   @SuppressWarnings("PMD.UseConcurrentHashMap") // already use
   Map<Tag, RequestHandler> ALL = Stream.of(
       new GetEpmdDumpRequestHandler(),
@@ -44,7 +48,21 @@ public interface RequestHandler {
       new StopRequestHandler()
   ).collect(toConcurrentMap(RequestHandler::getTag, it -> it));
 
+  /**
+   * Main request handler method.
+   *
+   * @param request parsed request object
+   *
+   * @param context request context
+   *
+   * @param state current EPMD server state
+   */
   void handle (Request request, ChannelHandlerContext context, ServerState state);
 
+  /**
+   * Getting request tag, which handler is able to handle.
+   *
+   * @return supported {@link Tag} by this handler
+   */
   Tag getTag ();
 }

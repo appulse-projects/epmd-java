@@ -46,9 +46,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 /**
+ * Server running command executor.
  *
- * @author Artem Labazin
  * @since 0.3.2
+ * @author Artem Labazin
  */
 @Slf4j
 @FieldDefaults(level = PRIVATE, makeFinal = true)
@@ -62,6 +63,13 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
 
   AtomicBoolean closed = new AtomicBoolean(false);
 
+  /**
+   * Constructor.
+   *
+   * @param commonOptions common command options for all commands
+   *
+   * @param options specific command options
+   */
   @SneakyThrows
   public ServerCommandExecutor (CommonOptions commonOptions, @NonNull CommandOptions options) {
     super(commonOptions);
@@ -82,7 +90,7 @@ public class ServerCommandExecutor extends AbstractCommandExecutor implements Cl
 
   @Override
   public void execute () {
-    log.debug("Starting server on port {}", getPort());
+    log.info("Starting server on port {}", getPort());
     try {
       new ServerBootstrap()
           .group(bossGroup, workerGroup)

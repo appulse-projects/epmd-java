@@ -16,33 +16,60 @@
 
 package io.appulse.epmd.java.core.model;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import java.util.stream.Stream;
 
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 
 /**
+ * Protocol type.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
+@FieldDefaults(level = PRIVATE, makeFinal = true)
 public enum Protocol {
 
-  UNDEFINED(-1),
+  /**
+   * TCP protocol.
+   */
   TCP(0),
+
+  /**
+   * UDP protocol.
+   */
   UDP(1),
-  SCTP(2);
+
+  /**
+   * STCP protocol.
+   */
+  SCTP(2),
+
+  /**
+   * Unknown protocol.
+   */
+  UNKNOWN(-1);
 
   @Getter
-  private final byte code;
+  byte code;
 
   Protocol (int code) {
     this.code = (byte) code;
   }
 
+  /**
+   * Parses numeric code to {@link Protocol} instance.
+   *
+   * @param code {@link Protocol} numeric representation.
+   *
+   * @return {@link Protocol} instance. {@link Protocol#UNKNOWN} if unknown.
+   */
   public static Protocol of (byte code) {
     return Stream.of(values())
         .filter(it -> it.getCode() == code)
         .findAny()
-        .orElse(UNDEFINED);
+        .orElse(UNKNOWN);
   }
 }

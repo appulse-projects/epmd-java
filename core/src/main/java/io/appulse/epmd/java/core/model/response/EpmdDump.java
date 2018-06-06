@@ -39,6 +39,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.val;
 
 /**
+ * EPMD node infos dump response.
  *
  * @author Artem Labazin
  * @since 0.0.1
@@ -90,22 +91,19 @@ public class EpmdDump implements DataSerializable {
               .filter(token -> !token.isEmpty())
               .toArray(String[]::new)
           )
-          .map(it -> new NodeDump(
-              Status.of(it[0]),
-              it[2].substring(1, it[2].length() - 1),
-              Integer.parseInt(it[5].substring(0, it[5].length() - 1)),
-              Integer.parseInt(it[8])
-          ))
-          //                    .map(it -> NodeDump.builder()
-          //                            .status(Status.of(it[0]))
-          //                            .name(it[2].substring(1, it[2].length() - 1))
-          //                            .port(Integer.parseInt(it[5].substring(0, it[5].length() - 1)))
-          //                            .fileDescriptor(Integer.parseInt(it[8]))
-          //                            .build()
-          //                    )
+          .map(it -> NodeDump.builder()
+              .status(Status.of(it[0]))
+              .name(it[2].substring(1, it[2].length() - 1))
+              .port(Integer.parseInt(it[5].substring(0, it[5].length() - 1)))
+              .fileDescriptor(Integer.parseInt(it[8]))
+              .build()
+          )
           .collect(toList());
   }
 
+  /**
+   * Node dump information.
+   */
   public static final class NodeDump {
 
     private final Status status;
@@ -116,25 +114,46 @@ public class EpmdDump implements DataSerializable {
 
     private final int fileDescriptor;
 
-    public NodeDump (Status status, String name, int port, int fileDescriptor) {
+    @Builder
+    NodeDump (Status status, String name, int port, int fileDescriptor) {
       this.status = status;
       this.name = name;
       this.port = port;
       this.fileDescriptor = fileDescriptor;
     }
 
+    /**
+     * Returns node status.
+     *
+     * @return {@link Status} instance.
+     */
     public Status getStatus () {
       return status;
     }
 
+    /**
+     * Returns node's name.
+     *
+     * @return node's name.
+     */
     public String getName () {
       return name;
     }
 
+    /**
+     * Returns node's port.
+     *
+     * @return port.
+     */
     public int getPort () {
       return port;
     }
 
+    /**
+     * Returns node's file descriptor.
+     *
+     * @return file descriptor.
+     */
     public int getFileDescriptor () {
       return fileDescriptor;
     }
@@ -145,11 +164,25 @@ public class EpmdDump implements DataSerializable {
              + fileDescriptor + '}';
     }
 
+    /**
+     * Node's status enum.
+     */
     public enum Status {
 
+      /**
+       * Active node.
+       */
       ACTIVE("active"),
+
+      /**
+       * Inactive node.
+       */
       OLD_OR_UNUSED("old/unused"),
-      UNDEFINED("");
+
+      /**
+       * Unknown node status.
+       */
+      UNKNOWN("");
 
       private final String text;
 
@@ -162,11 +195,18 @@ public class EpmdDump implements DataSerializable {
         return text;
       }
 
+      /**
+       * Parses status string to {@link Status} instance.
+       *
+       * @param str status string representation.
+       *
+       * @return parsed {@link Status} instance.
+       */
       static Status of (String str) {
         return Stream.of(values())
             .filter(it -> it.text.equalsIgnoreCase(str))
             .findAny()
-            .orElse(UNDEFINED);
+            .orElse(UNKNOWN);
       }
     }
   }

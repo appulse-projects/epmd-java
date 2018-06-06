@@ -26,9 +26,10 @@ import lombok.Value;
 import lombok.experimental.Delegate;
 
 /**
+ * EPMD server state holder object.
  *
- * @author Artem Labazin
  * @since 0.4.0
+ * @author Artem Labazin
  */
 @Value
 @Builder

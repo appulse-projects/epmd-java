@@ -24,14 +24,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
+ * Marker annotation for telling response class on request.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 @Documented
 @Target(TYPE)
 @Retention(RUNTIME)
 public @interface ExpectedResponse {
 
+  /**
+   * Specify response type on request object.
+   *
+   * @return response type.
+   */
   Class<?> value ();
 }

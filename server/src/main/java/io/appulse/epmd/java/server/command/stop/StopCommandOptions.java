@@ -26,9 +26,12 @@ import lombok.Getter;
 import lombok.ToString;
 
 /**
+ * Forcibly unregisters a name with epmd.
+ * <p>
+ * Only allowed if -relaxed_command_check was given when epmd was started.
  *
- * @author Artem Labazin
  * @since 0.3.2
+ * @author Artem Labazin
  */
 @Getter
 @ToString

@@ -26,9 +26,12 @@ import io.appulse.utils.Bytes;
 import lombok.ToString;
 
 /**
+ * Dump all data from EPMD request.
+ * <p>
+ * This request is not really used, it is to be regarded as a debug feature.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 @ToString
 @ExpectedResponse(EpmdDump.class)

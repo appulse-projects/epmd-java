@@ -39,9 +39,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 /**
+ * EPMD connection.
  *
- * @author Artem Labazin
  * @since 0.2.2
+ * @author Artem Labazin
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -70,7 +71,7 @@ class Connection implements Closeable {
 
   Socket socket = new Socket();
 
-  public void send (@NonNull Object request) throws EpmdConnectionException {
+  void send (@NonNull Object request) throws EpmdConnectionException {
     log.debug("Sending: {}", request);
 
     val bytes = SERIALIZER.serialize(request);
@@ -87,7 +88,7 @@ class Connection implements Closeable {
     log.debug("Message {} was sent", request);
   }
 
-  public <T> T send (@NonNull Object request, @NonNull Class<T> responseType) throws EpmdConnectionException {
+  <T> T send (@NonNull Object request, @NonNull Class<T> responseType) throws EpmdConnectionException {
     send(request);
 
     byte[] messageBytes;
@@ -120,11 +121,11 @@ class Connection implements Closeable {
               socket.getLocalPort(), socket.getRemoteSocketAddress());
   }
 
-  public boolean isClosed () {
+  boolean isClosed () {
     return socket.isClosed();
   }
 
-  public boolean isConnected () {
+  boolean isConnected () {
     return socket.isConnected();
   }
 

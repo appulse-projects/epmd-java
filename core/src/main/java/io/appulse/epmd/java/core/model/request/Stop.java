@@ -33,9 +33,10 @@ import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
 /**
+ * Stop EPMD server request.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 @Getter
 @ToString

@@ -90,8 +90,7 @@ public class ServerCommandExecutorTest {
 
   @Test
   public void register () {
-    val creation = client.register("register", 8971, R3_ERLANG, TCP, R6, R6);
-    assertThat(creation).isNotEqualTo(0);
+    client.register("register", 8971, R3_ERLANG, TCP, R6, R6);
 
     val optional = client.lookup("register");
     assertThat(optional).isPresent();

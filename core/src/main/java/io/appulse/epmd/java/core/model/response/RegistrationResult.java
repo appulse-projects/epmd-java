@@ -32,9 +32,10 @@ import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
 /**
+ * Registration response.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 @Getter
 @Builder

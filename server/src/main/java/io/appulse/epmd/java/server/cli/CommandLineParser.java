@@ -38,13 +38,21 @@ import lombok.val;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Command line arguments parser.
  *
- * @author Artem Labazin
  * @since 0.3.2
+ * @author Artem Labazin
  */
 @SuppressWarnings("PMD.SystemPrintln")
 public final class CommandLineParser {
 
+  /**
+   * Parsing passed arguments to {@link CommandExecutor} instance.
+   *
+   * @param args sommand line arguments
+   *
+   * @return {@link CommandExecutor} instance
+   */
   public static CommandExecutor parse (@NonNull String[] args) {
     val newArgs = setDefaultCommandIfNeed(args);
 
@@ -64,7 +72,7 @@ public final class CommandLineParser {
         .map(it -> it.get(0))
         .filter(it -> it instanceof CommandOptions)
         .map(it -> (CommandOptions) it)
-        .map(it -> it.getComandExecutor(commonOptions))
+        .map(it -> it.createComandExecutor(commonOptions))
         .orElseThrow(RuntimeException::new);
   }
 

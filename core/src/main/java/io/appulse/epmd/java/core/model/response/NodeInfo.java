@@ -40,9 +40,10 @@ import lombok.experimental.FieldDefaults;
 import lombok.val;
 
 /**
+ * Node info response.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 @Getter
 @ToString
@@ -63,6 +64,9 @@ public class NodeInfo implements TaggedMessage {
 
   Optional<String> name;
 
+  /**
+   * Default no arguments constructor with default values.
+   */
   public NodeInfo () {
     port = empty();
     type = empty();
@@ -72,6 +76,23 @@ public class NodeInfo implements TaggedMessage {
     name = empty();
   }
 
+  /**
+   * All arguments constructor.
+   *
+   * @param ok response success or not
+   *
+   * @param port node's port
+   *
+   * @param type node type
+   *
+   * @param protocol protocol version
+   *
+   * @param high node's highest supported version
+   *
+   * @param low node's lowest supported version
+   *
+   * @param name node's name
+   */
   @Builder
   public NodeInfo (boolean ok, Integer port, NodeType type, Protocol protocol, Version high, Version low, String name) {
     this.ok = ok;

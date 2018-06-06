@@ -27,9 +27,10 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 
 /**
+ * Class for serializing different objects to byte arrays.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 public final class MessageSerializer {
 
@@ -43,6 +44,13 @@ public final class MessageSerializer {
     ));
   }
 
+  /**
+   * Serializes objects to byte arrays.
+   *
+   * @param obj object for serialization
+   *
+   * @return object's byte array representation
+   */
   @SneakyThrows
   public byte[] serialize (@NonNull Object obj) {
     Class<?> type = obj.getClass();

@@ -33,9 +33,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 /**
+ * Getting dump request handler.
  *
- * @author Artem Labazin
  * @since 0.4.0
+ * @author Artem Labazin
  */
 @Slf4j
 class GetEpmdDumpRequestHandler implements RequestHandler {
@@ -50,7 +51,13 @@ class GetEpmdDumpRequestHandler implements RequestHandler {
     state.getNodes()
         .values()
         .stream()
-        .map(it -> new NodeDump(ACTIVE, it.getName(), it.getPort(), -1))
+        .map(it -> NodeDump.builder()
+            .status(ACTIVE)
+            .name(it.getName())
+            .port(it.getPort())
+            .fileDescriptor(-1)
+            .build()
+        )
         .forEach(builder::node);
 
     val response = builder.build();

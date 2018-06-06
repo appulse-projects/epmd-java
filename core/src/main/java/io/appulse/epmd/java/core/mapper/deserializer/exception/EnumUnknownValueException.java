@@ -17,26 +17,61 @@
 package io.appulse.epmd.java.core.mapper.deserializer.exception;
 
 /**
+ * Indicates enum's deserialization exception.
  *
- * @author Artem Labazin
  * @since 0.1.0
+ * @author Artem Labazin
  */
 public class EnumUnknownValueException extends DeserializationException {
 
   private static final long serialVersionUID = 1696232532905750930L;
 
+  /**
+   * Constructs a new runtime exception with null as its detail message.
+   * <p>
+   * The cause is not initialized, and may subsequently be initialized
+   * by a call to Throwable.initCause(java.lang.Throwable).
+   */
   public EnumUnknownValueException () {
     super();
   }
 
+  /**
+   * Constructs a new runtime exception with the specified detail message.
+   * <p>
+   * The cause is not initialized, and may subsequently be initialized
+   * by a call to Throwable.initCause(java.lang.Throwable).
+   *
+   * @param message the detail message.
+   */
   public EnumUnknownValueException (String message) {
     super(message);
   }
 
+  /**
+   * Constructs a new runtime exception with the specified detail message.
+   * <p>
+   * The cause is not initialized, and may subsequently be initialized
+   * by a call to Throwable.initCause(java.lang.Throwable).
+   *
+   * @param message the detail message.
+   *
+   * @param cause the cause (which is saved for later retrieval by the Throwable.getCause() method).
+   *              (A null value is permitted, and indicates that the cause is nonexistent or unknown.)
+   */
   public EnumUnknownValueException (String message, Throwable cause) {
     super(message, cause);
   }
 
+  /**
+   * Constructs a new runtime exception with the specified cause and a detail message
+   * of (cause==null ? null : cause.toString()) (which typically contains the class and detail message of cause).
+   * <p>
+   * This constructor is useful for runtime exceptions that are little more than wrappers for other throwables.
+   *
+   * @param cause the cause (which is saved for later retrieval by the Throwable.getCause() method).
+   *              (A null value is permitted, and indicates that the cause is nonexistent or unknown.)
+   */
   public EnumUnknownValueException (Throwable cause) {
     super(cause);
   }

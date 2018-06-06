@@ -20,9 +20,11 @@ import io.appulse.epmd.java.core.mapper.deserializer.exception.DeserializationEx
 import io.appulse.utils.Bytes;
 
 /**
+ * Interface that defines API used by {@link MessageDeserializer}
+ * to deserialize Objects of arbitrary types from bytes.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 interface Deserializer {
 

@@ -19,13 +19,21 @@ package io.appulse.epmd.java.core.model.response;
 import lombok.ToString;
 
 /**
+ * Kill EPMD result.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 @ToString
 public enum KillResult {
 
+  /**
+   * Success result.
+   */
   OK,
-  UNDEFINED;
+
+  /**
+   * Unknown result.
+   */
+  UNKNOWN;
 }

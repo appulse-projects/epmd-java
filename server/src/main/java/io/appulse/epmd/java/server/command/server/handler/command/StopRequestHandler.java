@@ -32,9 +32,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 /**
+ * Stopping a node request handler.
  *
- * @author Artem Labazin
  * @since 0.4.0
+ * @author Artem Labazin
  */
 @Slf4j
 class StopRequestHandler implements RequestHandler {

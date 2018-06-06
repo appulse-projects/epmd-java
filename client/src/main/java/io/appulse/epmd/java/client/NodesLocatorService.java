@@ -32,9 +32,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 /**
+ * Service for retrieving node descriptions at EPMD server.
  *
- * @author Artem Labazin
  * @since 0.2.2
+ * @author Artem Labazin
  */
 @Slf4j
 @RequiredArgsConstructor

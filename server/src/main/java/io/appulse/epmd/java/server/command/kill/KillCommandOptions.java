@@ -23,9 +23,11 @@ import com.beust.jcommander.Parameters;
 import lombok.ToString;
 
 /**
+ * Kill the currently running epmd (only allowed if -names show empty database or
+ * -relaxed_command_check was given when epmd was started).
  *
- * @author Artem Labazin
  * @since 0.3.2
+ * @author Artem Labazin
  */
 @ToString
 @Parameters(commandNames = "-kill")

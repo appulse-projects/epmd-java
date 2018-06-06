@@ -23,9 +23,10 @@ import com.beust.jcommander.Parameters;
 import lombok.ToString;
 
 /**
+ * List names registered with the currently running epmd.
  *
- * @author Artem Labazin
  * @since 0.3.2
+ * @author Artem Labazin
  */
 @ToString
 @Parameters(commandNames = "-names")

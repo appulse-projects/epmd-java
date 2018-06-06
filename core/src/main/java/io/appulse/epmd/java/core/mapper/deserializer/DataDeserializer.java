@@ -27,9 +27,11 @@ import lombok.NonNull;
 import lombok.val;
 
 /**
+ * Implementation for deserializing POJOs
+ * which implements {@link DataSerializable} interface.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 class DataDeserializer implements Deserializer {
 

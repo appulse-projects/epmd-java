@@ -32,9 +32,13 @@ import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
 
 /**
+ * Get the distribution port of another Node.
+ * <p>
+ * When one node wants to connect to another node it starts with a this request to the EPMD
+ * on the host where the node resides to get the distribution port that the node listens to.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 @Data
 @NoArgsConstructor

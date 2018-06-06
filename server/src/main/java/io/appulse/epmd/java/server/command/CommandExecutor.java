@@ -17,11 +17,15 @@
 package io.appulse.epmd.java.server.command;
 
 /**
+ * Interface for executing parsed server command.
  *
- * @author Artem Labazin
  * @since 0.3.2
+ * @author Artem Labazin
  */
 public interface CommandExecutor {
 
+  /**
+   * Runs command.
+   */
   void execute ();
 }

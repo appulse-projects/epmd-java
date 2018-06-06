@@ -25,9 +25,10 @@ import lombok.NonNull;
 import lombok.Value;
 
 /**
+ * Class for representing registered node.
  *
- * @author Artem Labazin
  * @since 0.3.2
+ * @author Artem Labazin
  */
 @Value
 @Builder

@@ -22,13 +22,19 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * Main class, program's entry point.
  *
- * @author Artem Labazin
  * @since 0.3.2
+ * @author Artem Labazin
  */
 @Slf4j
 public final class Main {
 
+  /**
+   * Main method.
+   *
+   * @param args program's arguments
+   */
   @SuppressWarnings("PMD.AvoidPrintStackTrace")
   public static void main (@NonNull String[] args) {
     try {

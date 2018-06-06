@@ -27,9 +27,10 @@ import io.appulse.utils.Bytes;
 import lombok.NonNull;
 
 /**
+ * Class for deserializing byte arrays to Java class.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 public final class MessageDeserializer {
 
@@ -43,10 +44,33 @@ public final class MessageDeserializer {
     ));
   }
 
+  /**
+   * Deserializes byte array to a new object of the specified type.
+   *
+   * @param bytes type's byte array representation
+   *
+   * @param type instance's type
+   *
+   * @param <T> specified instance type
+   *
+   * @return deserialized from byte array object instance of {@code T} type.
+   */
   public <T> T deserialize (@NonNull byte[] bytes, @NonNull Class<T> type) {
     return deserialize(Bytes.wrap(bytes), type);
   }
 
+
+  /**
+   * Deserializes byte array to a new object of the specified type.
+   *
+   * @param bytes type's byte array representation
+   *
+   * @param type instance's type
+   *
+   * @param <T> specified instance type
+   *
+   * @return deserialized from byte array object instance of {@code T} type.
+   */
   public <T> T deserialize (@NonNull Bytes bytes, @NonNull Class<T> type) {
     return DESERIALIZERS.stream()
         .filter(it -> it.isApplicable(type))

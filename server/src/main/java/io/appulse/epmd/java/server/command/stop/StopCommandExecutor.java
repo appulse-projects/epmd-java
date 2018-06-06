@@ -29,9 +29,10 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * Stop command executor.
  *
- * @author Artem Labazin
  * @since 0.3.2
+ * @author Artem Labazin
  */
 @Slf4j
 @FieldDefaults(level = PRIVATE, makeFinal = true)
@@ -39,6 +40,13 @@ public class StopCommandExecutor extends AbstractCommandExecutor {
 
   StopCommandOptions options;
 
+  /**
+   * Constructor.
+   *
+   * @param commonOptions common command options for all commands
+   *
+   * @param options specific command options
+   */
   public StopCommandExecutor (CommonOptions commonOptions, @NonNull CommandOptions options) {
     super(commonOptions);
     this.options = ofNullable(options)

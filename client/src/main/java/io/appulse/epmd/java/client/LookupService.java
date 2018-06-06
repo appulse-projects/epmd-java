@@ -33,9 +33,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 /**
+ * Service for searching {@link NodeInfo} by node name.
  *
- * @author Artem Labazin
  * @since 0.2.2
+ * @author Artem Labazin
  */
 @Slf4j
 @RequiredArgsConstructor

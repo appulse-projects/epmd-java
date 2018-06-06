@@ -38,9 +38,14 @@ import lombok.experimental.FieldDefaults;
 import lombok.val;
 
 /**
+ * Register a node in EPMD request.
+ * <p>
+ * When a distributed node is started it registers itself in the EPMD.
+ * The message ALIVE2_REQ described below is sent from the node to the EPMD.
+ * The response from the EPMD is ALIVE2_RESP.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 @Getter
 @Builder
@@ -51,6 +56,9 @@ import lombok.val;
 @ExpectedResponse(RegistrationResult.class)
 public class Registration implements Request {
 
+  /**
+   * The port number on which the node accept connection requests.
+   */
   int port;
 
   @NonNull
@@ -59,12 +67,21 @@ public class Registration implements Request {
   @NonNull
   Protocol protocol;
 
+  /**
+   * The highest distribution version that this node can handle.
+   */
   @NonNull
   Version high;
 
+  /**
+   * The lowest distribution version that this node can handle.
+   */
   @NonNull
   Version low;
 
+  /**
+   * The node name as an UTF-8 encoded string.
+   */
   @NonNull
   String name;
 

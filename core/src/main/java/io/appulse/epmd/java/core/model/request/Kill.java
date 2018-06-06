@@ -26,9 +26,10 @@ import io.appulse.utils.Bytes;
 import lombok.ToString;
 
 /**
+ * Kill EPMD request.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 @ToString
 @ExpectedResponse(KillResult.class)

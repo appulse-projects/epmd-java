@@ -28,14 +28,22 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * Kill EPMD server command executor.
  *
- * @author Artem Labazin
  * @since 0.3.2
+ * @author Artem Labazin
  */
 @Slf4j
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class KillCommandExecutor extends AbstractCommandExecutor {
 
+  /**
+   * Constructor.
+   *
+   * @param commonOptions common command options for all commands
+   *
+   * @param options specific command options
+   */
   public KillCommandExecutor (CommonOptions commonOptions, @NonNull CommandOptions options) {
     super(commonOptions);
     if (!(options instanceof KillCommandOptions)) {

@@ -19,14 +19,26 @@ package io.appulse.epmd.java.core.model.response;
 import lombok.ToString;
 
 /**
+ * Stop node response.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 @ToString
 public enum StopResult {
 
+  /**
+   * Node was stopped.
+   */
   STOPPED,
+
+  /**
+   * Node doesn't exist.
+   */
   NOEXIST,
-  UNDEFINED;
+
+  /**
+   * Unknown result.
+   */
+  UNKNOWN;
 }

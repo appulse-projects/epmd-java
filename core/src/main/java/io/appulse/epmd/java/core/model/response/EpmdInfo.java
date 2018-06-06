@@ -39,9 +39,10 @@ import lombok.experimental.FieldDefaults;
 import lombok.val;
 
 /**
+ * EPMD information with nodes descriptions.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 @Getter
 @Builder
@@ -95,6 +96,9 @@ public class EpmdInfo implements DataSerializable {
         .collect(toList());
   }
 
+  /**
+   * Node's description value object.
+   */
   @Value
   @Builder
   public static class NodeDescription {

@@ -1,8 +1,6 @@
-usage: epmd [-d|-debug] [DbgExtra...] [-address List]
-            [-port No] [-daemon] [-relaxed_command_check]
-       epmd [-d|-debug] [-port No] [-names|-kill|-stop name]
-
-See the Erlang epmd manual page for info about the usage.
+usage: java -jar epmd.jar [-d|-debug] [DbgExtra...] [-address List]
+                          [-port No] [-daemon] [-relaxed_command_check]
+       java -jar epmd.jar [-d|-debug] [-port No] [-names|-kill|-stop name]
 
 Regular options
     -address List
@@ -18,8 +16,6 @@ Regular options
 
         If you give more than one debug flag you may
         get more debugging information.
-    -daemon
-        Start epmd detached (as a daemon)
     -relaxed_command_check
         Allow this instance of epmd to be killed with
         epmd -kill even if there are registered nodes.

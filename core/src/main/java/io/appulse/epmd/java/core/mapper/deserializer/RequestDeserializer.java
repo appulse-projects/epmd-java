@@ -28,9 +28,11 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 /**
+ * Implementation for deserializing POJOs
+ * which implements {@link Request} interface.
  *
+ * @since 0.0.1
  * @author Artem Labazin
- * @since 0.4.0
  */
 @Slf4j
 class RequestDeserializer implements Deserializer {

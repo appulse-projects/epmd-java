@@ -26,9 +26,10 @@ import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
 
 /**
+ * Abstract {@link CommandExecutor} implementation, which incapsulates common fields.
  *
- * @author Artem Labazin
  * @since 0.3.2
+ * @author Artem Labazin
  */
 @Getter(PROTECTED)
 @FieldDefaults(level = PRIVATE, makeFinal = true)
@@ -38,6 +39,11 @@ public abstract class AbstractCommandExecutor implements CommandExecutor {
 
   int port;
 
+  /**
+   * Constructor for incapsulating common command options.
+   *
+   * @param commonOptions common command options
+   */
   protected AbstractCommandExecutor (@NonNull CommonOptions commonOptions) {
     debug = commonOptions.isDebug();
     port = commonOptions.getPort();

@@ -32,12 +32,16 @@ import lombok.SneakyThrows;
 import lombok.val;
 
 /**
+ * Marker interface for command options.
  *
- * @author Artem Labazin
  * @since 0.3.2
+ * @author Artem Labazin
  */
 public interface CommandOptions {
 
+  /**
+   * All known command options.
+   */
   List<CommandOptions> ALL = unmodifiableList(asList(
       new KillCommandOptions(),
       new NamesCommandOptions(),
@@ -45,10 +49,22 @@ public interface CommandOptions {
       new StopCommandOptions()
   ));
 
+  /**
+   * Returns {@link CommandExecutor} which is associated with this options.
+   *
+   * @return {@link CommandExecutor} type for instantiating
+   */
   Class<? extends CommandExecutor> getCommandExecutorClass ();
 
+  /**
+   * Instantiate new {@link CommandExecutor} with specified {@link CommonOptions}.
+   *
+   * @param commonOptions common options part
+   *
+   * @return new instance of {@link CommandExecutor}
+   */
   @SneakyThrows
-  default CommandExecutor getComandExecutor (@NonNull CommonOptions commonOptions) {
+  default CommandExecutor createComandExecutor (@NonNull CommonOptions commonOptions) {
     val type = getCommandExecutorClass();
     val constructor = type.getConstructor(CommonOptions.class, CommandOptions.class);
     return constructor.newInstance(commonOptions, this);

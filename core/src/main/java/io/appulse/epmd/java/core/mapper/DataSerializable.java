@@ -19,13 +19,24 @@ package io.appulse.epmd.java.core.mapper;
 import io.appulse.utils.Bytes;
 
 /**
+ * Interface API for specifying how to serialize/deserialize request/response.
  *
- * @author Artem Labazin
  * @since 0.0.2
+ * @author Artem Labazin
  */
 public interface DataSerializable {
 
+  /**
+   * Writes object instance to {@link Bytes}.
+   *
+   * @param bytes buffer for writing
+   */
   void write (Bytes bytes);
 
+  /**
+   * Reads object instance from {@link Bytes}.
+   *
+   * @param bytes buffer for reading
+   */
   void read (Bytes bytes);
 }

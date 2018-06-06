@@ -19,9 +19,11 @@ package io.appulse.epmd.java.core.mapper.serializer;
 import io.appulse.epmd.java.core.mapper.serializer.exception.SerializationException;
 
 /**
+ * Interface that defines API used by {@link MessageSerializer}
+ * to serialize Objects of arbitrary types to bytes.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 interface Serializer {
 

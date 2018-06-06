@@ -33,9 +33,10 @@ import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 
 /**
+ * Server running command options.
  *
- * @author Artem Labazin
  * @since 0.3.2
+ * @author Artem Labazin
  */
 @Data
 @FieldDefaults(level = PRIVATE)

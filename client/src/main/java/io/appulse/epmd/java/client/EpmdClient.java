@@ -48,8 +48,8 @@ import lombok.val;
 /**
  * EPMD client.
  *
- * @author Artem Labazin
  * @since 0.2.2
+ * @author Artem Labazin
  */
 @Slf4j
 @FieldDefaults(level = PRIVATE, makeFinal = true)
@@ -67,18 +67,44 @@ public final class EpmdClient implements Closeable {
 
   Integer port;
 
+  /**
+   * Default no arguments constructor.
+   * <p>
+   * It uses default inet address (localhost) and port (4369).
+   */
   public EpmdClient () {
     this(Default.ADDRESS, Default.PORT);
   }
 
+  /**
+   * Constructs EPMD client with the specified {@link InetAddress}.
+   * <p>
+   * It uses default port (4369).
+   *
+   * @param address EPMD server address
+   */
   public EpmdClient (InetAddress address) {
     this(address, Default.PORT);
   }
 
+  /**
+   * Constructs EPMD client with the specified port.
+   * <p>
+   * It uses default inet address (localhost).
+   *
+   * @param port EPMD server port
+   */
   public EpmdClient (int port) {
     this(Default.ADDRESS, port);
   }
 
+  /**
+   * Constructs EPMD client with the specified address and port.
+   *
+   * @param address EPMD server address
+   *
+   * @param port EPMD server port
+   */
   @Builder
   public EpmdClient (@NonNull InetAddress address, int port) {
     lookupService = new LookupService(address, port);
@@ -88,6 +114,23 @@ public final class EpmdClient implements Closeable {
     log.debug("Instantiated EPMD client to '{}:{}'", address, port);
   }
 
+  /**
+   * Registers node at EPMD server.
+   *
+   * @param name node name
+   *
+   * @param nodePort node port
+   *
+   * @param type node type
+   *
+   * @param protocol node protocol
+   *
+   * @param low lowest supported distribution protocol version
+   *
+   * @param high highest supported distribution protocol version
+   *
+   * @return creation id from EPMD
+   */
   public int register (String name, int nodePort, NodeType type, Protocol protocol, Version low, Version high) {
     val request = Registration.builder()
         .name(name)
@@ -101,6 +144,13 @@ public final class EpmdClient implements Closeable {
     return register(request);
   }
 
+  /**
+   * Registers node at EPMD server.
+   *
+   * @param request registration holder
+   *
+   * @return creation id from EPMD
+   */
   public int register (@NonNull Registration request) {
     if (cache.containsKey(request.getName()) && cache.get(request.getName()).isConnected()) {
       log.error("Node with name '{}' already exists");
@@ -129,6 +179,11 @@ public final class EpmdClient implements Closeable {
     return response.getCreation();
   }
 
+  /**
+   * Returns nodes infos from EPMD.
+   *
+   * @return list of nodes from EPMD
+   */
   public List<EpmdDump.NodeDump> dumpAll () {
     try (val connection = new Connection(address, port)) {
       val dump = connection.send(new GetEpmdDump(), EpmdDump.class);
@@ -136,6 +191,11 @@ public final class EpmdClient implements Closeable {
     }
   }
 
+  /**
+   * Stops a node by name.
+   *
+   * @param node node's name
+   */
   public void stop (@NonNull String node) {
     try (val connection = new Connection(address, port)) {
       connection.send(new Stop(node));
@@ -171,10 +231,19 @@ public final class EpmdClient implements Closeable {
     super.finalize();
   }
 
+  /**
+   * EPMD client defaults.
+   */
   public static class Default {
 
+    /**
+     * Default EPMD client address (localhost).
+     */
     public static final InetAddress ADDRESS = getDefaultInetAddress();
 
+    /**
+     * Default EPMD client port (4369).
+     */
     public static final int PORT = getDefaultPort();
 
     @SneakyThrows

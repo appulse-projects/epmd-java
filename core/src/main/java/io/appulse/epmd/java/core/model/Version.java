@@ -16,9 +16,12 @@
 
 package io.appulse.epmd.java.core.model;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import java.util.stream.Stream;
 
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Lowest/Highest supported version of the distribution protocol.
@@ -41,30 +44,89 @@ import lombok.Getter;
  * see:
  * https://github.com/erlang/otp/blob/master/erts/epmd/epmd.mk#L51
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
+@FieldDefaults(level = PRIVATE, makeFinal = true)
 public enum Version {
 
+  /**
+   * R3 distribution protocol version.
+   * <p>
+   * Description:
+   * <p>
+   * http://erlang.org/doc/apps/erts/erl_dist_protocol.html#id106278
+   */
   R3(0),
+
+  /**
+   * R4 distribution protocol version.
+   * <p>
+   * Description:
+   * <p>
+   * http://erlang.org/doc/apps/erts/erl_dist_protocol.html#id106750
+   */
   R4(1),
+
+  /**
+   * R5 distribution protocol version.
+   * <p>
+   * Description:
+   * <p>
+   * http://erlang.org/doc/apps/erts/erl_dist_protocol.html#id106843
+   */
   R5(2),
+
+  /**
+   * R5C distribution protocol version.
+   * <p>
+   * Description:
+   * <p>
+   * http://erlang.org/doc/apps/erts/erl_dist_protocol.html#id106857
+   */
   R5C(3),
+
+  /**
+   * R6_DEVELOPMENT distribution protocol version.
+   * <p>
+   * Description:
+   * <p>
+   http://erlang.org/doc/apps/erts/erl_dist_protocol.html#id106869
+   */
   R6_DEVELOPMENT(4),
+
+  /**
+   * R6 distribution protocol version.
+   * <p>
+   * Description:
+   * <p>
+   * http://erlang.org/doc/apps/erts/erl_dist_protocol.html#id106869
+   */
   R6(5),
-  UNDEFINED(-1);
+
+  /**
+   * Unknown distribution protocol version.
+   */
+  UNKNOWN(-1);
 
   @Getter
-  private final short code;
+  short code;
 
   Version (int code) {
     this.code = (short) code;
   }
 
+  /**
+   * Parses numeric code to {@link Version} instance.
+   *
+   * @param code {@link Version} numeric representation.
+   *
+   * @return {@link Version} instance. {@link Version#UNKNOWN} if unknown.
+   */
   public static Version of (short code) {
     return Stream.of(values())
         .filter(it -> it.getCode() == code)
         .findAny()
-        .orElse(UNDEFINED);
+        .orElse(UNKNOWN);
   }
 }

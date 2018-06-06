@@ -16,9 +16,12 @@
 
 package io.appulse.epmd.java.core.model;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import java.util.stream.Stream;
 
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 
 /**
  * What epmd has been told, differs very much between versions, both
@@ -30,29 +33,60 @@ import lombok.Getter;
  * see:
  * https://github.com/erlang/otp/blob/master/erts/epmd/epmd.mk#L36
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
+@FieldDefaults(level = PRIVATE, makeFinal = true)
 public enum NodeType {
 
+  /**
+   * R3 hidden node type.
+   */
   R3_HIDDEN(72),
+
+  /**
+   * R3 node type.
+   */
   R3_ERLANG(77),
+
+  /**
+   * R4 hidden node type.
+   */
   R4_HIDDEN(104),
+
+  /**
+   * R4 node type.
+   */
   R4_ERLANG(109),
+
+  /**
+   * R6 node type.
+   */
   R6_ERLANG(110),
-  UNDEFINED(-1);
+
+  /**
+   * Unknown node type.
+   */
+  UNKNOWN(-1);
 
   @Getter
-  private final byte code;
+  byte code;
 
   NodeType (int code) {
     this.code = (byte) code;
   }
 
+  /**
+   * Parses numeric code to {@link NodeType} instance.
+   *
+   * @param code {@link NodeType} numeric representation.
+   *
+   * @return {@link NodeType} instance. {@link NodeType#UNKNOWN} if unknown.
+   */
   public static NodeType of (byte code) {
     return Stream.of(values())
         .filter(it -> it.getCode() == code)
         .findAny()
-        .orElse(UNDEFINED);
+        .orElse(UNKNOWN);
   }
 }

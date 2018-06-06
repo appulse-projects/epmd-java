@@ -35,9 +35,10 @@ import io.appulse.epmd.java.core.mapper.deserializer.exception.EnumUnknownValueE
 import io.appulse.utils.Bytes;
 
 /**
+ * Implementation for deserializing enum values.
  *
- * @author Artem Labazin
  * @since 0.0.1
+ * @author Artem Labazin
  */
 class EnumDeserializer implements Deserializer {
 

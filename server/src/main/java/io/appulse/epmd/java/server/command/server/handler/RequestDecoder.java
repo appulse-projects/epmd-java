@@ -37,9 +37,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 /**
+ * Netty's decoder for requests.
  *
- * @author Artem Labazin
  * @since 0.4.0
+ * @author Artem Labazin
  */
 @Slf4j
 public class RequestDecoder extends ReplayingDecoder<Request> {
