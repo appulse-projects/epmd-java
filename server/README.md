@@ -6,7 +6,7 @@
 
 ### As application
 
-Run it just a regular `Java` CLI app:
+Run it as a regular `Java` CLI app:
 
 ```bash
 $> java -jar epmd-1.0.2.jar
@@ -79,10 +79,9 @@ Interactive options
 
 ```
 
-
 ### As library
 
-Include the dependency to your project's pom.xml file:
+**Maven**:
 
 ```xml
 <dependencies>
@@ -96,7 +95,7 @@ Include the dependency to your project's pom.xml file:
 </dependencies>
 ```
 
-or Gradle:
+**Gradle**:
 
 ```groovy
 compile 'io.appulse.epmd.java:server:1.0.2'

@@ -6,7 +6,7 @@ Client's library for `EPMD` server.
 
 ### Add dependency
 
-Include the dependency to your project's pom.xml file:
+**Maven**:
 
 ```xml
 <dependencies>
@@ -20,7 +20,7 @@ Include the dependency to your project's pom.xml file:
 </dependencies>
 ```
 
-or Gradle:
+**Gradle**:
 
 ```groovy
 compile 'io.appulse.epmd.java:client:1.0.2'
@@ -34,7 +34,7 @@ Create `EpmdClient` with default port **4369** or extracted from `ERL_EPMD_PORT`
 EpmdClient client = new EmpdClient();
 ```
 
-You are able to specify `EPMD` server port manually:
+It's also possible to specify `EPMD` server port manually:
 
 ```java
 EpmdClient client = new EmpdClient(9999);
