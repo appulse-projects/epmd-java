@@ -9,15 +9,15 @@
 Run it as a regular `Java` CLI app:
 
 ```bash
-$> java -jar epmd-1.0.2.jar
-2018-06-06 00:10:18.869  INFO : Starting server on port 4369
+$> java -jar epmd-2.0.0.jar
+2019-06-06 00:10:18.869  INFO : Starting server on port 4369
 
 ```
 
 To get names of all registered nodes:
 
 ```bash
-$> java -jar epmd-1.0.2.jar -names
+$> java -jar epmd-2.0.0.jar -names
 popa
 echo
 ```
@@ -25,7 +25,7 @@ echo
 To see another options and commands, just type:
 
 ```bash
-$> java -jar epmd-1.0.2.jar --help
+$> java -jar epmd-2.0.0.jar --help
 usage: java -jar epmd.jar [-d|-debug] [DbgExtra...] [-address List]
                           [-port No] [-daemon] [-relaxed_command_check]
        java -jar epmd.jar [-d|-debug] [-port No] [-names|-kill|-stop name]
@@ -89,7 +89,7 @@ Interactive options
     <dependency>
         <groupId>io.appulse.epmd.java</groupId>
         <artifactId>server</artifactId>
-        <version>1.0.2</version>
+        <version>2.0.0</version>
     </dependency>
     ...
 </dependencies>
@@ -98,7 +98,7 @@ Interactive options
 **Gradle**:
 
 ```groovy
-compile 'io.appulse.epmd.java:server:1.0.2'
+compile 'io.appulse.epmd.java:server:2.0.0'
 ```
 
 To start EPMD server in your code:

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2018 the original author or authors.
+Copyright 2019 the original author or authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ limitations under the License.
 
   <groupId>io.appulse</groupId>
   <artifactId>epmd-java</artifactId>
-  <version>1.0.2</version>
+  <version>2.0.0</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -37,11 +37,15 @@ limitations under the License.
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
 
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <java.version>${java.vm.specification.version}</java.version>
 
-    <maven.compiler.testTarget>1.8</maven.compiler.testTarget>
-    <maven.compiler.testSource>1.8</maven.compiler.testSource>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+
+    <maven.compiler.testTarget>${java.version}</maven.compiler.testTarget>
+    <maven.compiler.testSource>${java.version}</maven.compiler.testSource>
+
+    <skipAllTests>false</skipAllTests>
   </properties>
 
   <name>[EPMD] Parent</name>
@@ -49,7 +53,7 @@ limitations under the License.
     Parent (root) EPMD project, based on Java
   </description>
   <url>https://github.com/appulse-projects/epmd-java</url>
-  <inceptionYear>2018</inceptionYear>
+  <inceptionYear>2019</inceptionYear>
 
   <organization>
     <name>Appulse</name>
@@ -68,7 +72,7 @@ limitations under the License.
     <url>https://github.com/appulse-projects/epmd-java</url>
     <connection>scm:git:https://github.com/appulse-projects/epmd-java.git</connection>
     <developerConnection>scm:git:https://github.com/appulse-projects/epmd-java.git</developerConnection>
-    <tag>1.0.2</tag>
+    <tag>2.0.0</tag>
   </scm>
 
   <distributionManagement>
@@ -104,7 +108,7 @@ limitations under the License.
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.0</version>
+      <version>1.18.6</version>
       <scope>provided</scope>
     </dependency>
 
@@ -116,13 +120,59 @@ limitations under the License.
     <dependency>
       <groupId>io.appulse</groupId>
       <artifactId>utils-java</artifactId>
-      <version>1.8.0</version>
+      <version>1.10.0</version>
     </dependency>
 
     <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>annotations</artifactId>
-      <version>3.0.1u2</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.4.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>5.4.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.11.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>2.24.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>2.24.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>1.10.6</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>net.jcip</groupId>
+      <artifactId>jcip-annotations</artifactId>
+      <version>1.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <version>3.1.11</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -131,28 +181,15 @@ limitations under the License.
       <version>3.0.2</version>
       <scope>provided</scope>
     </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <version>3.10.0</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
     <pluginManagement>
       <plugins>
         <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>findbugs-maven-plugin</artifactId>
-          <version>3.0.5</version>
+          <groupId>com.github.spotbugs</groupId>
+          <artifactId>spotbugs-maven-plugin</artifactId>
+          <version>3.1.11</version>
           <configuration>
             <effort>Max</effort>
             <threshold>Low</threshold>
@@ -161,22 +198,22 @@ limitations under the License.
           </configuration>
           <executions>
             <execution>
-              <id>analyze-compile</id>
-              <phase>compile</phase>
+              <id>spotbugs-validation</id>
+              <phase>verify</phase>
               <goals>
                 <goal>check</goal>
               </goals>
             </execution>
           </executions>
         </plugin>
+
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-pmd-plugin</artifactId>
-          <version>3.9.0</version>
+          <version>3.11.0</version>
           <configuration>
             <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
             <targetJdk>${maven.compiler.source}</targetJdk>
-            <verbose>true</verbose>
             <failOnViolation>true</failOnViolation>
             <printFailingErrors>true</printFailingErrors>
             <analysisCache>true</analysisCache>
@@ -187,7 +224,8 @@ limitations under the License.
           </configuration>
           <executions>
             <execution>
-              <phase>package</phase>
+              <id>pmd-validation</id>
+              <phase>verify</phase>
               <goals>
                 <goal>check</goal>
               </goals>
@@ -198,18 +236,18 @@ limitations under the License.
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>2.17</version>
+          <version>3.0.0</version>
           <dependencies>
             <dependency>
               <groupId>com.puppycrawl.tools</groupId>
               <artifactId>checkstyle</artifactId>
-              <version>8.10.1</version>
+              <version>8.17</version>
             </dependency>
           </dependencies>
           <executions>
             <execution>
-              <id>validate</id>
-              <phase>validate</phase>
+              <id>checkstyle-validation</id>
+              <phase>verify</phase>
               <goals>
                 <goal>check</goal>
               </goals>
@@ -220,6 +258,7 @@ limitations under the License.
                 <failOnViolation>true</failOnViolation>
                 <linkXRef>false</linkXRef>
                 <propertyExpansion>codestyleFolder=${project.basedir}/../.codestyle</propertyExpansion>
+                <includeTestSourceDirectory>true</includeTestSourceDirectory>
               </configuration>
             </execution>
           </executions>
@@ -228,6 +267,12 @@ limitations under the License.
     </pluginManagement>
 
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.0</version>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
@@ -245,17 +290,17 @@ limitations under the License.
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.1</version>
         <configuration>
           <additionalOptions>-Xdoclint:none</additionalOptions>
           <additionalparam>-Xdoclint:none</additionalparam>
           <breakiterator>true</breakiterator>
-          <charset>UTF-8</charset>
-          <docencoding>UTF-8</docencoding>
-          <encoding>UTF-8</encoding>
+          <charset>${project.build.sourceEncoding}</charset>
+          <docencoding>${project.build.sourceEncoding}</docencoding>
+          <encoding>${project.build.sourceEncoding}</encoding>
           <failOnError>true</failOnError>
           <show>protected</show>
-          <source>1.8</source>
+          <source>${java.version}</source>
           <version>true</version>
         </configuration>
         <executions>
@@ -270,16 +315,53 @@ limitations under the License.
       </plugin>
 
       <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <version>2.2.6</version>
+        <executions>
+          <execution>
+            <id>git-infos</id>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <runOnlyOnce>true</runOnlyOnce>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
+          <generateGitPropertiesFile>true</generateGitPropertiesFile>
+          <verbose>false</verbose>
+          <prefix>git</prefix>
+          <generateGitPropertiesFilename>
+            ${project.build.outputDirectory}/git.properties
+          </generateGitPropertiesFilename>
+          <dateFormat>yyyy-MM-dd'T'HH:mm:ssZ</dateFormat>
+          <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+          <excludeProperties>
+            <excludeProperty>git.closest.tag.commit.count</excludeProperty>
+            <excludeProperty>git.closest.tag.name</excludeProperty>
+          </excludeProperties>
+        </configuration>
+      </plugin>
+
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.21.0</version>
+        <version>2.22.1</version>
         <configuration>
+          <skipTests>${skipAllTests}</skipTests>
           <trimStackTrace>false</trimStackTrace>
           <includes>
             <include>**/*Test.java</include>
+            <include>**/*Tests.java</include>
+            <include>**/Test*.java</include>
           </includes>
           <excludes>
+            <exclude>**/it/**</exclude>
             <exclude>**/*IntegrationTest.java</exclude>
+            <exclude>**/*IntegrationTests.java</exclude>
+            <exclude>**/*IT.java</exclude>
+            <exclude>**/IT*.java</exclude>
           </excludes>
         </configuration>
       </plugin>
@@ -287,14 +369,19 @@ limitations under the License.
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.21.0</version>
+        <version>2.22.1</version>
         <configuration>
+          <skipITs>${skipAllTests}</skipITs>
+          <trimStackTrace>false</trimStackTrace>
           <includes>
             <include>**/*IntegrationTest.java</include>
+            <include>**/*IntegrationTests.java</include>
+            <include>**/*IT.java</include>
+            <include>**/IT*.java</include>
+            <include>**/it/**/*Test.java</include>
+            <include>**/it/**/*Tests.java</include>
+            <include>**/it/**/Test*.java</include>
           </includes>
-          <excludes>
-            <exclude>**/*Test.java</exclude>
-          </excludes>
         </configuration>
         <executions>
           <execution>
@@ -343,4 +430,39 @@ limitations under the License.
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>module-java</id>
+      <activation>
+        <jdk>[9,12)</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <release>${java.version}</release>
+            </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <argLine>
+                --illegal-access=permit
+              </argLine>
+            </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <argLine>
+                --illegal-access=permit
+              </argLine>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,10 @@ package io.appulse.epmd.java.server.cli;
 import static lombok.AccessLevel.PRIVATE;
 
 import com.beust.jcommander.Parameter;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 /**
@@ -29,6 +32,8 @@ import lombok.experimental.FieldDefaults;
  * @since 0.3.2
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = PRIVATE)
 public class CommonOptions {
 
