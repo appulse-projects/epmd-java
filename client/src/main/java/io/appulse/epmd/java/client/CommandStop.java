@@ -14,21 +14,34 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.core.mapper.deserializer;
+package io.appulse.epmd.java.client;
 
-import io.appulse.epmd.java.core.mapper.deserializer.exception.DeserializationException;
-import io.appulse.utils.Bytes;
+import java.util.function.Supplier;
 
-/**
- * Interface that defines API used by {@link MessageDeserializer}
- * to deserialize Objects of arbitrary types from bytes.
- *
- * @since 0.0.1
- * @author Artem Labazin
- */
-interface Deserializer {
+import io.appulse.epmd.java.core.model.request.Stop;
 
-  <T> T deserialize (Bytes buffer, Class<T> type) throws DeserializationException;
+import lombok.Builder;
+import lombok.NonNull;
+import lombok.Value;
+import lombok.val;
 
-  boolean isApplicable (Class<?> type);
+@Value
+@Builder
+class CommandStop implements Supplier<Void> {
+
+  @NonNull
+  ConnectionManager connectionManager;
+
+  @NonNull
+  String node;
+
+  @Override
+  public Void get () {
+    val request = new Stop(node);
+    val requestBytes = request.toBytes();
+    try (val connection = connectionManager.connect()) {
+      connection.send(requestBytes);
+      return null;
+    }
+  }
 }

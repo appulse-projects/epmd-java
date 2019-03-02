@@ -55,7 +55,7 @@ public class KillCommandExecutor extends AbstractCommandExecutor {
   public void execute () {
     boolean killed = false;
     try (EpmdClient client = new EpmdClient(getPort())) {
-      killed = client.kill();
+      killed = client.kill().join();
     }
     log.info("EPMD was killed: {}", killed);
   }

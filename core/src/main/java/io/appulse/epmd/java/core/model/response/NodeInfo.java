@@ -21,7 +21,6 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
-import static lombok.AccessLevel.PRIVATE;
 
 import java.util.Optional;
 
@@ -33,10 +32,8 @@ import io.appulse.epmd.java.core.model.Version;
 import io.appulse.utils.Bytes;
 
 import lombok.Builder;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.ToString;
-import lombok.experimental.FieldDefaults;
+import lombok.Value;
 import lombok.val;
 
 /**
@@ -45,10 +42,8 @@ import lombok.val;
  * @since 0.0.1
  * @author Artem Labazin
  */
-@Getter
-@ToString
-@FieldDefaults(level = PRIVATE)
-public class NodeInfo implements TaggedMessage {
+@Value
+public class NodeInfo implements Response, TaggedMessage {
 
   boolean ok;
 
@@ -64,17 +59,7 @@ public class NodeInfo implements TaggedMessage {
 
   Optional<String> name;
 
-  /**
-   * Default no arguments constructor with default values.
-   */
-  public NodeInfo () {
-    port = empty();
-    type = empty();
-    protocol = empty();
-    high = empty();
-    low = empty();
-    name = empty();
-  }
+  Optional<byte[]> extra;
 
   /**
    * All arguments constructor.
@@ -92,9 +77,19 @@ public class NodeInfo implements TaggedMessage {
    * @param low node's lowest supported version
    *
    * @param name node's name
+   *
+   * @param extra node's extra info
    */
   @Builder
-  public NodeInfo (boolean ok, Integer port, NodeType type, Protocol protocol, Version high, Version low, String name) {
+  public NodeInfo (@NonNull Boolean ok,
+                   Integer port,
+                   NodeType type,
+                   Protocol protocol,
+                   Version high,
+                   Version low,
+                   String name,
+                   byte[] extra
+  ) {
     this.ok = ok;
     this.port = ofNullable(port);
     this.type = ofNullable(type);
@@ -102,31 +97,24 @@ public class NodeInfo implements TaggedMessage {
     this.high = ofNullable(high);
     this.low = ofNullable(low);
     this.name = ofNullable(name);
+    this.extra = ofNullable(extra);
   }
 
-  @Override
-  public void write (@NonNull Bytes bytes) {
-    if (!ok) {
-      bytes.put1B(1);
-      return;
+  NodeInfo (Bytes bytes) {
+    val tag = Tag.of(bytes.getByte());
+    if (tag != getTag()) {
+      throw new IllegalArgumentException("Unexpected message's tag " + tag.name());
     }
 
-    bytes.put1B(0);
-    port.ifPresent(bytes::put2B);
-    type.ifPresent(it -> bytes.put1B(it.getCode()));
-    protocol.ifPresent(it -> bytes.put1B(it.getCode()));
-    high.ifPresent(it -> bytes.put2B(it.getCode()));
-    low.ifPresent(it -> bytes.put2B(it.getCode()));
-    name.ifPresent(it -> {
-      bytes.put2B(it.length());
-      bytes.put(it, ISO_8859_1);
-    });
-  }
-
-  @Override
-  public void read (@NonNull Bytes bytes) {
     if (bytes.getByte() != 0) {
       ok = false;
+      port = empty();
+      type = empty();
+      protocol = empty();
+      high = empty();
+      low = empty();
+      name = empty();
+      extra = empty();
       return;
     }
 
@@ -134,15 +122,46 @@ public class NodeInfo implements TaggedMessage {
     port = of(bytes.getUnsignedShort());
     type = of(bytes.getByte()).map(NodeType::of);
     protocol = of(bytes.getByte()).map(Protocol::of);
-    high = of(bytes.getShort()).map(Version::of);
-    low = of(bytes.getShort()).map(Version::of);
+    high = of(bytes.getUnsignedShort()).map(Version::of);
+    low = of(bytes.getUnsignedShort()).map(Version::of);
 
-    val length = bytes.getShort();
+    val length = bytes.getUnsignedShort();
     name = of(bytes.getString(length, ISO_8859_1));
+
+    val extraLength = bytes.getUnsignedShort();
+    extra = of(bytes.getBytes(extraLength));
   }
 
   @Override
-  public Tag getTag () {
+  public byte[] toBytes () {
+    if (!ok) {
+      return new byte[] { getTag().getCode(), 1 };
+    }
+
+    val nameBytes = name
+        .map(it -> it.getBytes(ISO_8859_1))
+        .orElseGet(() -> new byte[0]);
+
+    val extraBytes = extra
+        .orElseGet(() -> new byte[0]);
+
+    return Bytes.allocate(14 + nameBytes.length + extraBytes.length)
+        .put1B(getTag().getCode())
+        .put1B(0)
+        .put2B(port.get())
+        .put1B(type.get().getCode())
+        .put1B(protocol.get().getCode())
+        .put2B(high.get().getCode())
+        .put2B(low.get().getCode())
+        .put2B(nameBytes.length)
+        .put(nameBytes)
+        .put2B(extraBytes.length)
+        .put(extraBytes)
+        .array();
+  }
+
+  @Override
+  public final Tag getTag () {
     return PORT2_RESPONSE;
   }
 }

@@ -23,22 +23,15 @@ import static io.appulse.epmd.java.core.model.Version.R4;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
-import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
 import io.appulse.utils.Bytes;
 
 import lombok.val;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-/**
- *
- * @author Artem Labazin
- * @since 0.0.1
- */
-public class NodeInfoTest {
+class NodeInfoTest {
 
   @Test
-  public void serializeNok () {
+  void serializeNok () {
     val expected = Bytes.allocate()
         .put1B(PORT2_RESPONSE.getCode())
         .put1B(1)
@@ -48,12 +41,12 @@ public class NodeInfoTest {
         .ok(false)
         .build();
 
-    assertThat(new MessageSerializer().serialize(request))
+    assertThat(request.toBytes())
         .isEqualTo(expected);
   }
 
   @Test
-  public void serializeOk () {
+  void serializeOk () {
     val name = "popa";
     val expected = Bytes.allocate()
         .put1B(PORT2_RESPONSE.getCode())
@@ -65,6 +58,7 @@ public class NodeInfoTest {
         .put2B(1)
         .put2B(name.getBytes().length)
         .put(name)
+        .put2B(0)
         .array();
 
     val request = NodeInfo.builder()
@@ -77,18 +71,18 @@ public class NodeInfoTest {
         .name(name)
         .build();
 
-    assertThat(new MessageSerializer().serialize(request))
+    assertThat(request.toBytes())
         .isEqualTo(expected);
   }
 
   @Test
-  public void deserializeNok () {
+  void deserializeNok () {
     val bytes = Bytes.allocate()
         .put1B(PORT2_RESPONSE.getCode())
         .put1B(1)
         .array();
 
-    val response = new MessageDeserializer().deserialize(bytes, NodeInfo.class);
+    val response = Response.parse(bytes, NodeInfo.class);
 
     assertThat(response).isNotNull();
     assertThat(response.isOk()).isFalse();
@@ -113,7 +107,7 @@ public class NodeInfoTest {
   }
 
   @Test
-  public void deserializeOk () {
+  void deserializeOk () {
     val name = "popa";
     val bytes = Bytes.allocate()
         .put1B(PORT2_RESPONSE.getCode())
@@ -125,9 +119,10 @@ public class NodeInfoTest {
         .put2B(1)
         .put2B(name.getBytes().length)
         .put(name, ISO_8859_1)
+        .put2B(0)
         .array();
 
-    val response = new MessageDeserializer().deserialize(bytes, NodeInfo.class);
+    val response = Response.parse(bytes, NodeInfo.class);
 
     assertThat(response).isNotNull();
     assertThat(response.isOk()).isTrue();

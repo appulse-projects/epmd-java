@@ -20,37 +20,27 @@ import static io.appulse.epmd.java.core.model.NodeType.R3_ERLANG;
 import static io.appulse.epmd.java.core.model.Protocol.TCP;
 import static io.appulse.epmd.java.core.model.Version.R6;
 import static io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump.Status.ACTIVE;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import io.appulse.epmd.java.client.EpmdClient;
 import io.appulse.epmd.java.client.exception.EpmdRegistrationException;
+import io.appulse.epmd.java.core.model.request.Registration;
 import io.appulse.epmd.java.server.cli.CommonOptions;
 import io.appulse.utils.SocketUtils;
-import io.appulse.utils.test.TestMethodNamePrinter;
 import io.appulse.utils.threads.AppulseExecutors;
 
 import lombok.val;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestRule;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-/**
- *
- * @author Artem Labazin
- * @since 0.4.0
- */
-public class ServerCommandExecutorTest {
-
-  @Rule
-  public TestRule watcher = new TestMethodNamePrinter();
+class ServerCommandExecutorTest {
 
   ExecutorService executorService = AppulseExecutors.newSingleThreadExecutor().build();
 
@@ -60,8 +50,8 @@ public class ServerCommandExecutorTest {
 
   Future<?> future;
 
-  @Before
-  public void before () throws Exception {
+  @BeforeEach
+  void before () throws Exception {
     val port = SocketUtils.findFreePort()
         .orElseThrow(RuntimeException::new);
 
@@ -71,35 +61,44 @@ public class ServerCommandExecutorTest {
 
     future = executorService.submit(server::execute);
 
-    TimeUnit.SECONDS.sleep(1);
+    SECONDS.sleep(1);
 
     client = new EpmdClient(port);
   }
 
-  @After
-  public void after () {
+  @AfterEach
+  void after () {
     client.close();
     server.close();
     future.cancel(true);
   }
 
   @Test
-  public void empty () {
+  void empty () {
     // empty
   }
 
   @Test
-  public void register () {
-    client.register("register", 8971, R3_ERLANG, TCP, R6, R6);
+  void register () throws Exception {
+    val registration = Registration.builder()
+        .name("registers")
+        .port(8976)
+        .type(R3_ERLANG)
+        .protocol(TCP)
+        .high(R6)
+        .low(R6)
+        .build();
 
-    val optional = client.lookup("register");
+    client.register(registration).get(3, SECONDS);
+
+    val optional = client.lookup("registers", client.getPort()).get(3, SECONDS);
     assertThat(optional).isPresent();
 
     val nodeInfo = optional.get();
     SoftAssertions.assertSoftly(softly -> {
       softly.assertThat(nodeInfo.getPort())
           .isPresent()
-          .hasValue(8971);
+          .hasValue(8976);
 
       softly.assertThat(nodeInfo.getType())
           .isPresent()
@@ -118,24 +117,33 @@ public class ServerCommandExecutorTest {
           .hasValue(R6);
     });
 
-    assertThatThrownBy(() -> client.register("register", 8971, R3_ERLANG, TCP, R6, R6))
-        .isInstanceOf(EpmdRegistrationException.class);
+    assertThatThrownBy(() -> client.register(registration).get(3, SECONDS))
+        .hasCauseInstanceOf(EpmdRegistrationException.class);
 
     client.stop("register");
   }
 
   @Test
-  public void dumpEmpty () {
-    val nodes = client.dumpAll();
+  void dumpEmpty () throws Exception {
+    val nodes = client.dump().get(3, SECONDS);
     assertThat(nodes)
         .isNotNull()
         .isEmpty();
   }
 
   @Test
-  public void dumpAll () {
-    client.register("dump", 19027, R3_ERLANG, TCP, R6, R6);
-    val nodes = client.dumpAll();
+  void dumpAll () throws Exception {
+    val registration = Registration.builder()
+        .name("dump")
+        .port(19027)
+        .type(R3_ERLANG)
+        .protocol(TCP)
+        .high(R6)
+        .low(R6)
+        .build();
+
+    client.register(registration).get(3, SECONDS);
+    val nodes = client.dump().get(3, SECONDS);
     assertThat(nodes)
         .isNotNull()
         .hasSize(1)

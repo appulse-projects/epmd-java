@@ -20,6 +20,7 @@ import static lombok.AccessLevel.PRIVATE;
 
 import java.util.stream.Stream;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
@@ -47,6 +48,7 @@ import lombok.experimental.FieldDefaults;
  * @since 0.0.1
  * @author Artem Labazin
  */
+@AllArgsConstructor
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public enum Version {
 
@@ -110,11 +112,7 @@ public enum Version {
   UNKNOWN(-1);
 
   @Getter
-  short code;
-
-  Version (int code) {
-    this.code = (short) code;
-  }
+  int code;
 
   /**
    * Parses numeric code to {@link Version} instance.
@@ -123,7 +121,7 @@ public enum Version {
    *
    * @return {@link Version} instance. {@link Version#UNKNOWN} if unknown.
    */
-  public static Version of (short code) {
+  public static Version of (int code) {
     return Stream.of(values())
         .filter(it -> it.getCode() == code)
         .findAny()

@@ -16,15 +16,13 @@
 
 package io.appulse.epmd.java.core.model;
 
-import io.appulse.epmd.java.core.mapper.DataSerializable;
-
 /**
  * Interface for serializable messages, which support {@link Tag}.
  *
  * @since 0.4.0
  * @author Artem Labazin
  */
-public interface TaggedMessage extends DataSerializable {
+public interface TaggedMessage {
 
   /**
    * Returns message's tag.

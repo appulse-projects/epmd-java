@@ -20,50 +20,41 @@ import static io.appulse.epmd.java.core.model.NodeType.R3_ERLANG;
 import static io.appulse.epmd.java.core.model.Protocol.TCP;
 import static io.appulse.epmd.java.core.model.Version.R6;
 import static io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump.Status.ACTIVE;
-import static lombok.AccessLevel.PRIVATE;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.appulse.epmd.java.client.exception.EpmdConnectionException;
 import io.appulse.epmd.java.client.exception.EpmdRegistrationException;
-import io.appulse.epmd.java.client.util.CheckLocalEpmdExists;
-import io.appulse.epmd.java.client.util.LocalEpmdHelper;
-import io.appulse.utils.test.TestMethodNamePrinter;
+import io.appulse.epmd.java.client.exception.EpmdRegistrationNameConflictException;
+import io.appulse.epmd.java.core.model.request.Registration;
 
-import lombok.experimental.FieldDefaults;
 import lombok.val;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestRule;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-/**
- *
- * @author Artem Labazin
- * @since 0.2.2
- */
-@FieldDefaults(level = PRIVATE)
-public class LocalEpmdClientTest {
-
-  @ClassRule
-  public static CheckLocalEpmdExists localEpmdExists = new CheckLocalEpmdExists();
-
-  @Rule
-  public TestRule watcher = new TestMethodNamePrinter();
+class LocalEpmdClientTest {
 
   EpmdClient client;
 
-  @Before
-  public void before () {
+  @BeforeAll
+  static void beforeAll () {
+    if (!LocalEpmdHelper.exists()) {
+      throw new IllegalStateException("Could not find local EPMD. Skipping test");
+    }
+  }
+
+  @BeforeEach
+  void beforeEach () {
     LocalEpmdHelper.run();
     client = new EpmdClient();
   }
 
-  @After
-  public void after () {
+  @AfterEach
+  void afterEach () {
     if (client != null) {
       client.close();
       client = null;
@@ -72,20 +63,46 @@ public class LocalEpmdClientTest {
   }
 
   @Test
-  public void twoRegisters () throws Exception {
-    val creation = client.register("register", 8971, R3_ERLANG, TCP, R6, R6);
-    assertThat(creation).isNotEqualTo(0);
+  void twoRegisters () throws Exception {
+    val registration = Registration.builder()
+        .name("register")
+        .port(8971)
+        .type(R3_ERLANG)
+        .protocol(TCP)
+        .high(R6)
+        .low(R6)
+        .build();
 
-    assertThatExceptionOfType(EpmdRegistrationException.class)
-          .isThrownBy(() -> client.register("register", 8971, R3_ERLANG, TCP, R6, R6));
+    val result = client.register(registration).get(3, SECONDS);
+    assertThat(result)
+        .isNotNull();
+
+    assertThat(result.getCreation())
+        .isNotEqualTo(0);
+
+    assertThatThrownBy(() -> client.register(registration).get(3, SECONDS))
+        .hasCauseExactlyInstanceOf(EpmdRegistrationNameConflictException.class);
   }
 
   @Test
-  public void register () throws Exception {
-    val creation = client.register("register", 61_123, R3_ERLANG, TCP, R6, R6);
-    assertThat(creation).isNotEqualTo(0);
+  void register () throws Exception {
+    val registration = Registration.builder()
+        .name("register")
+        .port(61_123)
+        .type(R3_ERLANG)
+        .protocol(TCP)
+        .high(R6)
+        .low(R6)
+        .build();
 
-    val optional = client.lookup("register");
+    val creation = client.register(registration)
+        .get(3, SECONDS)
+        .getCreation();
+
+    assertThat(creation)
+        .isNotEqualTo(0);
+
+    val optional = client.lookup("register").get(3, SECONDS);
     assertThat(optional).isPresent();
 
     val nodeInfo = optional.get();
@@ -113,31 +130,58 @@ public class LocalEpmdClientTest {
   }
 
   @Test
-  public void invalidRegistration () {
-    try (EpmdClient client2 = new EpmdClient(8091)) {
-      assertThatExceptionOfType(EpmdRegistrationException.class)
-          .isThrownBy(() -> client2.register("popa", 8971, R3_ERLANG, TCP, R6, R6));
+  void invalidRegistration () {
+    val registration = Registration.builder()
+        .name("popa")
+        .port(8971)
+        .type(R3_ERLANG)
+        .protocol(TCP)
+        .high(R6)
+        .low(R6)
+        .build();
+
+    try (EpmdClient client2 = new EpmdClient(8099)) {
+      assertThatThrownBy(() -> client2.register(registration).get(3, SECONDS))
+          .hasCauseInstanceOf(EpmdRegistrationException.class);
     }
   }
 
   @Test
-  public void lookupAndRegistration () {
-    assertThat(client.register("node-1", 61_111, R3_ERLANG, TCP, R6, R6))
+  void lookupAndRegistration () throws Exception {
+    val registration1 = Registration.builder()
+        .name("node-1")
+        .port(61_111)
+        .type(R3_ERLANG)
+        .protocol(TCP)
+        .high(R6)
+        .low(R6)
+        .build();
+
+    assertThat(client.register(registration1).get(3, SECONDS).getCreation())
         .isNotEqualTo(0);
 
-    val optional1 = client.lookup("node-1");
+    val optional1 = client.lookup("node-1").get(3, SECONDS);
     assertThat(optional1)
         .isPresent();
     assertThat(optional1.get().isOk())
         .isTrue();
 
-    assertThat(client.lookup("node-2"))
+    assertThat(client.lookup("node-2").get(3, SECONDS))
         .isNotPresent();
 
-    assertThat(client.register("node-2", 61_011, R3_ERLANG, TCP, R6, R6))
+    val registration2 = Registration.builder()
+        .name("node-2")
+        .port(61_112)
+        .type(R3_ERLANG)
+        .protocol(TCP)
+        .high(R6)
+        .low(R6)
+        .build();
+
+    assertThat(client.register(registration2).get(3, SECONDS))
         .isNotEqualTo(0);
 
-    val optional2 = client.lookup("node-2");
+    val optional2 = client.lookup("node-2").get(3, SECONDS);
     assertThat(optional2)
         .isPresent();
     assertThat(optional2.get().isOk())
@@ -145,25 +189,32 @@ public class LocalEpmdClientTest {
   }
 
   @Test
-  public void connectionBroken () {
-    try (EpmdClient client2 = new EpmdClient(8091)) {
-      assertThatExceptionOfType(EpmdConnectionException.class)
-          .isThrownBy(() -> client2.lookup("popa"));
-    }
+  void connectionBroken () {
+    assertThatThrownBy(() -> client.lookup("popa", 8099).get(3, SECONDS))
+        .hasCauseInstanceOf(EpmdConnectionException.class);
   }
 
   @Test
-  public void dumpEmpty () {
-    val nodes = client.dumpAll();
+  void dumpEmpty () throws Exception {
+    val nodes = client.dump().get(3, SECONDS);
     assertThat(nodes)
         .isNotNull()
         .isEmpty();
   }
 
   @Test
-  public void dumpAll () {
-    client.register("dump", 19027, R3_ERLANG, TCP, R6, R6);
-    val nodes = client.dumpAll();
+  void dump () throws Exception {
+    val registration = Registration.builder()
+        .name("dump")
+        .port(19027)
+        .type(R3_ERLANG)
+        .protocol(TCP)
+        .high(R6)
+        .low(R6)
+        .build();
+
+    client.register(registration).get(3, SECONDS);
+    val nodes = client.dump().get(3, SECONDS);
     assertThat(nodes)
         .isNotNull()
         .isNotEmpty();
@@ -189,8 +240,8 @@ public class LocalEpmdClientTest {
   }
 
   @Test
-  public void kill () {
-    assertThat(client.kill())
+  void kill () throws Exception {
+    assertThat(client.kill().get(3, SECONDS))
         .as("EPMD client wasn't killed")
         .isTrue();
   }

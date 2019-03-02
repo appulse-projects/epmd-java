@@ -19,23 +19,17 @@ package io.appulse.epmd.java.core.model.response;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static lombok.AccessLevel.PRIVATE;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-import io.appulse.epmd.java.core.mapper.DataSerializable;
 import io.appulse.utils.Bytes;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Singular;
-import lombok.ToString;
 import lombok.Value;
-import lombok.experimental.FieldDefaults;
 import lombok.val;
 
 /**
@@ -44,13 +38,10 @@ import lombok.val;
  * @since 0.0.1
  * @author Artem Labazin
  */
-@Getter
+@Value
 @Builder
-@ToString
-@NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = PRIVATE)
-public class EpmdInfo implements DataSerializable {
+public class EpmdInfo implements Response {
 
   @NonNull
   Integer port;
@@ -59,24 +50,7 @@ public class EpmdInfo implements DataSerializable {
   @Singular
   List<NodeDescription> nodes;
 
-  @Override
-  public void write (@NonNull Bytes bytes) {
-    bytes.put4B(port);
-
-    if (nodes.isEmpty()) {
-      bytes.put(new byte[0]);
-      return;
-    }
-
-    val string = nodes.stream()
-        .map(it -> String.format("name %s at port %d", it.getName(), it.getPort()))
-        .collect(joining("\n"));
-
-    bytes.put(string, ISO_8859_1);
-  }
-
-  @Override
-  public void read (@NonNull Bytes bytes) {
+  EpmdInfo (Bytes bytes) {
     port = bytes.getInt();
     val string = bytes.getString(ISO_8859_1);
 
@@ -94,6 +68,26 @@ public class EpmdInfo implements DataSerializable {
             .build()
         )
         .collect(toList());
+  }
+
+  @Override
+  public byte[] toBytes () {
+    if (nodes.isEmpty()) {
+      return Bytes.allocate(4)
+          .put4B(port)
+          .put(new byte[0])
+          .array();
+    }
+
+    val bytes = nodes.stream()
+        .map(it -> String.format("name %s at port %d", it.getName(), it.getPort()))
+        .collect(joining("\n"))
+        .getBytes(ISO_8859_1);
+
+    return Bytes.allocate(Integer.BYTES + bytes.length)
+        .put4B(port)
+        .put(bytes)
+        .array();
   }
 
   /**

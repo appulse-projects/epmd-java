@@ -26,9 +26,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import io.appulse.epmd.java.client.exception.EpmdConnectionException;
-import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
-import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
-import io.appulse.epmd.java.core.model.response.RegistrationResult;
 import io.appulse.utils.SocketUtils;
 
 import lombok.NonNull;
@@ -53,15 +50,9 @@ class Connection implements Closeable {
 
   private static final int READ_TIMEOUT;
 
-  private static final MessageSerializer SERIALIZER;
-
-  private static final MessageDeserializer DESERIALIZER;
-
   static {
     CONNECT_TIMEOUT = (int) SECONDS.toMillis(5);
     READ_TIMEOUT = CONNECT_TIMEOUT * 2;
-    SERIALIZER = new MessageSerializer();
-    DESERIALIZER = new MessageDeserializer();
   }
 
   @NonNull
@@ -71,10 +62,8 @@ class Connection implements Closeable {
 
   Socket socket = new Socket();
 
-  void send (@NonNull Object request) throws EpmdConnectionException {
-    log.debug("Sending: {}", request);
-
-    val bytes = SERIALIZER.serialize(request);
+  void send (@NonNull byte[] bytes) {
+    log.debug("Sending: {}", bytes);
 
     connect();
 
@@ -85,26 +74,29 @@ class Connection implements Closeable {
       throw new EpmdConnectionException(ex);
     }
 
-    log.debug("Message {} was sent", request);
+    log.debug("Message {} was sent", bytes);
   }
 
-  <T> T send (@NonNull Object request, @NonNull Class<T> responseType) throws EpmdConnectionException {
-    send(request);
-
-    byte[] messageBytes;
+  byte[] receive () {
+    byte[] bytes;
     try {
-      messageBytes = responseType == RegistrationResult.class
-                     ? SocketUtils.read(socket, 4)
-                     : SocketUtils.read(socket);
+      bytes = SocketUtils.read(socket);
     } catch (Exception ex) {
       throw new EpmdConnectionException(ex);
     }
+    log.debug("Received bytes:\n{}", bytes);
+    return bytes;
+  }
 
-    log.debug("Received bytes:\n{}", messageBytes);
-    val result = DESERIALIZER.deserialize(messageBytes, responseType);
-
-    log.debug("Received message:\n{}", result);
-    return result;
+  byte[] receive (int length) {
+    byte[] bytes;
+    try {
+      bytes = SocketUtils.read(socket, length);
+    } catch (Exception ex) {
+      throw new EpmdConnectionException(ex);
+    }
+    log.debug("Received bytes:\n{}", bytes);
+    return bytes;
   }
 
   @Override

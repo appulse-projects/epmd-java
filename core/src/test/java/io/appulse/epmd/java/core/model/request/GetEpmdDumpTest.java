@@ -19,40 +19,34 @@ package io.appulse.epmd.java.core.model.request;
 import static io.appulse.epmd.java.core.model.Tag.DUMP_REQUEST;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
-import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
 import io.appulse.utils.Bytes;
 
 import lombok.val;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-/**
- *
- * @author Artem Labazin
- * @since 0.0.1
- */
-public class GetEpmdDumpTest {
+class GetEpmdDumpTest {
 
   @Test
-  public void serialize () {
+  void serialize () {
     val expected = Bytes.allocate()
         .put2B(1)
         .put1B(DUMP_REQUEST.getCode())
         .array();
 
     val request = new GetEpmdDump();
-    assertThat(new MessageSerializer().serialize(request))
+
+    assertThat(request.toBytes())
         .isEqualTo(expected);
   }
 
   @Test
-  public void deserialize () {
+  void deserialize () {
     val bytes = Bytes.allocate()
         .put2B(1)
         .put1B(DUMP_REQUEST.getCode())
         .array();
 
-    assertThat(new MessageDeserializer().deserialize(bytes, GetEpmdDump.class))
+    assertThat((GetEpmdDump) Request.parse(bytes))
         .isNotNull()
         .isInstanceOf(GetEpmdDump.class);
   }

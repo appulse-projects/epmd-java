@@ -14,33 +14,39 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.core.model.request;
+package io.appulse.epmd.java.client.exception;
 
-import static io.appulse.epmd.java.core.model.Tag.NAMES_REQUEST;
+import static java.util.Locale.ENGLISH;
 
-import io.appulse.epmd.java.core.model.Tag;
-
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 
 /**
- * Get all registered names from EPMD request.
+ * Exception for case, when a node with such name is already exist.
  *
- * @since 0.0.1
+ * @since 2.0.0
  * @author Artem Labazin
  */
 @Value
-public class GetEpmdInfo implements Request {
+@EqualsAndHashCode(callSuper = true)
+public class EpmdRegistrationNameConflictException extends EpmdRegistrationException {
 
-  @Override
-  public byte[] toBytes () {
-    return new byte[] {
-        0, 1, // 2 bytes of size
-        getTag().getCode()
-    };
+  private static final long serialVersionUID = 1059576272321883883L;
+
+  String name;
+
+  /**
+   * Constructor.
+   *
+   * @param name a registration node name
+   */
+  public EpmdRegistrationNameConflictException (String name) {
+    super();
+    this.name = name;
   }
 
   @Override
-  public Tag getTag () {
-    return NAMES_REQUEST;
+  public String getMessage () {
+    return String.format(ENGLISH, "A node with the name '%s' already exists", name);
   }
 }

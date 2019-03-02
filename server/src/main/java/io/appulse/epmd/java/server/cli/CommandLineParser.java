@@ -54,7 +54,7 @@ public final class CommandLineParser {
    * @return {@link CommandExecutor} instance
    */
   public static CommandExecutor parse (@NonNull String[] args) {
-    val newArgs = setDefaultCommandIfNeed(args);
+    val newArgs = withDefaultCommandIfNeed(args);
 
     CommonOptions commonOptions = new CommonOptions();
     JCommander commander = buildJCommander(commonOptions);
@@ -76,7 +76,7 @@ public final class CommandLineParser {
         .orElseThrow(RuntimeException::new);
   }
 
-  private static String[] setDefaultCommandIfNeed (String[] args) {
+  private static String[] withDefaultCommandIfNeed (String[] args) {
     val commands = CommandOptions.ALL.stream()
         .map(Object::getClass)
         .map(it -> it.getAnnotation(Parameters.class))

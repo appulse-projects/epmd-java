@@ -16,7 +16,12 @@
 
 package io.appulse.epmd.java.core.model.request;
 
+import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.epmd.java.core.model.TaggedMessage;
+import io.appulse.utils.Bytes;
+
+import lombok.NonNull;
+import lombok.val;
 
 /**
  * Marker interface for request objects, which should be serialized.
@@ -26,4 +31,62 @@ import io.appulse.epmd.java.core.model.TaggedMessage;
  */
 public interface Request extends TaggedMessage {
 
+  /**
+   * Parses request message from a byte array into an object.
+   *
+   * @param array the byte array
+   *
+   * @param <T> parsed type, extends {@link Request}
+   *
+   * @return the parsed object
+   */
+  static <T extends Request> T parse (@NonNull byte[] array) {
+    val bytes = Bytes.wrap(array);
+    return parse(bytes);
+  }
+
+  /**
+   * Parses request message from a byte array into an object.
+   *
+   * @param bytes the byte array
+   *
+   * @param <T> parsed type, extends {@link Request}
+   *
+   * @return the parsed object
+   */
+  @SuppressWarnings("unchecked")
+  static <T extends Request> T parse (@NonNull Bytes bytes) {
+    if (bytes.remaining() < Short.BYTES) {
+      throw new IllegalArgumentException("Not enought bytes");
+    }
+
+    val messageLength = bytes.getUnsignedShort();
+    if (bytes.remaining() != messageLength) {
+      throw new IllegalArgumentException("Doesn't have enought bytes");
+    }
+
+    switch (Tag.of(bytes.getByte())) {
+    case ALIVE2_REQUEST:
+      return (T) new Registration(bytes);
+    case PORT_PLEASE2_REQUEST:
+      return (T) new GetNodeInfo(bytes);
+    case NAMES_REQUEST:
+      return (T) new GetEpmdInfo();
+    case DUMP_REQUEST:
+      return (T) new GetEpmdDump();
+    case KILL_REQUEST:
+      return (T) new Kill();
+    case STOP_REQUEST:
+      return (T) new Stop(bytes);
+    default:
+      throw new IllegalArgumentException();
+    }
+  }
+
+  /**
+   * Converts the object into a byte array.
+   *
+   * @return the byte array
+   */
+  byte[] toBytes ();
 }

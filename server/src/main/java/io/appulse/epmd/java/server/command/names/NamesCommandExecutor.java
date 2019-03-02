@@ -52,6 +52,7 @@ public class NamesCommandExecutor extends AbstractCommandExecutor {
   public void execute () {
     try (val client = new EpmdClient(getPort())) {
       client.getNodes()
+          .join()
           .stream()
           .map(NodeDescription::getName)
           .forEach(System.out::println);

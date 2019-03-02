@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.client.util;
+package io.appulse.epmd.java.client;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -26,15 +26,10 @@ import java.io.InputStreamReader;
 import lombok.SneakyThrows;
 import lombok.val;
 
-/**
- *
- * @author Artem Labazin
- * @since 0.2.2
- */
-public final class LocalEpmdHelper {
+final class LocalEpmdHelper {
 
   @SneakyThrows
-  public static boolean exists () {
+  static boolean exists () {
     val builder = new ProcessBuilder("which", "epmd");
     Process process;
     try {
@@ -50,7 +45,7 @@ public final class LocalEpmdHelper {
   }
 
   @SneakyThrows
-  public static void run () {
+  static void run () {
     if (isRunning()) {
       kill();
     }
@@ -69,7 +64,7 @@ public final class LocalEpmdHelper {
   }
 
   @SneakyThrows
-  public static void kill () {
+  static void kill () {
     if (!isRunning()) {
       return;
     }
@@ -87,7 +82,7 @@ public final class LocalEpmdHelper {
   }
 
   @SneakyThrows
-  public static boolean isRunning () {
+  static boolean isRunning () {
     val builder = new ProcessBuilder("epmd", "-names");
     val process = builder.start();
     if (!process.waitFor(1, MINUTES)) {
@@ -98,7 +93,7 @@ public final class LocalEpmdHelper {
   }
 
   @SneakyThrows
-  private static String getEpmdPids () {
+  static String getEpmdPids () {
     val builder = new ProcessBuilder("pgrep", "-f", "epmd");
     val process = builder.start();
     if (!process.waitFor(1, MINUTES)) {
@@ -121,5 +116,6 @@ public final class LocalEpmdHelper {
   }
 
   private LocalEpmdHelper () {
+    throw new UnsupportedOperationException();
   }
 }

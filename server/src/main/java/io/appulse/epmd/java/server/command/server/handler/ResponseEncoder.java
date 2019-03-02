@@ -16,7 +16,7 @@
 
 package io.appulse.epmd.java.server.command.server.handler;
 
-import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
+import io.appulse.epmd.java.core.model.response.Response;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -35,8 +35,6 @@ import lombok.val;
 @Sharable
 public class ResponseEncoder extends MessageToByteEncoder<Object> {
 
-  private final MessageSerializer serializer = new MessageSerializer();
-
   @Override
   public void exceptionCaught (ChannelHandlerContext context, Throwable cause) throws Exception {
     val message = String.format("Error during channel connection with %s",
@@ -49,7 +47,7 @@ public class ResponseEncoder extends MessageToByteEncoder<Object> {
   @Override
   protected void encode (ChannelHandlerContext context, Object response, ByteBuf out) throws Exception {
     log.debug("Encoding message {} for {}", response, context.channel().remoteAddress());
-    val bytes = serializer.serialize(response);
+    val bytes = ((Response) response).toBytes();
     log.debug("Output bytes:\n{}", bytes);
     out.writeBytes(bytes);
     log.debug("Message was sent");

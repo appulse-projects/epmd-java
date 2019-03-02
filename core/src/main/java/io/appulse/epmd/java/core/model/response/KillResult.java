@@ -16,7 +16,15 @@
 
 package io.appulse.epmd.java.core.model.response;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.util.Locale.ENGLISH;
+
+import java.util.stream.Stream;
+
+import io.appulse.utils.Bytes;
+
 import lombok.ToString;
+import lombok.val;
 
 /**
  * Kill EPMD result.
@@ -25,7 +33,7 @@ import lombok.ToString;
  * @author Artem Labazin
  */
 @ToString
-public enum KillResult {
+public enum KillResult implements Response {
 
   /**
    * Success result.
@@ -33,7 +41,20 @@ public enum KillResult {
   OK,
 
   /**
-   * Unknown result.
+   * Unsuccess result.
    */
-  UNKNOWN;
+  NOK;
+
+  static KillResult from (Bytes bytes) {
+    val string = bytes.getString(ISO_8859_1);
+    return Stream.of(values())
+        .filter(it -> it.name().equalsIgnoreCase(string))
+        .findAny()
+        .orElse(NOK);
+  }
+
+  @Override
+  public byte[] toBytes () {
+    return name().toUpperCase(ENGLISH).getBytes(ISO_8859_1);
+  }
 }

@@ -25,33 +25,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 
-import io.appulse.utils.test.TestMethodNamePrinter;
-
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestRule;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame;
 
-/**
- *
- * @author Artem Labazin
- * @since 0.2.2
- */
 @Slf4j
 @FieldDefaults(level = PRIVATE)
-public class RemoteEpmdClientTest {
+class RemoteEpmdClientTest {
 
-  @ClassRule
-  public static final GenericContainer<?> ECHO = new GenericContainer<>("xxlabaza/echo-service-elixir:latest")
+  static final GenericContainer<?> ECHO = new GenericContainer<>("xxlabaza/echo-service-elixir:latest")
       .withCommand("--cookie=secret", "--name=echo@localhost")
       .withLogConsumer(frame -> log.info(((OutputFrame) frame).getUtf8String()))
       .withExposedPorts(4369)
@@ -65,18 +56,25 @@ public class RemoteEpmdClientTest {
         }
       });
 
-  @Rule
-  public TestRule watcher = new TestMethodNamePrinter();
-
   EpmdClient client;
 
-  @Before
-  public void before () {
+  @BeforeAll
+  static void beforeAll () {
+    ECHO.start();
+  }
+
+  @AfterAll
+  static void afterAll () {
+    ECHO.stop();
+  }
+
+  @BeforeEach
+  void beforeEach () {
     client = new EpmdClient(ECHO.getMappedPort(4369));
   }
 
-  @After
-  public void after () {
+  @AfterEach
+  void afterEach () {
     if (client != null) {
       client.close();
       client = null;
@@ -84,15 +82,15 @@ public class RemoteEpmdClientTest {
   }
 
   @Test
-  public void isContainerRunning () {
+  void isContainerRunning () {
     assertThat(ECHO.isRunning())
         .as("Conteiner is not running")
         .isEqualTo(true);
   }
 
   @Test
-  public void lookup () {
-    val optional = client.lookup("echo@localhost", ECHO.getMappedPort(4369));
+  void lookup () {
+    val optional = client.lookup("echo@localhost", ECHO.getMappedPort(4369)).join();
     assertThat(optional)
         .isPresent();
 
@@ -128,8 +126,8 @@ public class RemoteEpmdClientTest {
   }
 
   @Test
-  public void getLocalNodes () {
-    val nodes = client.getNodes(ECHO.getMappedPort(4369));
+  void getLocalNodes () {
+    val nodes = client.getNodes(ECHO.getMappedPort(4369)).join();
     assertThat(nodes)
         .isNotNull()
         .hasSize(1)
@@ -143,8 +141,8 @@ public class RemoteEpmdClientTest {
   }
 
   @Test
-  public void getRemoteNodes () {
-    val nodes = client.getNodes(ECHO.getContainerIpAddress(), ECHO.getMappedPort(4369));
+  void getRemoteNodes () {
+    val nodes = client.getNodes(ECHO.getContainerIpAddress(), ECHO.getMappedPort(4369)).join();
     assertThat(nodes)
         .isNotNull()
         .hasSize(1)

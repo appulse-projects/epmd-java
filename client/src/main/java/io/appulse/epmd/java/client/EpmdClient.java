@@ -16,26 +16,29 @@
 
 package io.appulse.epmd.java.client;
 
-import static io.appulse.epmd.java.core.model.response.KillResult.OK;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static lombok.AccessLevel.PRIVATE;
 
 import java.io.Closeable;
 import java.net.InetAddress;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 import io.appulse.epmd.java.client.exception.EpmdRegistrationException;
-import io.appulse.epmd.java.core.model.NodeType;
-import io.appulse.epmd.java.core.model.Protocol;
-import io.appulse.epmd.java.core.model.Version;
-import io.appulse.epmd.java.core.model.request.GetEpmdDump;
-import io.appulse.epmd.java.core.model.request.Kill;
+import io.appulse.epmd.java.client.exception.EpmdRegistrationNameConflictException;
 import io.appulse.epmd.java.core.model.request.Registration;
-import io.appulse.epmd.java.core.model.request.Stop;
 import io.appulse.epmd.java.core.model.response.EpmdDump;
-import io.appulse.epmd.java.core.model.response.KillResult;
+import io.appulse.epmd.java.core.model.response.EpmdInfo.NodeDescription;
+import io.appulse.epmd.java.core.model.response.NodeInfo;
 import io.appulse.epmd.java.core.model.response.RegistrationResult;
+import io.appulse.utils.threads.AppulseExecutors;
+import io.appulse.utils.threads.AppulseThreadFactory;
+import io.appulse.utils.threads.FutureUtils;
 
 import lombok.Builder;
 import lombok.NonNull;
@@ -55,17 +58,12 @@ import lombok.val;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public final class EpmdClient implements Closeable {
 
-  Map<String, Connection> cache = new ConcurrentHashMap<>();
+  Set<String> registered = ConcurrentHashMap.<String>newKeySet();
+
+  ExecutorService executor;
 
   @Delegate
-  LookupService lookupService;
-
-  @Delegate
-  NodesLocatorService nodesLocatorService;
-
-  InetAddress address;
-
-  Integer port;
+  ConnectionManager connectionManager;
 
   /**
    * Default no arguments constructor.
@@ -73,7 +71,7 @@ public final class EpmdClient implements Closeable {
    * It uses default inet address (localhost) and port (4369).
    */
   public EpmdClient () {
-    this(Default.ADDRESS, Default.PORT);
+    this(EpmdDefaults.ADDRESS, EpmdDefaults.PORT);
   }
 
   /**
@@ -84,7 +82,7 @@ public final class EpmdClient implements Closeable {
    * @param address EPMD server address
    */
   public EpmdClient (InetAddress address) {
-    this(address, Default.PORT);
+    this(address, EpmdDefaults.PORT);
   }
 
   /**
@@ -95,7 +93,7 @@ public final class EpmdClient implements Closeable {
    * @param port EPMD server port
    */
   public EpmdClient (int port) {
-    this(Default.ADDRESS, port);
+    this(EpmdDefaults.ADDRESS, port);
   }
 
   /**
@@ -107,41 +105,19 @@ public final class EpmdClient implements Closeable {
    */
   @Builder
   public EpmdClient (@NonNull InetAddress address, int port) {
-    lookupService = new LookupService(address, port);
-    nodesLocatorService = new NodesLocatorService(address, port);
-    this.address = address;
-    this.port = port;
-    log.debug("Instantiated EPMD client to '{}:{}'", address, port);
-  }
+    connectionManager = new ConnectionManager(address, port);
 
-  /**
-   * Registers node at EPMD server.
-   *
-   * @param name node name
-   *
-   * @param nodePort node port
-   *
-   * @param type node type
-   *
-   * @param protocol node protocol
-   *
-   * @param low lowest supported distribution protocol version
-   *
-   * @param high highest supported distribution protocol version
-   *
-   * @return creation id from EPMD
-   */
-  public int register (String name, int nodePort, NodeType type, Protocol protocol, Version low, Version high) {
-    val request = Registration.builder()
-        .name(name)
-        .port(nodePort)
-        .type(type)
-        .protocol(protocol)
-        .high(high)
-        .low(low)
+    executor = AppulseExecutors.newCachedThreadPool()
+        .corePoolSize(2)
+        .maxPoolSize(2)
+        .enableClientTrace()
+        .threadFactory(AppulseThreadFactory.builder()
+            .name("epmd-%d")
+            .build())
+        .keepAliveTime(500L)
+        .unit(MILLISECONDS)
+        .queueLimit(100)
         .build();
-
-    return register(request);
   }
 
   /**
@@ -151,32 +127,28 @@ public final class EpmdClient implements Closeable {
    *
    * @return creation id from EPMD
    */
-  public int register (@NonNull Registration request) {
-    if (cache.containsKey(request.getName()) && cache.get(request.getName()).isConnected()) {
-      log.error("Node with name '{}' already exists");
-      throw new EpmdRegistrationException();
-    }
-    log.debug("Registering: '{}'", request.getName());
-    val connection = new Connection(address, port);
-
-    RegistrationResult response;
-    try {
-      response = connection.send(request, RegistrationResult.class);
-    } catch (Exception ex) {
-      connection.close();
-      log.error("'{}' wasn't registered successfully", request.getName());
-      throw new EpmdRegistrationException(ex);
+  public CompletableFuture<RegistrationResult> register (@NonNull Registration request) {
+    if (registered.contains(request.getName())) {
+      val exception = new EpmdRegistrationNameConflictException(request.getName());
+      log.error(exception.getMessage(), exception);
+      return FutureUtils.completedExceptionally(exception);
     }
 
-    if (!response.isOk()) {
-      connection.close();
-      log.error("'{}' wasn't registered successfully", request.getName());
-      throw new EpmdRegistrationException();
-    }
+    val supplier = CommandRegistration.builder()
+        .connectionManager(connectionManager)
+        .request(request)
+        .build();
 
-    cache.put(request.getName(), connection);
-    log.info("'{}' was registered successfully", request.getName());
-    return response.getCreation();
+    return CompletableFuture.supplyAsync(supplier, executor)
+        .exceptionally(throwable -> {
+          log.error("'{}' wasn't registered successfully", request.getName());
+          throw new EpmdRegistrationException(throwable);
+        })
+        .thenApply(result -> {
+          registered.add(request.getName());
+          log.info("'{}' was registered successfully", request.getName());
+          return result;
+        });
   }
 
   /**
@@ -184,22 +156,25 @@ public final class EpmdClient implements Closeable {
    *
    * @return list of nodes from EPMD
    */
-  public List<EpmdDump.NodeDump> dumpAll () {
-    try (val connection = new Connection(address, port)) {
-      val dump = connection.send(new GetEpmdDump(), EpmdDump.class);
-      return dump.getNodes();
-    }
+  public CompletableFuture<List<EpmdDump.NodeDump>> dump () {
+    val supplier = new CommandDump(connectionManager);
+    return CompletableFuture.supplyAsync(supplier, executor);
   }
 
   /**
    * Stops a node by name.
    *
    * @param node node's name
+   *
+   * @return {@link CompletableFuture} instance of success or not action
    */
-  public void stop (@NonNull String node) {
-    try (val connection = new Connection(address, port)) {
-      connection.send(new Stop(node));
-    }
+  public CompletableFuture<Void> stop (@NonNull String node) {
+    val supplier = CommandStop.builder()
+        .connectionManager(connectionManager)
+        .node(node)
+        .build();
+
+    return CompletableFuture.supplyAsync(supplier, executor);
   }
 
   /**
@@ -207,62 +182,165 @@ public final class EpmdClient implements Closeable {
    *
    * @return was it killed or not.
    */
-  public boolean kill () {
-    try (val connection = new Connection(address, port)) {
-      val result = connection.send(new Kill(), KillResult.class);
-      return result == OK;
-    } catch (RuntimeException ex) {
-      return false;
-    } finally {
-      close();
-    }
-  }
-
-  @Override
-  public void close () {
-    cache.values().forEach(Connection::close);
-    cache.clear();
-    log.debug("EPMD client was closed");
-  }
-
-  @Override
-  protected void finalize () throws Throwable {
-    close();
-    super.finalize();
+  public CompletableFuture<Boolean> kill () {
+    val supplier = new CommandKill(connectionManager);
+    return CompletableFuture.supplyAsync(supplier, executor);
   }
 
   /**
-   * EPMD client defaults.
+   * Look up a specific node in lremote or ocal EPMD server.
+   *
+   * @param node a full or short node name to search
+   *
+   * @return an optional information about a node from EPMD server
    */
-  public static class Default {
+  public CompletableFuture<Optional<NodeInfo>> lookup (@NonNull String node) {
+    return lookup(node, EpmdDefaults.PORT);
+  }
 
-    /**
-     * Default EPMD client address (localhost).
-     */
-    public static final InetAddress ADDRESS = getDefaultInetAddress();
+  /**
+   * Look up a specific node in lremote or ocal EPMD server.
+   *
+   * @param node a full or short node name to search
+   *
+   * @param port remote (or local) EPMD server's port
+   *
+   * @return an optional information about a node from EPMD server
+   */
+  @SneakyThrows
+  public CompletableFuture<Optional<NodeInfo>> lookup (@NonNull String node, int port) {
+    val tokens = node.split("@", 2);
+    val shortName = tokens[0];
+    val address = tokens.length == 2
+                  ? InetAddress.getByName(tokens[1])
+                  : EpmdDefaults.ADDRESS;
 
-    /**
-     * Default EPMD client port (4369).
-     */
-    public static final int PORT = getDefaultPort();
+    return lookup(shortName, address, port);
+  }
 
-    @SneakyThrows
-    private static InetAddress getDefaultInetAddress () {
-      return InetAddress.getLocalHost();
-    }
+  /**
+   * Look up a specific node in lremote or ocal EPMD server.
+   *
+   * @param node a full or short node name to search
+   *
+   * @param address remote (or local) EPMD server's inet address
+   *
+   * @return an optional information about a node from EPMD server
+   */
+  public CompletableFuture<Optional<NodeInfo>> lookup (@NonNull String node, @NonNull InetAddress address) {
+    return lookup(node, address, EpmdDefaults.PORT);
+  }
 
-    private static int getDefaultPort () {
-      int port = 4369;
-      try {
-        val value = System.getenv("ERL_EPMD_PORT");
-        if (value != null) {
-          port = Integer.parseInt(value);
-        }
-      } catch (NumberFormatException | SecurityException ex) {
-        throw new IllegalStateException("Couldn't extract EPMD port", ex);
-      }
-      log.debug("Default EPMD port is: '{}'", port);
-      return port;
-    }
+  /**
+   * Look up a specific node in lremote or ocal EPMD server.
+   *
+   * @param node a full or short node name to search
+   *
+   * @param address a remote (or local) EPMD server's inet address
+   *
+   * @param port a remote (or local) EPMD server's port
+   *
+   * @return an optional information about a node from EPMD server
+   */
+  public CompletableFuture<Optional<NodeInfo>> lookup (@NonNull String node, @NonNull InetAddress address, int port) {
+    val tokens = node.split("@", 2);
+    val shortName = tokens[0];
+    log.debug("Looking up node '{}' at '{}:{}'", shortName, address, port);
+
+    val supplier = CommandGetNodeInfo.builder()
+        .connectionManager(connectionManager)
+        .address(address)
+        .port(port)
+        .shortNodeName(shortName)
+        .build();
+
+    return CompletableFuture.supplyAsync(supplier, executor);
+  }
+
+  /**
+   * Returns all registered nodes descriptions in a local EPMD server.
+   *
+   * @return a list of all registered nodes.
+   */
+  public CompletableFuture<List<NodeDescription>> getNodes () {
+    return getNodes(EpmdDefaults.ADDRESS, EpmdDefaults.PORT);
+  }
+
+  /**
+   * Returns all registered nodes descriptions in a local EPMD server.
+   *
+   * @param port a nonstandard EPMD server's port
+   *
+   * @return a list of all registered nodes.
+   */
+  public CompletableFuture<List<NodeDescription>> getNodes (int port) {
+    return getNodes(EpmdDefaults.ADDRESS, port);
+  }
+
+  /**
+   * Returns all registered nodes descriptions in a remote EPMD server.
+   *
+   * @param host a remote EPMD server's host
+   *
+   * @return a list of all registered nodes.
+   */
+  public CompletableFuture<List<NodeDescription>> getNodes (@NonNull String host) {
+    return getNodes(host, EpmdDefaults.PORT);
+  }
+
+  /**
+   * Returns all registered nodes descriptions in a remote EPMD server.
+   *
+   * @param host a remote EPMD server's host
+   *
+   * @param port a nonstandard EPMD server's port
+   *
+   * @return a list of all registered nodes.
+   */
+  @SneakyThrows
+  public CompletableFuture<List<NodeDescription>> getNodes (@NonNull String host, int port) {
+    val address = InetAddress.getByName(host);
+    return getNodes(address, port);
+  }
+
+  /**
+   * Returns all registered nodes descriptions in a remote EPMD server.
+   *
+   * @param address a remote EPMD server's address
+   *
+   * @return a list of all registered nodes.
+   */
+  public CompletableFuture<List<NodeDescription>> getNodes (@NonNull InetAddress address) {
+    return getNodes(address, EpmdDefaults.PORT);
+  }
+
+  /**
+   * Returns all registered nodes descriptions in a remote EPMD server.
+   *
+   * @param address a remote EPMD server's address
+   *
+   * @param port a nonstandard EPMD server's port
+   *
+   * @return a list of all registered nodes.
+   */
+  @SneakyThrows
+  public CompletableFuture<List<NodeDescription>> getNodes (@NonNull InetAddress address, int port) {
+    log.debug("Getting nodes from {}:{}", address, port);
+    val supplier = CommandGetEpmdInfo.builder()
+        .connectionManager(connectionManager)
+        .address(address)
+        .port(port)
+        .build();
+
+    return CompletableFuture.supplyAsync(supplier, executor);
+  }
+
+  @Override
+  @SneakyThrows
+  public void close () {
+    executor.shutdown();
+    registered.clear();
+    val terminated = executor.awaitTermination(5, SECONDS);
+    log.debug("EPMD was successfully terminated - {}", terminated);
   }
 }

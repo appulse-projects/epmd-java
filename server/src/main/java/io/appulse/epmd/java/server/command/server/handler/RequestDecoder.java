@@ -18,21 +18,12 @@ package io.appulse.epmd.java.server.command.server.handler;
 
 import java.util.List;
 
-import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
-import io.appulse.epmd.java.core.model.Tag;
-import io.appulse.epmd.java.core.model.request.GetEpmdDump;
-import io.appulse.epmd.java.core.model.request.GetEpmdInfo;
-import io.appulse.epmd.java.core.model.request.GetNodeInfo;
-import io.appulse.epmd.java.core.model.request.Kill;
-import io.appulse.epmd.java.core.model.request.Registration;
 import io.appulse.epmd.java.core.model.request.Request;
-import io.appulse.epmd.java.core.model.request.Stop;
 import io.appulse.utils.Bytes;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -44,12 +35,6 @@ import lombok.val;
  */
 @Slf4j
 public class RequestDecoder extends ReplayingDecoder<Request> {
-
-  private static final MessageDeserializer DESERIALIZER;
-
-  static {
-    DESERIALIZER = new MessageDeserializer();
-  }
 
   @Override
   public void exceptionCaught (ChannelHandlerContext context, Throwable cause) throws Exception {
@@ -79,30 +64,8 @@ public class RequestDecoder extends ReplayingDecoder<Request> {
 
     bytes.position(0);
 
-    val request = parse(bytes);
+    val request = Request.parse(bytes);
     log.debug("Received request: {}", request);
     out.add(request);
-  }
-
-  private Request parse (@NonNull Bytes bytes) {
-    val tag = Tag.of(bytes.getByte(2));
-    switch (tag) {
-    case DUMP_REQUEST:
-      return DESERIALIZER.deserialize(bytes, GetEpmdDump.class);
-    case NAMES_REQUEST:
-      return DESERIALIZER.deserialize(bytes, GetEpmdInfo.class);
-    case PORT_PLEASE2_REQUEST:
-      return DESERIALIZER.deserialize(bytes, GetNodeInfo.class);
-    case KILL_REQUEST:
-      return DESERIALIZER.deserialize(bytes, Kill.class);
-    case ALIVE2_REQUEST:
-      return DESERIALIZER.deserialize(bytes, Registration.class);
-    case STOP_REQUEST:
-      return DESERIALIZER.deserialize(bytes, Stop.class);
-    default:
-      val message = String.format("Unexpected decoded request tag: '%s'", tag);
-      log.error(message);
-      throw new IllegalArgumentException(message);
-    }
   }
 }

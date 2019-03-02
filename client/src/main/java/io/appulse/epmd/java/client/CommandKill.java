@@ -14,20 +14,30 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.core.mapper.serializer;
+package io.appulse.epmd.java.client;
 
-import io.appulse.epmd.java.core.mapper.serializer.exception.SerializationException;
+import java.util.function.Supplier;
 
-/**
- * Interface that defines API used by {@link MessageSerializer}
- * to serialize Objects of arbitrary types to bytes.
- *
- * @since 0.0.1
- * @author Artem Labazin
- */
-interface Serializer {
+import io.appulse.epmd.java.core.model.request.Kill;
 
-  byte[] serialize (Object object, Class<?> type) throws SerializationException;
+import lombok.NonNull;
+import lombok.Value;
+import lombok.val;
 
-  boolean isApplicable (Class<?> type);
+@Value
+class CommandKill implements Supplier<Boolean> {
+
+  @NonNull
+  ConnectionManager connectionManager;
+
+  @Override
+  public Boolean get () {
+    val requestBytes = new Kill().toBytes();
+    try (val connection = connectionManager.connect()) {
+      connection.send(requestBytes);
+      return true;
+    } catch (Exception ex) {
+      return false;
+    }
+  }
 }

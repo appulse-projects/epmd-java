@@ -17,7 +17,6 @@
 package io.appulse.epmd.java.core.model.response;
 
 import static io.appulse.epmd.java.core.model.Tag.ALIVE2_RESPONSE;
-import static lombok.AccessLevel.PRIVATE;
 
 import io.appulse.epmd.java.core.model.Tag;
 import io.appulse.epmd.java.core.model.TaggedMessage;
@@ -25,11 +24,8 @@ import io.appulse.utils.Bytes;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.ToString;
-import lombok.experimental.FieldDefaults;
+import lombok.Value;
+import lombok.val;
 
 /**
  * Registration response.
@@ -37,38 +33,44 @@ import lombok.experimental.FieldDefaults;
  * @since 0.0.1
  * @author Artem Labazin
  */
-@Getter
+@Value
 @Builder
-@ToString
-@NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = PRIVATE)
-public class RegistrationResult implements TaggedMessage {
+public class RegistrationResult implements Response, TaggedMessage {
 
   boolean ok;
 
   int creation;
 
+  RegistrationResult (Bytes bytes) {
+    val tag = Tag.of(bytes.getByte());
+    if (tag != getTag()) {
+      throw new IllegalArgumentException("Unexpected message's tag " + tag.name());
+    }
+
+    ok = bytes.getByte() == 0;
+    creation = ok
+               ? bytes.getUnsignedShort()
+               : 0;
+  }
+
   @Override
-  public void write (@NonNull Bytes bytes) {
+  public byte[] toBytes () {
+    val bytes = Bytes.allocate(4)
+        .put1B(getTag().getCode());
+
     if (ok) {
       bytes.put1B(0);
     } else {
       bytes.put1B(1);
     }
-    bytes.put2B(creation);
+    return bytes
+        .put2B(creation)
+        .array();
   }
 
   @Override
-  public void read (@NonNull Bytes bytes) {
-    ok = bytes.getByte() == 0;
-    if (ok) {
-      creation = bytes.getUnsignedShort();
-    }
-  }
-
-  @Override
-  public Tag getTag () {
+  public final Tag getTag () {
     return ALIVE2_RESPONSE;
   }
 }

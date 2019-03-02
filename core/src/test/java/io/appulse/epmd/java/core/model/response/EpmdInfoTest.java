@@ -20,23 +20,16 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
-import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
-import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
 import io.appulse.epmd.java.core.model.response.EpmdInfo.NodeDescription;
 import io.appulse.utils.Bytes;
 
 import lombok.val;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-/**
- *
- * @author Artem Labazin
- * @since 0.0.1
- */
-public class EpmdInfoTest {
+class EpmdInfoTest {
 
   @Test
-  public void serializeEmpty () {
+  void serializeEmpty () {
     val expected = Bytes.allocate()
         .put4B(8080)
         .array();
@@ -45,12 +38,12 @@ public class EpmdInfoTest {
         .port(8080)
         .build();
 
-    assertThat(new MessageSerializer().serialize(request))
+    assertThat(request.toBytes())
         .isEqualTo(expected);
   }
 
   @Test
-  public void serializeNotEmpty () {
+  void serializeNotEmpty () {
     val str = "name popa1 at port 1234\n" +
               "name popa2 at port 5678\n" +
               "name popa3 at port 9000";
@@ -79,17 +72,17 @@ public class EpmdInfoTest {
         )
         .build();
 
-    assertThat(new MessageSerializer().serialize(request))
+    assertThat(request.toBytes())
         .isEqualTo(expected);
   }
 
   @Test
-  public void deserializeEmpty () {
+  void deserializeEmpty () {
     val bytes = Bytes.allocate()
         .put4B(8080)
         .array();
 
-    val response = new MessageDeserializer().deserialize(bytes, EpmdInfo.class);
+    val response = Response.parse(bytes, EpmdInfo.class);
 
     assertThat(response)
         .isNotNull();
@@ -102,7 +95,7 @@ public class EpmdInfoTest {
   }
 
   @Test
-  public void deserializeNotEmpty () {
+  void deserializeNotEmpty () {
     val str = "name popa1 at port 1234\n" +
               "name popa2 at port 5678\n" +
               "name popa3 at port 9000";
@@ -112,7 +105,7 @@ public class EpmdInfoTest {
         .put(str, ISO_8859_1)
         .array();
 
-    val response = new MessageDeserializer().deserialize(bytes, EpmdInfo.class);
+    val response = Response.parse(bytes, EpmdInfo.class);
 
     assertThat(response)
         .isNotNull();

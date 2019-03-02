@@ -19,41 +19,34 @@ package io.appulse.epmd.java.core.model.response;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
-import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
 import io.appulse.utils.Bytes;
 
 import lombok.val;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-/**
- *
- * @author Artem Labazin
- * @since 0.0.1
- */
-public class KillResultTest {
+class KillResultTest {
 
   @Test
-  public void serialize () {
+  void serialize () {
     val value = KillResult.OK;
 
     val bytes = Bytes.allocate()
         .put(value.name(), ISO_8859_1)
         .array();
 
-    assertThat(new MessageSerializer().serialize(value))
+    assertThat(value.toBytes())
         .isEqualTo(bytes);
   }
 
   @Test
-  public void deserialize () {
+  void deserialize () {
     val value = KillResult.OK;
 
     val bytes = Bytes.allocate()
         .put(value.name(), ISO_8859_1)
         .array();
 
-    assertThat(new MessageDeserializer().deserialize(bytes, KillResult.class))
+    assertThat(Response.parse(bytes, KillResult.class))
         .isEqualTo(value);
   }
 }

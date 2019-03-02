@@ -19,22 +19,15 @@ package io.appulse.epmd.java.core.model.response;
 import static io.appulse.epmd.java.core.model.Tag.ALIVE2_RESPONSE;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.appulse.epmd.java.core.mapper.deserializer.MessageDeserializer;
-import io.appulse.epmd.java.core.mapper.serializer.MessageSerializer;
 import io.appulse.utils.Bytes;
 
 import lombok.val;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-/**
- *
- * @author Artem Labazin
- * @since 0.0.1
- */
-public class RegistrationResultTest {
+class RegistrationResultTest {
 
   @Test
-  public void serialize () {
+  void serialize () {
     val expected = Bytes.allocate()
         .put1B(ALIVE2_RESPONSE.getCode())
         .put1B(0)
@@ -46,19 +39,19 @@ public class RegistrationResultTest {
         .creation(42)
         .build();
 
-    assertThat(new MessageSerializer().serialize(request))
+    assertThat(request.toBytes())
         .isEqualTo(expected);
   }
 
   @Test
-  public void deserialize () {
+  void deserialize () {
     val bytes = Bytes.allocate()
         .put1B(ALIVE2_RESPONSE.getCode())
         .put1B(0)
         .put2B(42)
         .array();
 
-    val response = new MessageDeserializer().deserialize(bytes, RegistrationResult.class);
+    val response = Response.parse(bytes, RegistrationResult.class);
 
     assertThat(response)
         .isNotNull();

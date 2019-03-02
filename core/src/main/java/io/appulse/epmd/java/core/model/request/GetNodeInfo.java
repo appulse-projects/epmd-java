@@ -18,18 +18,14 @@ package io.appulse.epmd.java.core.model.request;
 
 import static io.appulse.epmd.java.core.model.Tag.PORT_PLEASE2_REQUEST;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static lombok.AccessLevel.PRIVATE;
 
-import io.appulse.epmd.java.core.mapper.ExpectedResponse;
 import io.appulse.epmd.java.core.model.Tag;
-import io.appulse.epmd.java.core.model.response.NodeInfo;
 import io.appulse.utils.Bytes;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.experimental.FieldDefaults;
+import lombok.Value;
+import lombok.val;
 
 /**
  * Get the distribution port of another Node.
@@ -40,24 +36,26 @@ import lombok.experimental.FieldDefaults;
  * @since 0.0.1
  * @author Artem Labazin
  */
-@Data
-@NoArgsConstructor
+@Value
 @AllArgsConstructor
-@FieldDefaults(level = PRIVATE)
-@ExpectedResponse(NodeInfo.class)
 public class GetNodeInfo implements Request {
 
   @NonNull
   String name;
 
-  @Override
-  public void write (@NonNull Bytes bytes) {
-    bytes.put(name, ISO_8859_1);
+  GetNodeInfo (Bytes bytes) {
+    name = bytes.getString(ISO_8859_1);
   }
 
   @Override
-  public void read (@NonNull Bytes bytes) {
-    name = bytes.getString(ISO_8859_1);
+  public byte[] toBytes () {
+    val nameBytes = name.getBytes(ISO_8859_1);
+    val length = Byte.BYTES + nameBytes.length;
+    return Bytes.allocate(length + Short.BYTES)
+        .put2B(length)
+        .put1B(getTag().getCode())
+        .put(nameBytes)
+        .array();
   }
 
   @Override
