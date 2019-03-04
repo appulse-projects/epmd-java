@@ -56,16 +56,16 @@ public interface Request extends TaggedMessage {
    */
   @SuppressWarnings("unchecked")
   static <T extends Request> T parse (@NonNull Bytes bytes) {
-    if (bytes.remaining() < Short.BYTES) {
+    if (bytes.readableBytes() < Short.BYTES) {
       throw new IllegalArgumentException("Not enought bytes");
     }
 
-    val messageLength = bytes.getUnsignedShort();
-    if (bytes.remaining() != messageLength) {
+    val messageLength = bytes.readUnsignedShort();
+    if (bytes.readableBytes() != messageLength) {
       throw new IllegalArgumentException("Doesn't have enought bytes");
     }
 
-    switch (Tag.of(bytes.getByte())) {
+    switch (Tag.of(bytes.readByte())) {
     case ALIVE2_REQUEST:
       return (T) new Registration(bytes);
     case PORT_PLEASE2_REQUEST:

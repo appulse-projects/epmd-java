@@ -44,7 +44,7 @@ public class GetNodeInfo implements Request {
   String name;
 
   GetNodeInfo (Bytes bytes) {
-    name = bytes.getString(ISO_8859_1);
+    name = bytes.readString(ISO_8859_1);
   }
 
   @Override
@@ -52,9 +52,9 @@ public class GetNodeInfo implements Request {
     val nameBytes = name.getBytes(ISO_8859_1);
     val length = Byte.BYTES + nameBytes.length;
     return Bytes.allocate(length + Short.BYTES)
-        .put2B(length)
-        .put1B(getTag().getCode())
-        .put(nameBytes)
+        .write2B(length)
+        .write1B(getTag().getCode())
+        .writeNB(nameBytes)
         .array();
   }
 

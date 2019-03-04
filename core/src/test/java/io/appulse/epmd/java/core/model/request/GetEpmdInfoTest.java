@@ -29,8 +29,8 @@ class GetEpmdInfoTest {
   @Test
   void serialize () {
     val expected = Bytes.allocate()
-        .put2B(1)
-        .put1B(NAMES_REQUEST.getCode())
+        .write2B(1)
+        .write1B(NAMES_REQUEST.getCode())
         .array();
 
     val request = new GetEpmdInfo();
@@ -41,8 +41,8 @@ class GetEpmdInfoTest {
   @Test
   void deserialize () {
     val bytes = Bytes.allocate()
-        .put2B(1)
-        .put1B(NAMES_REQUEST.getCode())
+        .write2B(1)
+        .write1B(NAMES_REQUEST.getCode())
         .array();
 
     assertThat((GetEpmdInfo) Request.parse(bytes))

@@ -52,8 +52,8 @@ public class EpmdDump implements Response {
   List<NodeDump> nodes;
 
   EpmdDump (Bytes bytes) {
-    port = bytes.getInt();
-    val string = bytes.getString(ISO_8859_1);
+    port = bytes.readInt();
+    val string = bytes.readString(ISO_8859_1);
 
     nodes = Stream.of(string.split("\\n"))
           .map(String::trim)
@@ -77,8 +77,8 @@ public class EpmdDump implements Response {
   public byte[] toBytes () {
     if (nodes.isEmpty()) {
       return Bytes.allocate(4)
-          .put4B(port)
-          .put(new byte[0])
+          .write4B(port)
+          .writeNB(new byte[0])
           .array();
     }
 
@@ -91,8 +91,8 @@ public class EpmdDump implements Response {
         .getBytes(ISO_8859_1);
 
     return Bytes.allocate(Integer.BYTES + bytes.length)
-        .put4B(port)
-        .put(bytes)
+        .write4B(port)
+        .writeNB(bytes)
         .array();
   }
 

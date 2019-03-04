@@ -30,9 +30,9 @@ class StopTest {
   void serialize () {
     val name = "popa";
     val expected = Bytes.allocate()
-        .put2B(1 + name.getBytes().length)
-        .put1B(STOP_REQUEST.getCode())
-        .put(name)
+        .write2B(1 + name.getBytes().length)
+        .write1B(STOP_REQUEST.getCode())
+        .writeNB(name)
         .array();
 
     val request = new Stop(name);
@@ -44,9 +44,9 @@ class StopTest {
   void deserialize () {
     val name = "popa";
     val bytes = Bytes.allocate()
-        .put2B(1 + name.getBytes().length)
-        .put1B(STOP_REQUEST.getCode())
-        .put(name)
+        .write2B(1 + name.getBytes().length)
+        .write1B(STOP_REQUEST.getCode())
+        .writeNB(name)
         .array();
 
     val response = (Stop) Request.parse(bytes);

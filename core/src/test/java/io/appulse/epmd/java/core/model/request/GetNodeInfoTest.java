@@ -30,9 +30,9 @@ class GetNodeInfoTest {
   void serialize () {
     val name = "popa";
     val expected = Bytes.allocate()
-        .put2B(1 + name.getBytes().length)
-        .put1B(PORT_PLEASE2_REQUEST.getCode())
-        .put(name)
+        .write2B(1 + name.getBytes().length)
+        .write1B(PORT_PLEASE2_REQUEST.getCode())
+        .writeNB(name)
         .array();
 
     val request = new GetNodeInfo(name);
@@ -44,9 +44,9 @@ class GetNodeInfoTest {
   void deserialize () {
     val name = "popa";
     val bytes = Bytes.allocate()
-        .put2B(1 + name.getBytes().length)
-        .put1B(PORT_PLEASE2_REQUEST.getCode())
-        .put(name)
+        .write2B(1 + name.getBytes().length)
+        .write1B(PORT_PLEASE2_REQUEST.getCode())
+        .writeNB(name)
         .array();
 
     val result = (GetNodeInfo) Request.parse(bytes);

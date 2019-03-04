@@ -31,7 +31,7 @@ class KillResultTest {
     val value = KillResult.OK;
 
     val bytes = Bytes.allocate()
-        .put(value.name(), ISO_8859_1)
+        .writeNB(value.name(), ISO_8859_1)
         .array();
 
     assertThat(value.toBytes())
@@ -43,7 +43,7 @@ class KillResultTest {
     val value = KillResult.OK;
 
     val bytes = Bytes.allocate()
-        .put(value.name(), ISO_8859_1)
+        .writeNB(value.name(), ISO_8859_1)
         .array();
 
     assertThat(Response.parse(bytes, KillResult.class))

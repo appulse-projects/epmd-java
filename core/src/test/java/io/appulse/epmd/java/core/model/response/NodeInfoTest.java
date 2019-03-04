@@ -33,8 +33,8 @@ class NodeInfoTest {
   @Test
   void serializeNok () {
     val expected = Bytes.allocate()
-        .put1B(PORT2_RESPONSE.getCode())
-        .put1B(1)
+        .write1B(PORT2_RESPONSE.getCode())
+        .write1B(1)
         .array();
 
     val request = NodeInfo.builder()
@@ -49,16 +49,16 @@ class NodeInfoTest {
   void serializeOk () {
     val name = "popa";
     val expected = Bytes.allocate()
-        .put1B(PORT2_RESPONSE.getCode())
-        .put1B(0)
-        .put2B(8080)
-        .put1B(104)
-        .put1B(1)
-        .put2B(1)
-        .put2B(1)
-        .put2B(name.getBytes().length)
-        .put(name)
-        .put2B(0)
+        .write1B(PORT2_RESPONSE.getCode())
+        .write1B(0)
+        .write2B(8080)
+        .write1B(104)
+        .write1B(1)
+        .write2B(1)
+        .write2B(1)
+        .write2B(name.getBytes().length)
+        .writeNB(name)
+        .write2B(0)
         .array();
 
     val request = NodeInfo.builder()
@@ -78,8 +78,8 @@ class NodeInfoTest {
   @Test
   void deserializeNok () {
     val bytes = Bytes.allocate()
-        .put1B(PORT2_RESPONSE.getCode())
-        .put1B(1)
+        .write1B(PORT2_RESPONSE.getCode())
+        .write1B(1)
         .array();
 
     val response = Response.parse(bytes, NodeInfo.class);
@@ -110,16 +110,16 @@ class NodeInfoTest {
   void deserializeOk () {
     val name = "popa";
     val bytes = Bytes.allocate()
-        .put1B(PORT2_RESPONSE.getCode())
-        .put1B(0)
-        .put2B(8080)
-        .put1B(104)
-        .put1B(1)
-        .put2B(1)
-        .put2B(1)
-        .put2B(name.getBytes().length)
-        .put(name, ISO_8859_1)
-        .put2B(0)
+        .write1B(PORT2_RESPONSE.getCode())
+        .write1B(0)
+        .write2B(8080)
+        .write1B(104)
+        .write1B(1)
+        .write2B(1)
+        .write2B(1)
+        .write2B(name.getBytes().length)
+        .writeNB(name, ISO_8859_1)
+        .write2B(0)
         .array();
 
     val response = Response.parse(bytes, NodeInfo.class);

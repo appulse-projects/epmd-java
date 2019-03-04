@@ -43,29 +43,29 @@ public class RegistrationResult implements Response, TaggedMessage {
   int creation;
 
   RegistrationResult (Bytes bytes) {
-    val tag = Tag.of(bytes.getByte());
+    val tag = Tag.of(bytes.readByte());
     if (tag != getTag()) {
       throw new IllegalArgumentException("Unexpected message's tag " + tag.name());
     }
 
-    ok = bytes.getByte() == 0;
+    ok = bytes.readByte() == 0;
     creation = ok
-               ? bytes.getUnsignedShort()
+               ? bytes.readUnsignedShort()
                : 0;
   }
 
   @Override
   public byte[] toBytes () {
     val bytes = Bytes.allocate(4)
-        .put1B(getTag().getCode());
+        .write1B(getTag().getCode());
 
     if (ok) {
-      bytes.put1B(0);
+      bytes.write1B(0);
     } else {
-      bytes.put1B(1);
+      bytes.write1B(1);
     }
     return bytes
-        .put2B(creation)
+        .write2B(creation)
         .array();
   }
 

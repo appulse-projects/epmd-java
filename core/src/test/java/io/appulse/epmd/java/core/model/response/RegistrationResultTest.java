@@ -29,9 +29,9 @@ class RegistrationResultTest {
   @Test
   void serialize () {
     val expected = Bytes.allocate()
-        .put1B(ALIVE2_RESPONSE.getCode())
-        .put1B(0)
-        .put2B(42)
+        .write1B(ALIVE2_RESPONSE.getCode())
+        .write1B(0)
+        .write2B(42)
         .array();
 
     val request = RegistrationResult.builder()
@@ -46,9 +46,9 @@ class RegistrationResultTest {
   @Test
   void deserialize () {
     val bytes = Bytes.allocate()
-        .put1B(ALIVE2_RESPONSE.getCode())
-        .put1B(0)
-        .put2B(42)
+        .write1B(ALIVE2_RESPONSE.getCode())
+        .write1B(0)
+        .write2B(42)
         .array();
 
     val response = Response.parse(bytes, RegistrationResult.class);

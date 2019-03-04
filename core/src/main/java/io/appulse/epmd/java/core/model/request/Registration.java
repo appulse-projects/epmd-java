@@ -80,17 +80,17 @@ public class Registration implements Request {
   byte[] extra = new byte[0];
 
   Registration (Bytes bytes) {
-    port = bytes.getUnsignedShort();
-    type = NodeType.of(bytes.getByte());
-    protocol = Protocol.of(bytes.getByte());
-    high = Version.of(bytes.getUnsignedShort());
-    low = Version.of(bytes.getUnsignedShort());
+    port = bytes.readUnsignedShort();
+    type = NodeType.of(bytes.readByte());
+    protocol = Protocol.of(bytes.readByte());
+    high = Version.of(bytes.readUnsignedShort());
+    low = Version.of(bytes.readUnsignedShort());
 
-    val nameLength = bytes.getUnsignedShort();
-    name = bytes.getString(nameLength, ISO_8859_1);
+    val nameLength = bytes.readUnsignedShort();
+    name = bytes.readString(nameLength, ISO_8859_1);
 
-    val extraLength = bytes.getUnsignedShort();
-    extra = bytes.getBytes(extraLength);
+    val extraLength = bytes.readUnsignedShort();
+    extra = bytes.readBytes(extraLength);
   }
 
   @Override
@@ -98,17 +98,17 @@ public class Registration implements Request {
     val nameBytes = name.getBytes(ISO_8859_1);
     val length = 13 + nameBytes.length + extra.length;
     return Bytes.allocate(length + Short.BYTES)
-        .put2B(length)
-        .put1B(getTag().getCode())
-        .put2B(port)
-        .put1B(type.getCode())
-        .put1B(protocol.getCode())
-        .put2B(high.getCode())
-        .put2B(low.getCode())
-        .put2B(nameBytes.length)
-        .put(nameBytes)
-        .put2B(extra.length)
-        .put(extra)
+        .write2B(length)
+        .write1B(getTag().getCode())
+        .write2B(port)
+        .write1B(type.getCode())
+        .write1B(protocol.getCode())
+        .write2B(high.getCode())
+        .write2B(low.getCode())
+        .write2B(nameBytes.length)
+        .writeNB(nameBytes)
+        .write2B(extra.length)
+        .writeNB(extra)
         .array();
   }
 

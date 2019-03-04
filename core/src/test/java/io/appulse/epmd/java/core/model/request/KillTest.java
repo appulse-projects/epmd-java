@@ -29,8 +29,8 @@ class KillTest {
   @Test
   void serialize () {
     val expected = Bytes.allocate()
-        .put2B(1)
-        .put1B(KILL_REQUEST.getCode())
+        .write2B(1)
+        .write1B(KILL_REQUEST.getCode())
         .array();
 
     val request = new Kill();
@@ -41,8 +41,8 @@ class KillTest {
   @Test
   void deserialize () {
     val bytes = Bytes.allocate()
-        .put2B(1)
-        .put1B(KILL_REQUEST.getCode())
+        .write2B(1)
+        .write1B(KILL_REQUEST.getCode())
         .array();
 
     assertThat((Kill) Request.parse(bytes))

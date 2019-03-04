@@ -31,7 +31,7 @@ class EpmdInfoTest {
   @Test
   void serializeEmpty () {
     val expected = Bytes.allocate()
-        .put4B(8080)
+        .write4B(8080)
         .array();
 
     val request = EpmdInfo.builder()
@@ -49,8 +49,8 @@ class EpmdInfoTest {
               "name popa3 at port 9000";
 
     val expected = Bytes.allocate()
-        .put4B(8080)
-        .put(str, ISO_8859_1)
+        .write4B(8080)
+        .writeNB(str, ISO_8859_1)
         .array();
 
     val request = EpmdInfo.builder()
@@ -79,7 +79,7 @@ class EpmdInfoTest {
   @Test
   void deserializeEmpty () {
     val bytes = Bytes.allocate()
-        .put4B(8080)
+        .write4B(8080)
         .array();
 
     val response = Response.parse(bytes, EpmdInfo.class);
@@ -101,8 +101,8 @@ class EpmdInfoTest {
               "name popa3 at port 9000";
 
     val bytes = Bytes.allocate()
-        .put4B(8080)
-        .put(str, ISO_8859_1)
+        .write4B(8080)
+        .writeNB(str, ISO_8859_1)
         .array();
 
     val response = Response.parse(bytes, EpmdInfo.class);

@@ -59,10 +59,8 @@ public class RequestDecoder extends ReplayingDecoder<Request> {
     log.debug("Readed message body:\n{}", body);
 
     Bytes bytes = Bytes.allocate(Short.BYTES + length)
-        .put2B(length)
-        .put(body);
-
-    bytes.position(0);
+        .write2B(length)
+        .writeNB(body);
 
     val request = Request.parse(bytes);
     log.debug("Received request: {}", request);

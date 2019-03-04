@@ -33,16 +33,16 @@ class RegistrationTest {
   void serialize () {
     val name = "popa";
     val expected = Bytes.allocate()
-        .put2B(13 + name.getBytes().length)
-        .put1B(ALIVE2_REQUEST.getCode())
-        .put2B(8080)
-        .put1B(R3_HIDDEN.getCode())
-        .put1B(SCTP.getCode())
-        .put2B(R6.getCode())
-        .put2B(R6.getCode())
-        .put2B(name.getBytes().length)
-        .put(name)
-        .put2B(0)
+        .write2B(13 + name.getBytes().length)
+        .write1B(ALIVE2_REQUEST.getCode())
+        .write2B(8080)
+        .write1B(R3_HIDDEN.getCode())
+        .write1B(SCTP.getCode())
+        .write2B(R6.getCode())
+        .write2B(R6.getCode())
+        .write2B(name.getBytes().length)
+        .writeNB(name)
+        .write2B(0)
         .array();
 
     val request = Registration.builder()
@@ -62,16 +62,16 @@ class RegistrationTest {
   void deserialize () {
     val name = "popa";
     val bytes = Bytes.allocate()
-        .put2B(13 + name.getBytes().length)
-        .put1B(ALIVE2_REQUEST.getCode())
-        .put2B(8080)
-        .put1B(R3_HIDDEN.getCode())
-        .put1B(SCTP.getCode())
-        .put2B(R6.getCode())
-        .put2B(R6.getCode())
-        .put2B(name.getBytes().length)
-        .put(name)
-        .put2B(0)
+        .write2B(13 + name.getBytes().length)
+        .write1B(ALIVE2_REQUEST.getCode())
+        .write2B(8080)
+        .write1B(R3_HIDDEN.getCode())
+        .write1B(SCTP.getCode())
+        .write2B(R6.getCode())
+        .write2B(R6.getCode())
+        .write2B(name.getBytes().length)
+        .writeNB(name)
+        .write2B(0)
         .array();
 
     val response = (Registration) Request.parse(bytes);

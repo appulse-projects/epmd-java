@@ -51,7 +51,7 @@ public enum StopResult implements Response {
   UNKNOWN;
 
   static StopResult from (Bytes bytes) {
-    val string = bytes.getString(ISO_8859_1);
+    val string = bytes.readString(ISO_8859_1);
     return Stream.of(values())
         .filter(it -> it.name().equalsIgnoreCase(string))
         .findAny()

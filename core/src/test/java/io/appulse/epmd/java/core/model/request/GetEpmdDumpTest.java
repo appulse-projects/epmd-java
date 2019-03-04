@@ -29,8 +29,8 @@ class GetEpmdDumpTest {
   @Test
   void serialize () {
     val expected = Bytes.allocate()
-        .put2B(1)
-        .put1B(DUMP_REQUEST.getCode())
+        .write2B(1)
+        .write1B(DUMP_REQUEST.getCode())
         .array();
 
     val request = new GetEpmdDump();
@@ -42,8 +42,8 @@ class GetEpmdDumpTest {
   @Test
   void deserialize () {
     val bytes = Bytes.allocate()
-        .put2B(1)
-        .put1B(DUMP_REQUEST.getCode())
+        .write2B(1)
+        .write1B(DUMP_REQUEST.getCode())
         .array();
 
     assertThat((GetEpmdDump) Request.parse(bytes))

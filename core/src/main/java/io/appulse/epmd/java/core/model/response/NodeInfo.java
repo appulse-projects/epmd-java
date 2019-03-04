@@ -101,12 +101,12 @@ public class NodeInfo implements Response, TaggedMessage {
   }
 
   NodeInfo (Bytes bytes) {
-    val tag = Tag.of(bytes.getByte());
+    val tag = Tag.of(bytes.readByte());
     if (tag != getTag()) {
       throw new IllegalArgumentException("Unexpected message's tag " + tag.name());
     }
 
-    if (bytes.getByte() != 0) {
+    if (bytes.readByte() != 0) {
       ok = false;
       port = empty();
       type = empty();
@@ -119,17 +119,17 @@ public class NodeInfo implements Response, TaggedMessage {
     }
 
     ok = true;
-    port = of(bytes.getUnsignedShort());
-    type = of(bytes.getByte()).map(NodeType::of);
-    protocol = of(bytes.getByte()).map(Protocol::of);
-    high = of(bytes.getUnsignedShort()).map(Version::of);
-    low = of(bytes.getUnsignedShort()).map(Version::of);
+    port = of(bytes.readUnsignedShort());
+    type = of(bytes.readByte()).map(NodeType::of);
+    protocol = of(bytes.readByte()).map(Protocol::of);
+    high = of(bytes.readUnsignedShort()).map(Version::of);
+    low = of(bytes.readUnsignedShort()).map(Version::of);
 
-    val length = bytes.getUnsignedShort();
-    name = of(bytes.getString(length, ISO_8859_1));
+    val length = bytes.readUnsignedShort();
+    name = of(bytes.readString(length, ISO_8859_1));
 
-    val extraLength = bytes.getUnsignedShort();
-    extra = of(bytes.getBytes(extraLength));
+    val extraLength = bytes.readUnsignedShort();
+    extra = of(bytes.readBytes(extraLength));
   }
 
   @Override
@@ -146,17 +146,17 @@ public class NodeInfo implements Response, TaggedMessage {
         .orElseGet(() -> new byte[0]);
 
     return Bytes.allocate(14 + nameBytes.length + extraBytes.length)
-        .put1B(getTag().getCode())
-        .put1B(0)
-        .put2B(port.get())
-        .put1B(type.get().getCode())
-        .put1B(protocol.get().getCode())
-        .put2B(high.get().getCode())
-        .put2B(low.get().getCode())
-        .put2B(nameBytes.length)
-        .put(nameBytes)
-        .put2B(extraBytes.length)
-        .put(extraBytes)
+        .write1B(getTag().getCode())
+        .write1B(0)
+        .write2B(port.get())
+        .write1B(type.get().getCode())
+        .write1B(protocol.get().getCode())
+        .write2B(high.get().getCode())
+        .write2B(low.get().getCode())
+        .write2B(nameBytes.length)
+        .writeNB(nameBytes)
+        .write2B(extraBytes.length)
+        .writeNB(extraBytes)
         .array();
   }
 
