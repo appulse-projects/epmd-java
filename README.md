@@ -2,6 +2,7 @@
 
 [![build_status](https://travis-ci.org/appulse-projects/epmd-java.svg?branch=master)](https://travis-ci.org/appulse-projects/epmd-java)
 [![maven_central](https://maven-badges.herokuapp.com/maven-central/io.appulse/epmd-java/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.appulse/epmd-java)
+[![License](http://img.shields.io/:license-apache-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 This is the set of projects, which implements EPMD server and its client.
 
