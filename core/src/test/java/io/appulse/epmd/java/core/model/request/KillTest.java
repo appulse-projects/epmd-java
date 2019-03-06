@@ -28,7 +28,7 @@ class KillTest {
 
   @Test
   void serialize () {
-    val expected = Bytes.allocate()
+    val expected = Bytes.resizableArray()
         .write2B(1)
         .write1B(KILL_REQUEST.getCode())
         .array();
@@ -40,7 +40,7 @@ class KillTest {
 
   @Test
   void deserialize () {
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .write2B(1)
         .write1B(KILL_REQUEST.getCode())
         .array();

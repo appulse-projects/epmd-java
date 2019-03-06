@@ -32,7 +32,7 @@ class EpmdDumpTest {
 
   @Test
   void serializeEmpty () {
-    val expected = Bytes.allocate()
+    val expected = Bytes.resizableArray()
         .write4B(8080)
         .array();
 
@@ -50,7 +50,7 @@ class EpmdDumpTest {
               "old/unused name\t<popa2> at port 5678, fd = 9\n" +
               "active name\t<popa3> at port 9000, fd = 7";
 
-    val expected = Bytes.allocate()
+    val expected = Bytes.resizableArray()
         .write4B(8080)
         .writeNB(str, ISO_8859_1)
         .array();
@@ -89,7 +89,7 @@ class EpmdDumpTest {
 
   @Test
   void deserializeEmpty () {
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .write4B(8080)
         .array();
 
@@ -110,7 +110,7 @@ class EpmdDumpTest {
               "old/unused name\t<popa2> at port 5678, fd = 9\n" +
               "active name\t<popa3> at port 9000, fd = 7";
 
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .write4B(8080)
         .writeNB(str, ISO_8859_1)
         .array();

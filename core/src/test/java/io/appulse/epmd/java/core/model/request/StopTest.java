@@ -29,7 +29,7 @@ class StopTest {
   @Test
   void serialize () {
     val name = "popa";
-    val expected = Bytes.allocate()
+    val expected = Bytes.resizableArray()
         .write2B(1 + name.getBytes().length)
         .write1B(STOP_REQUEST.getCode())
         .writeNB(name)
@@ -43,7 +43,7 @@ class StopTest {
   @Test
   void deserialize () {
     val name = "popa";
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .write2B(1 + name.getBytes().length)
         .write1B(STOP_REQUEST.getCode())
         .writeNB(name)

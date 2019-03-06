@@ -28,7 +28,7 @@ class RegistrationResultTest {
 
   @Test
   void serialize () {
-    val expected = Bytes.allocate()
+    val expected = Bytes.resizableArray()
         .write1B(ALIVE2_RESPONSE.getCode())
         .write1B(0)
         .write2B(42)
@@ -45,7 +45,7 @@ class RegistrationResultTest {
 
   @Test
   void deserialize () {
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .write1B(ALIVE2_RESPONSE.getCode())
         .write1B(0)
         .write2B(42)

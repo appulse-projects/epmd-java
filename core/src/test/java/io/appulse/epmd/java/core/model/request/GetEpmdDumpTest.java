@@ -28,7 +28,7 @@ class GetEpmdDumpTest {
 
   @Test
   void serialize () {
-    val expected = Bytes.allocate()
+    val expected = Bytes.resizableArray()
         .write2B(1)
         .write1B(DUMP_REQUEST.getCode())
         .array();
@@ -41,7 +41,7 @@ class GetEpmdDumpTest {
 
   @Test
   void deserialize () {
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .write2B(1)
         .write1B(DUMP_REQUEST.getCode())
         .array();

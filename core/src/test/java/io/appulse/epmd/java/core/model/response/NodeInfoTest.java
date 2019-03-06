@@ -32,7 +32,7 @@ class NodeInfoTest {
 
   @Test
   void serializeNok () {
-    val expected = Bytes.allocate()
+    val expected = Bytes.resizableArray()
         .write1B(PORT2_RESPONSE.getCode())
         .write1B(1)
         .array();
@@ -48,7 +48,7 @@ class NodeInfoTest {
   @Test
   void serializeOk () {
     val name = "popa";
-    val expected = Bytes.allocate()
+    val expected = Bytes.resizableArray()
         .write1B(PORT2_RESPONSE.getCode())
         .write1B(0)
         .write2B(8080)
@@ -77,7 +77,7 @@ class NodeInfoTest {
 
   @Test
   void deserializeNok () {
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .write1B(PORT2_RESPONSE.getCode())
         .write1B(1)
         .array();
@@ -109,7 +109,7 @@ class NodeInfoTest {
   @Test
   void deserializeOk () {
     val name = "popa";
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .write1B(PORT2_RESPONSE.getCode())
         .write1B(0)
         .write2B(8080)

@@ -32,7 +32,7 @@ class RegistrationTest {
   @Test
   void serialize () {
     val name = "popa";
-    val expected = Bytes.allocate()
+    val expected = Bytes.resizableArray()
         .write2B(13 + name.getBytes().length)
         .write1B(ALIVE2_REQUEST.getCode())
         .write2B(8080)
@@ -61,7 +61,7 @@ class RegistrationTest {
   @Test
   void deserialize () {
     val name = "popa";
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .write2B(13 + name.getBytes().length)
         .write1B(ALIVE2_REQUEST.getCode())
         .write2B(8080)

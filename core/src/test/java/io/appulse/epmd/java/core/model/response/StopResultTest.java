@@ -30,7 +30,7 @@ class StopResultTest {
   void serialize () {
     val value = StopResult.STOPPED;
 
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .writeNB(value.name(), ISO_8859_1)
         .array();
 
@@ -42,7 +42,7 @@ class StopResultTest {
   void deserialize () {
     val value = StopResult.STOPPED;
 
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .writeNB(value.name(), ISO_8859_1)
         .array();
 

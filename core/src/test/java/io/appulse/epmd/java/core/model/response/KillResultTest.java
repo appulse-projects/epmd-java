@@ -30,7 +30,7 @@ class KillResultTest {
   void serialize () {
     val value = KillResult.OK;
 
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .writeNB(value.name(), ISO_8859_1)
         .array();
 
@@ -42,7 +42,7 @@ class KillResultTest {
   void deserialize () {
     val value = KillResult.OK;
 
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .writeNB(value.name(), ISO_8859_1)
         .array();
 

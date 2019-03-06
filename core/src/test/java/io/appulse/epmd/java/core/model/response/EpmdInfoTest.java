@@ -30,7 +30,7 @@ class EpmdInfoTest {
 
   @Test
   void serializeEmpty () {
-    val expected = Bytes.allocate()
+    val expected = Bytes.resizableArray()
         .write4B(8080)
         .array();
 
@@ -48,7 +48,7 @@ class EpmdInfoTest {
               "name popa2 at port 5678\n" +
               "name popa3 at port 9000";
 
-    val expected = Bytes.allocate()
+    val expected = Bytes.resizableArray()
         .write4B(8080)
         .writeNB(str, ISO_8859_1)
         .array();
@@ -78,7 +78,7 @@ class EpmdInfoTest {
 
   @Test
   void deserializeEmpty () {
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .write4B(8080)
         .array();
 
@@ -100,7 +100,7 @@ class EpmdInfoTest {
               "name popa2 at port 5678\n" +
               "name popa3 at port 9000";
 
-    val bytes = Bytes.allocate()
+    val bytes = Bytes.resizableArray()
         .write4B(8080)
         .writeNB(str, ISO_8859_1)
         .array();
