@@ -29,9 +29,24 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+/**
+ * A command for getting the registered nodes information from a remote EPMD server.
+ *
+ * @since 2.0.0
+ * @author Artem Labazin
+ */
 @Slf4j
 final class CommandGetNodeInfo extends CommandAbstract<GetNodeInfo, Optional<NodeInfo>> {
 
+  /**
+   * Constructs the command object.
+   *
+   * @param address the remote EPMD server's inet address
+   *
+   * @param port the remote EPMD server's port
+   *
+   * @param request the command's request to the remote EPMD server
+   */
   @Builder
   CommandGetNodeInfo (InetAddress address, Integer port, GetNodeInfo request) {
     super(address, port, request);

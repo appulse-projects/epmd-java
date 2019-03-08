@@ -24,9 +24,24 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+/**
+ * A command for killing a node in a remote EPMD server.
+ *
+ * @since 2.0.0
+ * @author Artem Labazin
+ */
 @Slf4j
 final class CommandKill extends CommandAbstract<Kill, Boolean> {
 
+  /**
+   * Constructs the command object.
+   *
+   * @param address the remote EPMD server's inet address
+   *
+   * @param port the remote EPMD server's port
+   *
+   * @param request the command's request to the remote EPMD server
+   */
   @Builder
   CommandKill (InetAddress address, Integer port, Kill request) {
     super(address, port, request);

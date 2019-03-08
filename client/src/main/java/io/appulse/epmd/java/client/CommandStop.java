@@ -24,9 +24,24 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+/**
+ * A command for stopping a remote EPMD server.
+ *
+ * @since 2.0.0
+ * @author Artem Labazin
+ */
 @Slf4j
 final class CommandStop extends CommandAbstract<Stop, Void> {
 
+  /**
+   * Constructs the command object.
+   *
+   * @param address the remote EPMD server's inet address
+   *
+   * @param port the remote EPMD server's port
+   *
+   * @param request the command's request to the remote EPMD server
+   */
   @Builder
   CommandStop (InetAddress address, Integer port, Stop request) {
     super(address, port, request);

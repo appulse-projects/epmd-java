@@ -31,6 +31,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
+/**
+ * A command's common fields holder class.
+ *
+ * @param <R> the type of command's request
+ *
+ * @param <T> the type of response supplied by this command
+ *
+ * @since 2.0.0
+ * @author Artem Labazin
+ */
 @Getter
 @ToString
 @EqualsAndHashCode
@@ -47,10 +57,20 @@ abstract class CommandAbstract<R extends Request, T> implements Supplier<T> {
   @NonNull
   R request;
 
+  /**
+   * Creates a remote connection object.
+   *
+   * @return the new connection instance
+   */
   protected Connection createConnection () {
     return new Connection(address, port);
   }
 
+  /**
+   * Returns a request's byte array representation.
+   *
+   * @return the request's byte array representation
+   */
   protected byte[] getRequestBytes () {
     return request.toBytes();
   }

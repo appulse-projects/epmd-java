@@ -23,7 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 /**
- * EpmdDefaults values.
+ * EPMD's default values.
+ *
+ * @since 2.0.0
+ * @author Artem Labazin
  */
 @Slf4j
 public final class EpmdDefaults {
