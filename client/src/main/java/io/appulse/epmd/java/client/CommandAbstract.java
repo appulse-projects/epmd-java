@@ -17,48 +17,41 @@
 package io.appulse.epmd.java.client;
 
 import static lombok.AccessLevel.PRIVATE;
+import static lombok.AccessLevel.PROTECTED;
 
 import java.net.InetAddress;
+import java.util.function.Supplier;
 
+import io.appulse.epmd.java.core.model.request.Request;
+
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
-import lombok.val;
 
-@RequiredArgsConstructor
-@SuppressWarnings("checkstyle:HiddenField")
+@Getter
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = PROTECTED)
 @FieldDefaults(level = PRIVATE, makeFinal = true)
-class ConnectionManager {
+abstract class CommandAbstract<R extends Request, T> implements Supplier<T> {
 
-  @Getter
   @NonNull
   InetAddress address;
 
-  @Getter
   @NonNull
   Integer port;
 
-  Connection connect () {
-    return connect(address, port);
-  }
+  @NonNull
+  R request;
 
-  Connection connect (@NonNull String host) {
-    return connect(host, EpmdDefaults.PORT);
-  }
-
-  @SneakyThrows
-  Connection connect (@NonNull String host, int port) {
-    val address = InetAddress.getByName(host);
-    return connect(address, port);
-  }
-
-  Connection connect (@NonNull InetAddress address) {
-    return connect(address, EpmdDefaults.PORT);
-  }
-
-  Connection connect (@NonNull InetAddress address, int port) {
+  protected Connection createConnection () {
     return new Connection(address, port);
+  }
+
+  protected byte[] getRequestBytes () {
+    return request.toBytes();
   }
 }

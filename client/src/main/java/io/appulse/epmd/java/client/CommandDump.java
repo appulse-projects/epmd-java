@@ -16,28 +16,32 @@
 
 package io.appulse.epmd.java.client;
 
+import java.net.InetAddress;
 import java.util.List;
-import java.util.function.Supplier;
 
 import io.appulse.epmd.java.core.model.request.GetEpmdDump;
 import io.appulse.epmd.java.core.model.response.EpmdDump;
 import io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump;
 import io.appulse.epmd.java.core.model.response.Response;
 
-import lombok.NonNull;
-import lombok.Value;
+import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-@Value
-class CommandDump implements Supplier<List<NodeDump>> {
+@Slf4j
+final class CommandDump extends CommandAbstract<GetEpmdDump, List<NodeDump>> {
 
-  @NonNull
-  ConnectionManager connectionManager;
+  @Builder
+  CommandDump (InetAddress address, Integer port, GetEpmdDump request) {
+    super(address, port, request);
+  }
 
   @Override
   public List<NodeDump> get () {
-    val requestBytes = new GetEpmdDump().toBytes();
-    try (val connection = connectionManager.connect();) {
+    log.debug("requesting debug info");
+
+    val requestBytes = getRequestBytes();
+    try (val connection = createConnection();) {
       connection.send(requestBytes);
       val responseBytes = connection.receive();
       val response = Response.parse(responseBytes, EpmdDump.class);

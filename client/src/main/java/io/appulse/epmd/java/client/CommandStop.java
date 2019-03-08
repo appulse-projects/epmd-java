@@ -16,30 +16,29 @@
 
 package io.appulse.epmd.java.client;
 
-import java.util.function.Supplier;
+import java.net.InetAddress;
 
 import io.appulse.epmd.java.core.model.request.Stop;
 
 import lombok.Builder;
-import lombok.NonNull;
-import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-@Value
-@Builder
-class CommandStop implements Supplier<Void> {
+@Slf4j
+final class CommandStop extends CommandAbstract<Stop, Void> {
 
-  @NonNull
-  ConnectionManager connectionManager;
-
-  @NonNull
-  String node;
+  @Builder
+  CommandStop (InetAddress address, Integer port, Stop request) {
+    super(address, port, request);
+  }
 
   @Override
   public Void get () {
-    val request = new Stop(node);
+    val request = getRequest();
+    log.debug("stopping '{}'", request.getName());
+
     val requestBytes = request.toBytes();
-    try (val connection = connectionManager.connect()) {
+    try (val connection = createConnection()) {
       connection.send(requestBytes);
       return null;
     }

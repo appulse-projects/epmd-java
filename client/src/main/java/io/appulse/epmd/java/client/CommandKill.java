@@ -16,24 +16,28 @@
 
 package io.appulse.epmd.java.client;
 
-import java.util.function.Supplier;
+import java.net.InetAddress;
 
 import io.appulse.epmd.java.core.model.request.Kill;
 
-import lombok.NonNull;
-import lombok.Value;
+import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-@Value
-class CommandKill implements Supplier<Boolean> {
+@Slf4j
+final class CommandKill extends CommandAbstract<Kill, Boolean> {
 
-  @NonNull
-  ConnectionManager connectionManager;
+  @Builder
+  CommandKill (InetAddress address, Integer port, Kill request) {
+    super(address, port, request);
+  }
 
   @Override
   public Boolean get () {
-    val requestBytes = new Kill().toBytes();
-    try (val connection = connectionManager.connect()) {
+    log.debug("requesting kill");
+
+    val requestBytes = getRequestBytes();
+    try (val connection = createConnection()) {
       connection.send(requestBytes);
       return true;
     } catch (Exception ex) {

@@ -20,38 +20,30 @@ import static java.util.Optional.ofNullable;
 
 import java.net.InetAddress;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import io.appulse.epmd.java.core.model.request.GetNodeInfo;
 import io.appulse.epmd.java.core.model.response.NodeInfo;
 import io.appulse.epmd.java.core.model.response.Response;
 
 import lombok.Builder;
-import lombok.NonNull;
-import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-@Value
-@Builder
-class CommandGetNodeInfo implements Supplier<Optional<NodeInfo>> {
+@Slf4j
+final class CommandGetNodeInfo extends CommandAbstract<GetNodeInfo, Optional<NodeInfo>> {
 
-  @NonNull
-  ConnectionManager connectionManager;
-
-  @NonNull
-  InetAddress address;
-
-  @NonNull
-  Integer port;
-
-  @NonNull
-  String shortNodeName;
+  @Builder
+  CommandGetNodeInfo (InetAddress address, Integer port, GetNodeInfo request) {
+    super(address, port, request);
+  }
 
   @Override
   public Optional<NodeInfo> get () {
-    val request = new GetNodeInfo(shortNodeName);
+    val request = getRequest();
+    log.debug("requesting info about '{}'", request.getName());
+
     val requestBytes = request.toBytes();
-    try (val connection = connectionManager.connect(address, port)) {
+    try (val connection = createConnection()) {
       connection.send(requestBytes);
       val responseBytes = connection.receive();
       return ofNullable(responseBytes)

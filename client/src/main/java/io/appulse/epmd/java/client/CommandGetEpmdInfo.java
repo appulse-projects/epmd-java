@@ -18,7 +18,6 @@ package io.appulse.epmd.java.client;
 
 import java.net.InetAddress;
 import java.util.List;
-import java.util.function.Supplier;
 
 import io.appulse.epmd.java.core.model.request.GetEpmdInfo;
 import io.appulse.epmd.java.core.model.response.EpmdInfo;
@@ -26,27 +25,23 @@ import io.appulse.epmd.java.core.model.response.EpmdInfo.NodeDescription;
 import io.appulse.epmd.java.core.model.response.Response;
 
 import lombok.Builder;
-import lombok.NonNull;
-import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-@Value
-@Builder
-class CommandGetEpmdInfo implements Supplier<List<NodeDescription>> {
+@Slf4j
+final class CommandGetEpmdInfo extends CommandAbstract<GetEpmdInfo, List<NodeDescription>> {
 
-  @NonNull
-  ConnectionManager connectionManager;
-
-  @NonNull
-  InetAddress address;
-
-  @NonNull
-  Integer port;
+  @Builder
+  CommandGetEpmdInfo (InetAddress address, Integer port, GetEpmdInfo request) {
+    super(address, port, request);
+  }
 
   @Override
   public List<NodeDescription> get () {
-    val requestBytes = new GetEpmdInfo().toBytes();
-    try (val connection = connectionManager.connect(address, port)) {
+    log.debug("requesting registered nodes in EPMD server");
+
+    val requestBytes = getRequestBytes();
+    try (val connection = createConnection()) {
       connection.send(requestBytes);
       val responseBytes = connection.receive();
       val response = Response.parse(responseBytes, EpmdInfo.class);

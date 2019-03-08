@@ -16,7 +16,7 @@
 
 package io.appulse.epmd.java.client;
 
-import java.util.function.Supplier;
+import java.net.InetAddress;
 
 import io.appulse.epmd.java.client.exception.EpmdRegistrationException;
 import io.appulse.epmd.java.core.model.request.Registration;
@@ -24,27 +24,23 @@ import io.appulse.epmd.java.core.model.response.RegistrationResult;
 import io.appulse.epmd.java.core.model.response.Response;
 
 import lombok.Builder;
-import lombok.NonNull;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 @Slf4j
-@Value
-@Builder
-class CommandRegistration implements Supplier<RegistrationResult> {
+final class CommandRegistration extends CommandAbstract<Registration, RegistrationResult> {
 
-  @NonNull
-  ConnectionManager connectionManager;
-
-  @NonNull
-  Registration request;
+  @Builder
+  CommandRegistration (InetAddress address, Integer port, Registration request) {
+    super(address, port, request);
+  }
 
   @Override
   public RegistrationResult get () {
+    val request = getRequest();
     log.debug("Registering: '{}'", request.getName());
 
-    val connection = connectionManager.connect();
+    val connection = createConnection();
 
     val requestBytes = request.toBytes();
     connection.send(requestBytes);
