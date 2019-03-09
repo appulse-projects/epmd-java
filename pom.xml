@@ -31,6 +31,7 @@ limitations under the License.
     <module>core</module>
     <module>client</module>
     <module>server</module>
+    <module>cli</module>
   </modules>
 
   <properties>
@@ -262,6 +263,29 @@ limitations under the License.
               </configuration>
             </execution>
           </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.6.0</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>java</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <includeProjectDependencies>false</includeProjectDependencies>
+            <includePluginDependencies>true</includePluginDependencies>
+            <executableDependency>
+              <groupId>io.appulse.epmd.java</groupId>
+              <artifactId>core</artifactId>
+            </executableDependency>
+            <skip>true</skip>
+            <mainClass>none</mainClass>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
