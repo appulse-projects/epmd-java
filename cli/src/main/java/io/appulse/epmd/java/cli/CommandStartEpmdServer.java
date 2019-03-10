@@ -17,18 +17,30 @@
 package io.appulse.epmd.java.cli;
 
 import static java.util.Collections.singleton;
+import static lombok.AccessLevel.PRIVATE;
 
 import java.net.InetAddress;
 import java.util.Set;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.SneakyThrows;
+import lombok.ToString;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.ParentCommand;
 
 @Slf4j
-@Command(name = "server")
+@Getter
+@ToString
+@EqualsAndHashCode
+@Command(subcommands = {
+  SubcommandKillEpmdServer.class,
+  SubcommandGetAllNames.class,
+  SubcommandStopNode.class
+})
+@FieldDefaults(level = PRIVATE)
 class CommandStartEpmdServer implements Runnable {
 
   @SneakyThrows
@@ -36,8 +48,17 @@ class CommandStartEpmdServer implements Runnable {
     return singleton(InetAddress.getByName("0.0.0.0"));
   }
 
-  @ParentCommand
-  CommonOptions options;
+  @Option(
+    names = { "-h", "--help" },
+    usageHelp = true
+  )
+  boolean helpRequested;
+
+  @Option(names = "-port")
+  int port = 4369;
+
+  @Option(names = { "-d", "-debug" })
+  boolean[] debugLevel = new boolean[0];
 
   @Option(names = "-packet_timeout")
   int packetTimeout = 60;

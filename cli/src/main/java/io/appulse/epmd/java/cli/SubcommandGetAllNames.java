@@ -34,10 +34,10 @@ import picocli.CommandLine.ParentCommand;
 
 @Slf4j
 @Command(name = "-names")
-class CommandGetAllNodesNames implements Runnable {
+class SubcommandGetAllNames implements Runnable {
 
   @ParentCommand
-  CommonOptions options;
+  CommandStartEpmdServer options;
 
   @Override
   public void run () {

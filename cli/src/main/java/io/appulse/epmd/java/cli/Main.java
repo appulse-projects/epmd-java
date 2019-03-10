@@ -34,7 +34,7 @@ public final class Main {
    * @param args program's arguments
    */
   public static void main (@NonNull String[] args) {
-    new CommandLine(new CommonOptions())
+    new CommandLine(new CommandStartEpmdServer())
         .parseWithHandler(new RunLast(), args);
   }
 

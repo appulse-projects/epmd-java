@@ -28,26 +28,22 @@ import io.appulse.epmd.java.client.exception.EpmdConnectionException;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
 
 @Slf4j
-@Command(name = "-stop")
-class CommandStopNode implements Runnable {
+@Command(name = "-kill")
+class SubcommandKillEpmdServer implements Runnable {
 
   @ParentCommand
-  CommonOptions options;
-
-  @Parameters(paramLabel = "Name")
-  String name;
+  CommandStartEpmdServer options;
 
   @Override
   public void run () {
     try (val client = new EpmdClient(options.getPort())) {
-      if (client.stop(name).get(2, SECONDS)) {
-        System.out.println("STOPPED");
+      if (client.kill().get(2, SECONDS)) {
+        System.out.println("Killed");
       } else {
-        System.err.println("epmd: local epmd responded with <>");
+        System.err.println("Killing not allowed - living nodes in database.");
         System.exit(1);
       }
     } catch (CompletionException | ExecutionException ex) {
