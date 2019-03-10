@@ -16,9 +16,13 @@
 
 package io.appulse.epmd.java.client;
 
+import static io.appulse.epmd.java.core.model.response.StopResult.STOPPED;
+
 import java.net.InetAddress;
 
 import io.appulse.epmd.java.core.model.request.Stop;
+import io.appulse.epmd.java.core.model.response.Response;
+import io.appulse.epmd.java.core.model.response.StopResult;
 
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +35,7 @@ import lombok.val;
  * @author Artem Labazin
  */
 @Slf4j
-final class CommandStop extends CommandAbstract<Stop, Void> {
+final class CommandStop extends CommandAbstract<Stop, Boolean> {
 
   /**
    * Constructs the command object.
@@ -48,14 +52,16 @@ final class CommandStop extends CommandAbstract<Stop, Void> {
   }
 
   @Override
-  public Void get () {
+  public Boolean get () {
     val request = getRequest();
     log.debug("stopping '{}'", request.getName());
 
     val requestBytes = request.toBytes();
     try (val connection = createConnection()) {
       connection.send(requestBytes);
-      return null;
+      val responseBytes = connection.receive();
+      val response = Response.parse(responseBytes, StopResult.class);
+      return response == STOPPED;
     }
   }
 }

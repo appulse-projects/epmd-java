@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.cli.command;
+package io.appulse.epmd.java.cli;
 
 import static java.util.Collections.singleton;
 
 import java.net.InetAddress;
 import java.util.Set;
 
-import io.appulse.epmd.java.cli.CommonOptions;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
@@ -30,7 +29,7 @@ import picocli.CommandLine.ParentCommand;
 
 @Slf4j
 @Command(name = "server")
-public class ServerCommand implements Runnable {
+class CommandStartEpmdServer implements Runnable {
 
   @SneakyThrows
   private static Set<InetAddress> getDefaultAddresses () {
@@ -38,7 +37,7 @@ public class ServerCommand implements Runnable {
   }
 
   @ParentCommand
-  CommonOptions parent;
+  CommonOptions options;
 
   @Option(names = "-packet_timeout")
   int packetTimeout = 60;

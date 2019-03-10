@@ -183,7 +183,7 @@ public final class EpmdClient implements Closeable {
    *
    * @return {@link CompletableFuture} instance of success or not action
    */
-  public CompletableFuture<Void> stop (@NonNull String node) {
+  public CompletableFuture<Boolean> stop (@NonNull String node) {
     val supplier = CommandStop.builder()
         .address(address)
         .port(port)

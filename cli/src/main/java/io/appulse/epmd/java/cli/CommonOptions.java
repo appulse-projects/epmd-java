@@ -16,22 +16,28 @@
 
 package io.appulse.epmd.java.cli;
 
-import io.appulse.epmd.java.cli.command.KillOptions;
-import io.appulse.epmd.java.cli.command.NamesOptions;
-import io.appulse.epmd.java.cli.command.ServerCommand;
-import io.appulse.epmd.java.cli.command.StopCommand;
+import static lombok.AccessLevel.PRIVATE;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Slf4j
+@Getter
+@ToString
+@EqualsAndHashCode
 @Command(subcommands = {
-  KillOptions.class,
-  NamesOptions.class,
-  ServerCommand.class,
-  StopCommand.class
+  CommandKillEpmdServer.class,
+  CommandGetAllNodesNames.class,
+  CommandStartEpmdServer.class,
+  CommandStopNode.class
 })
-public class CommonOptions implements Runnable {
+@FieldDefaults(level = PRIVATE)
+class CommonOptions implements Runnable {
 
   @Option(
     names = { "-v", "--version" },
@@ -46,19 +52,19 @@ public class CommonOptions implements Runnable {
   boolean helpRequested;
 
   @Option(
-    names = { "-p", "--port" }
+    names = "-port"
   )
   int port = 4369;
 
   @Option(
-    names = { "-d", "--debug" }
+    names = { "-d", "-debug" }
   )
-  boolean debugInfoRequested;
+  boolean[] debugLevel = new boolean[0];
 
   @Override
   public void run () {
     log.info("\nversion={}\nusage={}\nport={}\ndebug={}",
              versionRequested, helpRequested,
-             port, debugInfoRequested);
+             port, debugLevel);
   }
 }

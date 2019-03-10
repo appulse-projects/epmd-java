@@ -135,7 +135,6 @@ class Connection implements Closeable {
     } catch (IOException ex) {
       val message = String.format("Couldn't connect to EPMD server (%s:%d), maybe it is down",
                                   address.toString(), port);
-      log.error(message);
       throw new EpmdConnectionException(message, ex);
     }
 

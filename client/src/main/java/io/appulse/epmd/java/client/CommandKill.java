@@ -16,10 +16,13 @@
 
 package io.appulse.epmd.java.client;
 
+import static io.appulse.epmd.java.core.model.response.KillResult.OK;
+
 import java.net.InetAddress;
 
 import io.appulse.epmd.java.core.model.request.Kill;
-
+import io.appulse.epmd.java.core.model.response.KillResult;
+import io.appulse.epmd.java.core.model.response.Response;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -54,7 +57,9 @@ final class CommandKill extends CommandAbstract<Kill, Boolean> {
     val requestBytes = getRequestBytes();
     try (val connection = createConnection()) {
       connection.send(requestBytes);
-      return true;
+      val responseBytes = connection.receive();
+      val response = Response.parse(responseBytes, KillResult.class);
+      return response == OK;
     } catch (Exception ex) {
       return false;
     }
