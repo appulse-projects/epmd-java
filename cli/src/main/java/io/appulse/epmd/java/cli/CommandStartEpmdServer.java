@@ -35,11 +35,13 @@ import picocli.CommandLine.Option;
 @Getter
 @ToString
 @EqualsAndHashCode
-@Command(subcommands = {
-  SubcommandKillEpmdServer.class,
-  SubcommandGetAllNames.class,
-  SubcommandStopNode.class
-})
+@Command(
+  subcommands = {
+    SubcommandKillEpmdServer.class,
+    SubcommandGetAllNames.class,
+    SubcommandStopNode.class
+  }
+)
 @FieldDefaults(level = PRIVATE)
 class CommandStartEpmdServer implements Runnable {
 
@@ -50,15 +52,25 @@ class CommandStartEpmdServer implements Runnable {
 
   @Option(
     names = { "-h", "--help" },
-    usageHelp = true
+    usageHelp = true,
+    hidden = true
   )
   boolean helpRequested;
+
+  @Option(names = "-address")
+  Set<InetAddress> addresses = getDefaultAddresses();
 
   @Option(names = "-port")
   int port = 4369;
 
   @Option(names = { "-d", "-debug" })
   boolean[] debugLevel = new boolean[0];
+
+  @Option(names = "-daemon")
+  boolean daemon;
+
+  @Option(names = "-relaxed_command_check")
+  boolean checks;
 
   @Option(names = "-packet_timeout")
   int packetTimeout = 60;
@@ -68,15 +80,6 @@ class CommandStartEpmdServer implements Runnable {
 
   @Option(names = "-delay_write")
   int delayWrite;
-
-  @Option(names = "-address")
-  Set<InetAddress> addresses = getDefaultAddresses();
-
-  @Option(names = "-daemon")
-  boolean daemon;
-
-  @Option(names = "-relaxed_command_check")
-  boolean checks;
 
   @Override
   public void run () {

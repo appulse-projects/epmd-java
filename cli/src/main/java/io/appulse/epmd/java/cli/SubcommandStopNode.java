@@ -38,7 +38,7 @@ class SubcommandStopNode implements Runnable {
   @ParentCommand
   CommandStartEpmdServer options;
 
-  @Parameters(paramLabel = "Name")
+  @Parameters
   String name;
 
   @Override

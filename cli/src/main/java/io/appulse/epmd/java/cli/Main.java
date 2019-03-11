@@ -16,8 +16,13 @@
 
 package io.appulse.epmd.java.cli;
 
-import lombok.NonNull;
+import static java.util.Locale.ENGLISH;
+
+import io.appulse.utils.ResourceUtils;
+
+import lombok.val;
 import picocli.CommandLine;
+import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.RunLast;
 
 /**
@@ -28,14 +33,27 @@ import picocli.CommandLine.RunLast;
  */
 public final class Main {
 
+  private static final String USAGE = ResourceUtils.getTextContent("/usage.txt").get();
+
   /**
    * Main method.
    *
    * @param args program's arguments
    */
-  public static void main (@NonNull String[] args) {
-    new CommandLine(new CommandStartEpmdServer())
-        .parseWithHandler(new RunLast(), args);
+  public static void main (String[] args) {
+    val command = new CommandStartEpmdServer();
+    val cmd = new CommandLine(command);
+    try {
+      val parsedResult = cmd.parseArgs(args);
+      if (cmd.isUsageHelpRequested()) {
+        System.out.println(USAGE);
+        return;
+      }
+      new RunLast().handleParseResult(parsedResult);
+    } catch (ParameterException ex) {
+      System.err.format(ENGLISH, "%s%n%n%s", ex.getMessage(), USAGE);
+      System.exit(1);
+    }
   }
 
   private Main () {
