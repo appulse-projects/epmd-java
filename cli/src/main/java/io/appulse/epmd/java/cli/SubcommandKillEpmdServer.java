@@ -39,7 +39,7 @@ class SubcommandKillEpmdServer implements Runnable {
 
   @Override
   public void run () {
-    try (val client = new EpmdClient(options.getPort())) {
+    try (val client = new EpmdClient(options.port)) {
       if (client.kill().get(2, SECONDS)) {
         System.out.println("Killed");
       } else {

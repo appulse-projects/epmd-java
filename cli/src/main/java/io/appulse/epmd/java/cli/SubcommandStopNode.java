@@ -43,7 +43,7 @@ class SubcommandStopNode implements Runnable {
 
   @Override
   public void run () {
-    try (val client = new EpmdClient(options.getPort())) {
+    try (val client = new EpmdClient(options.port)) {
       if (client.stop(name).get(2, SECONDS)) {
         System.out.println("STOPPED");
       } else {

@@ -41,7 +41,7 @@ class SubcommandGetAllNames implements Runnable {
 
   @Override
   public void run () {
-    try (val client = new EpmdClient(options.getPort())) {
+    try (val client = new EpmdClient(options.port)) {
       val descriptionsString = client.getNodes()
           .get(2, SECONDS)
           .stream()
