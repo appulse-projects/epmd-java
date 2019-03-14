@@ -54,14 +54,44 @@ public interface Request extends TaggedMessage {
    *
    * @return the parsed object
    */
-  @SuppressWarnings("unchecked")
   static <T extends Request> T parse (@NonNull Bytes bytes) {
     if (bytes.readableBytes() < Short.BYTES) {
       throw new IllegalArgumentException("Not enought bytes");
     }
-
     val messageLength = bytes.readUnsignedShort();
-    if (bytes.readableBytes() != messageLength) {
+    return parse(bytes, messageLength);
+  }
+
+  /**
+   * Parses request message from a byte array into an object.
+   *
+   * @param array the byte array
+   *
+   * @param length the readable length of th byte array
+   *
+   * @param <T> parsed type, extends {@link Request}
+   *
+   * @return the parsed object
+   */
+  static <T extends Request> T parse (@NonNull byte[] array, int length) {
+    val bytes = Bytes.wrap(array);
+    return parse(bytes, length);
+  }
+
+  /**
+   * Parses request message from a byte array into an object.
+   *
+   * @param bytes the byte array
+   *
+   * @param length the readable length of th byte array
+   *
+   * @param <T> parsed type, extends {@link Request}
+   *
+   * @return the parsed object
+   */
+  @SuppressWarnings("unchecked")
+  static <T extends Request> T parse (@NonNull Bytes bytes, int length) {
+    if (bytes.readableBytes() < length) {
       throw new IllegalArgumentException("Doesn't have enought bytes");
     }
 
