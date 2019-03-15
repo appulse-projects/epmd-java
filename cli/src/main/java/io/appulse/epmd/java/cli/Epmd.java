@@ -16,25 +16,32 @@
 
 package io.appulse.epmd.java.cli;
 
-import picocli.CommandLine;
+import lombok.extern.slf4j.Slf4j;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
-/**
- * Main class, program's entry point.
- *
- * @since 0.3.2
- * @author Artem Labazin
- */
-public final class Main {
-
-  /**
-   * Main method.
-   *
-   * @param args program's arguments
-   */
-  public static void main (String[] args) {
-    CommandLine.run(new Epmd(), args);
+@Slf4j
+@Command(
+  name = "epmd",
+  mixinStandardHelpOptions = true,
+  version = "epmd 2.0.0",
+  subcommands = {
+    SubcommandNames.class,
+    SubcommandServer.class,
+    SubcommandStop.class,
+    SubcommandKill.class
   }
+)
+class Epmd implements Runnable {
 
-  private Main () {
+  @Option(names = { "-p", "--port" })
+  int port = 4369;
+
+  @Option(names = { "-d", "--debug" })
+  boolean debug;
+
+  @Override
+  public void run () {
+    log.error("You must specify one of the commands");
   }
 }

@@ -16,18 +16,22 @@
 
 package io.appulse.epmd.java.cli;
 
+import static ch.qos.logback.classic.Level.DEBUG;
 import static java.util.Collections.singleton;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.Optional.of;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
+import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 import java.io.Closeable;
 import java.io.IOException;
-
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -36,6 +40,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Logger;
 import io.appulse.epmd.java.core.model.NodeType;
 import io.appulse.epmd.java.core.model.Protocol;
 import io.appulse.epmd.java.core.model.Version;
@@ -66,51 +73,33 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.ParentCommand;
 
-@Command(subcommands = {
-  SubcommandKillEpmdServer.class,
-  SubcommandGetAllNames.class,
-  SubcommandStopNode.class
-})
-class CommandStartEpmdServer implements Runnable {
+@Slf4j
+@Command(name = "server")
+class SubcommandServer implements Runnable {
 
-  @SneakyThrows
-  private static Set<InetAddress> getDefaultAddresses () {
-    return singleton(InetAddress.getByName("0.0.0.0"));
+  private static final InetAddress ANY_ADDRESS;
+
+  static {
+    try {
+      ANY_ADDRESS = InetAddress.getByName("0.0.0.0");
+    } catch (UnknownHostException ex) {
+      throw new RuntimeException(ex);
+    }
   }
 
-  @Option(
-    names = { "-h", "--help" },
-    usageHelp = true,
-    hidden = true
-  )
-  boolean helpRequested;
+  @ParentCommand
+  Epmd options;
 
-  @Option(names = "-address")
-  Set<InetAddress> addresses = getDefaultAddresses();
+  @Option(names = { "-a", "--allowed-ips" })
+  Set<InetAddress> ips = singleton(ANY_ADDRESS);
 
-  @Option(names = "-port")
-  int port = 4369;
-
-  @Option(names = { "-d", "-debug" })
-  boolean[] debugLevel = new boolean[0];
-
-  @Option(names = "-daemon")
-  boolean daemon;
-
-  @Option(names = "-relaxed_command_check")
-  boolean checks;
-
-  @Option(names = "-packet_timeout")
-  int packetTimeout = 60;
-
-  @Option(names = "-delay_accept")
-  int delayAccept;
-
-  @Option(names = "-delay_write")
-  int delayWrite;
+  @Option(names = { "-u", "--unsafe-commands" })
+  boolean unsafe;
 
   Map<String, Node> nodes;
 
@@ -119,6 +108,11 @@ class CommandStartEpmdServer implements Runnable {
   @Override
   @SneakyThrows
   public void run () {
+    val root = (Logger) LoggerFactory.getLogger(ROOT_LOGGER_NAME);
+    if (options.debug) {
+      root.setLevel(DEBUG);
+    }
+
     nodes = new ConcurrentHashMap<>();
     executor = AppulseExecutors.newCachedThreadPool()
         .threadFactory(AppulseThreadFactory.builder()
@@ -131,21 +125,37 @@ class CommandStartEpmdServer implements Runnable {
         .queueLimit(1000)
         .build();
 
-    try (val serverSocket = new ServerSocket(port, 1000)) {
+    try (val serverSocket = new ServerSocket(options.port, 1000)) {
+      log.info("EPMD server started (debug: {}, port: {}, allowed-ips: {}, unsafe-commands: {})",
+               options.debug, options.port, ips, unsafe);
+
       while (!Thread.interrupted()) {
-          val clientSocket = serverSocket.accept();
+        val clientSocket = serverSocket.accept();
 
-          val localAddress = clientSocket.getLocalAddress();
-          if (!addresses.contains(localAddress)) {
-            clientSocket.close();
-            continue;
-          }
+        val remoteSocketAddress = clientSocket.getRemoteSocketAddress();
+        val remoteAddress = ofNullable(remoteSocketAddress)
+            .filter(it -> it instanceof InetSocketAddress)
+            .map(it -> (InetSocketAddress) it)
+            .map(InetSocketAddress::getAddress)
+            .orElse(null);
 
-          val handler = new ServerHandler(clientSocket);
-          executor.submit(handler);
+        if (remoteAddress == null) {
+          log.warn("uh?");
+          continue;
+        } else if (!ips.contains(ANY_ADDRESS) && !ips.contains(remoteAddress)) {
+          clientSocket.close();
+          log.warn("unacceptable remote client's address {}", remoteAddress);
+          continue;
+        }
+        log.debug("{} - a new incoming connection", remoteSocketAddress);
+
+        val handler = new ServerHandler(clientSocket);
+        executor.submit(handler);
       }
     } finally {
       executor.shutdown();
+      val termnated = executor.awaitTermination(5, SECONDS);
+      log.info("EPMD server terminated successfully ({})", termnated);
     }
   }
 
@@ -171,14 +181,27 @@ class CommandStartEpmdServer implements Runnable {
     @Override
     @SneakyThrows
     public void run () {
-      val requestLengthBytes = SocketUtils.read(socket, 2);
-      val requestLength = BytesUtils.asShort(requestLengthBytes);
+      try {
+        val requestLengthBytes = SocketUtils.read(socket, 2);
+        val requestLength = BytesUtils.asShort(requestLengthBytes);
 
-      val requestBytes = SocketUtils.read(socket, requestLength);
-      val request = Request.parse(requestBytes);
+        val requestBytes = SocketUtils.read(socket, requestLength);
+        val request = Request.parse(requestBytes, requestLength);
 
-      findProcessor(request, socket)
-          .ifPresent(RequestProcessor::process);
+        log.debug("the new reqeust is {}", request);
+        findProcessor(request, socket)
+            .map(it -> {
+              log.debug("reqeust processor is {}", it.getClass().getSimpleName());
+              return it;
+            })
+            .ifPresent(RequestProcessor::process);
+      } catch (Throwable ex) {
+        if (options.debug) {
+          log.error("handling {} connection error - '{}'", ex.getMessage(), ex);
+        } else {
+          log.error("handling {} connection error - '{}'", ex.getMessage());
+        }
+      }
     }
 
     private Optional<RequestProcessor<?>> findProcessor (Request request, Socket socket) {
@@ -196,6 +219,7 @@ class CommandStartEpmdServer implements Runnable {
       case STOP_REQUEST:
         return of(new StopRequestProcessor(request, socket));
       default:
+        log.warn("unsupported request's tag - {}", request.getTag());
         return empty();
       }
     }
@@ -209,8 +233,14 @@ class CommandStartEpmdServer implements Runnable {
       @NonNull
       protected final Socket socket;
 
+      @SneakyThrows
       void process () {
         val response = respond();
+        if (response == null) {
+          socket.close();
+          return;
+        }
+
         send(response);
         afterSend(response);
       }
@@ -219,13 +249,16 @@ class CommandStartEpmdServer implements Runnable {
 
       @SneakyThrows
       protected void send (Response response) {
+        log.debug("sending a response to {}", socket.getRemoteSocketAddress());
         val responseBytes = response.toBytes();
         socket.getOutputStream().write(responseBytes);
         socket.getOutputStream().flush();
+        log.debug("{} was sent to {}", response, socket.getRemoteSocketAddress());
       }
 
       @SneakyThrows
       protected void afterSend (Response response) {
+        log.debug("close connection to {}", socket.getRemoteSocketAddress());
         socket.close();
       }
     }
@@ -238,7 +271,7 @@ class CommandStartEpmdServer implements Runnable {
 
       @Override
       protected Response respond () {
-        val creation = (int) System.currentTimeMillis() % 3 + 1;
+        val creation = (int) (System.currentTimeMillis() % 3 + 1);
         val node = nodes.computeIfAbsent(request.getName(), key -> Node.builder()
             .name(request.getName())
             .port(request.getPort())
@@ -280,7 +313,7 @@ class CommandStartEpmdServer implements Runnable {
       @Override
       protected Response respond () {
         val builder = EpmdDump.builder()
-            .port(port);
+            .port(options.port);
 
         getNodes().stream()
             .map(it -> NodeDump.builder()
@@ -304,7 +337,7 @@ class CommandStartEpmdServer implements Runnable {
 
       @Override
       protected Response respond () {
-        if (!checks) {
+        if (!unsafe) {
           return KillResult.NOK;
         }
         nodes.values().forEach(it -> {
@@ -360,7 +393,7 @@ class CommandStartEpmdServer implements Runnable {
       @Override
       protected Response respond () {
         val builder = EpmdInfo.builder()
-            .port(port);
+            .port(options.port);
 
         getNodes().stream()
             .map(it -> NodeDescription.builder()
@@ -382,7 +415,7 @@ class CommandStartEpmdServer implements Runnable {
 
       @Override
       protected Response respond () {
-        if (!checks) {
+        if (!unsafe) {
           return StopResult.NOEXIST;
         }
 
@@ -433,23 +466,16 @@ class CommandStartEpmdServer implements Runnable {
       }
     }
 
+    @SneakyThrows
     boolean isAlive () {
-      if (socket.isClosed()) {
+      val nodeSocketAddress = new InetSocketAddress(socket.getInetAddress(), port);
+      try (val nodeSocket = new Socket()) {
+        nodeSocket.connect(nodeSocketAddress, 2_000);
+        nodeSocket.close();
+      } catch (Throwable ex) {
         return false;
       }
-      try {
-        socket.getOutputStream().write(1);
-        return true;
-      } catch (IOException ex) {
-        // noop
-      }
-
-      try {
-        socket.close();
-      } catch (IOException ex) {
-        // noop
-      }
-      return false;
+      return true;
     }
   }
 }

@@ -16,8 +16,6 @@
 
 package io.appulse.epmd.java.cli;
 
-import static java.util.stream.Collectors.joining;
-import static java.util.Locale.ENGLISH;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.concurrent.CompletionException;
@@ -25,7 +23,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import io.appulse.epmd.java.client.EpmdClient;
-import io.appulse.epmd.java.client.exception.EpmdConnectionException;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -33,35 +30,29 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
 @Slf4j
-@Command(name = "-names")
-class SubcommandGetAllNames implements Runnable {
+@Command(name = "kill")
+class SubcommandKill implements Runnable {
 
   @ParentCommand
-  CommandStartEpmdServer options;
+  Epmd options;
 
   @Override
   public void run () {
     try (val client = new EpmdClient(options.port)) {
-      val descriptionsString = client.getNodes()
-          .get(2, SECONDS)
-          .stream()
-          .map(it -> String.format(ENGLISH, "name %s at port %d\n",
-                                   it.getName(),
-                                   it.getPort())
-          )
-          .collect(joining("", "\n", ""));
-
-      System.out.format(ENGLISH, "epmd: up and running on port %d with data:%s",
-                        client.getPort(), descriptionsString);
-
-    } catch (CompletionException | ExecutionException ex) {
-      val exception = ex.getCause();
-      if (exception instanceof EpmdConnectionException) {
-        System.err.println("epmd: Cannot connect to local epmd");
-        System.exit(1);
+      if (client.kill().get(2, SECONDS)) {
+        log.info("EPMD server was killed");
       } else {
-        log.error("{}", exception.getMessage(), exception);
+        log.error("killing is not allowed - there are living nodes in database.");
+        Runtime.getRuntime().exit(1);
       }
+    } catch (CompletionException | ExecutionException ex) {
+      val cause = ex.getCause();
+      if (options.debug) {
+        log.error("{}", cause.getMessage(), cause);
+      } else {
+        log.error("{}", cause.getMessage());
+      }
+      Runtime.getRuntime().exit(1);
     } catch (TimeoutException ex) {
       log.error("EPMD server doesn't respond too long");
     } catch (InterruptedException ex) {

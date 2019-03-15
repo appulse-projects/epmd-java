@@ -23,37 +23,40 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import io.appulse.epmd.java.client.EpmdClient;
-import io.appulse.epmd.java.client.exception.EpmdConnectionException;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
 
 @Slf4j
-@Command(name = "-kill")
-class SubcommandKillEpmdServer implements Runnable {
+@Command(name = "stop")
+class SubcommandStop implements Runnable {
 
   @ParentCommand
-  CommandStartEpmdServer options;
+  Epmd options;
+
+  @Parameters
+  String name;
 
   @Override
   public void run () {
     try (val client = new EpmdClient(options.port)) {
-      if (client.kill().get(2, SECONDS)) {
-        System.out.println("Killed");
+      if (client.stop(name).get(2, SECONDS)) {
+        log.info("the node '{}' was stopped", name);
       } else {
-        System.err.println("Killing not allowed - living nodes in database.");
-        System.exit(1);
+        log.error("couldn't stop the node '{}'", name);
+        Runtime.getRuntime().exit(1);
       }
     } catch (CompletionException | ExecutionException ex) {
-      val exception = ex.getCause();
-      if (exception instanceof EpmdConnectionException) {
-        System.err.println("epmd: Cannot connect to local epmd");
-        System.exit(1);
+      val cause = ex.getCause();
+      if (options.debug) {
+        log.error("{}", cause.getMessage(), cause);
       } else {
-        log.error("{}", exception.getMessage(), exception);
+        log.error("{}", cause.getMessage());
       }
+      Runtime.getRuntime().exit(1);
     } catch (TimeoutException ex) {
       log.error("EPMD server doesn't respond too long");
     } catch (InterruptedException ex) {
