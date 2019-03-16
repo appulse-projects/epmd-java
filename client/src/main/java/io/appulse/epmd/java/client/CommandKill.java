@@ -23,6 +23,7 @@ import java.net.InetAddress;
 import io.appulse.epmd.java.core.model.request.Kill;
 import io.appulse.epmd.java.core.model.response.KillResult;
 import io.appulse.epmd.java.core.model.response.Response;
+
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -61,6 +62,7 @@ final class CommandKill extends CommandAbstract<Kill, Boolean> {
       val response = Response.parse(responseBytes, KillResult.class);
       return response == OK;
     } catch (Exception ex) {
+      log.error("Error during killing the EPMD server", ex);
       return false;
     }
   }

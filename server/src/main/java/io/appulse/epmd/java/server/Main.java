@@ -16,11 +16,10 @@
 
 package io.appulse.epmd.java.server;
 
-import static java.util.Optional.ofNullable;
 import static java.util.Arrays.asList;
+import static java.util.Optional.ofNullable;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import lombok.val;
 import picocli.CommandLine;

@@ -18,12 +18,12 @@ package io.appulse.epmd.java.server;
 
 import static ch.qos.logback.classic.Level.DEBUG;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static java.util.Optional.of;
-import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toSet;
 import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 import java.io.Closeable;
@@ -54,29 +54,30 @@ import io.appulse.epmd.java.core.model.request.Registration;
 import io.appulse.epmd.java.core.model.request.Request;
 import io.appulse.epmd.java.core.model.request.Stop;
 import io.appulse.epmd.java.core.model.response.EpmdDump;
+import io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump;
 import io.appulse.epmd.java.core.model.response.EpmdInfo;
+import io.appulse.epmd.java.core.model.response.EpmdInfo.NodeDescription;
 import io.appulse.epmd.java.core.model.response.KillResult;
 import io.appulse.epmd.java.core.model.response.NodeInfo;
 import io.appulse.epmd.java.core.model.response.RegistrationResult;
 import io.appulse.epmd.java.core.model.response.Response;
 import io.appulse.epmd.java.core.model.response.StopResult;
-import io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump;
-import io.appulse.epmd.java.core.model.response.EpmdInfo.NodeDescription;
 import io.appulse.utils.BytesUtils;
 import io.appulse.utils.SocketUtils;
 import io.appulse.utils.threads.AppulseExecutors;
 import io.appulse.utils.threads.AppulseThreadFactory;
 
 import ch.qos.logback.classic.Logger;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Builder;
-import lombok.extern.slf4j.Slf4j;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Singular;
 import lombok.SneakyThrows;
-import lombok.val;
 import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -96,7 +97,7 @@ class SubcommandServer implements Runnable {
       ANY_ADDRESS = InetAddress.getByName("0.0.0.0");
       LOOPBACK_ADDRESS = InetAddress.getLoopbackAddress();
     } catch (UnknownHostException ex) {
-      throw new RuntimeException(ex);
+      throw new IllegalStateException(ex);
     }
   }
 
@@ -128,27 +129,27 @@ class SubcommandServer implements Runnable {
   }
 
   private void setupEnvironmentVariables () {
-    ips.add(LOOPBACK_ADDRESS);
-    if (ips.size() == 1) {
+    if (new SubcommandServer().ips.equals(ips)) {
       ips = ofNullable(System.getProperty("ERL_EPMD_ADDRESS"))
-          .map(it -> it.split(",\\s*"))
+          .map(it -> it.split(","))
           .map(it -> Stream.of(it)
+              .map(String::trim)
+              .filter(ip -> !ip.isEmpty())
               .map(ip -> {
                 try {
                   return InetAddress.getByName(ip);
                 } catch (UnknownHostException ex) {
-                  return null;
+                  throw new IllegalArgumentException("Invalid host " + ip, ex);
                 }
               })
-              .collect(toList()))
-          .map(HashSet::new)
-          .map(it -> (Set<InetAddress>) it)
+              .collect(toSet()))
           .map(it -> {
             it.add(LOOPBACK_ADDRESS);
             return it;
           })
           .orElse(ips);
     }
+    ips.add(LOOPBACK_ADDRESS);
 
     if (!unsafe) {
       val string = ofNullable(System.getProperty("ERL_EPMD_RELAXED_COMMAND_CHECK"))
@@ -160,6 +161,7 @@ class SubcommandServer implements Runnable {
 
   @Override
   @SneakyThrows
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   public void run () {
     setupEnvironmentVariables();
 
@@ -205,7 +207,7 @@ class SubcommandServer implements Runnable {
         log.debug("{} - a new incoming connection", remoteSocketAddress);
 
         val handler = new ServerHandler(clientSocket);
-        executor.submit(handler);
+        executor.execute(handler);
       }
     } finally {
       executor.shutdown();
@@ -250,7 +252,7 @@ class SubcommandServer implements Runnable {
               return it;
             })
             .ifPresent(RequestProcessor::process);
-      } catch (Throwable ex) {
+      } catch (Exception ex) {
         if (options.debug) {
           log.error("handling {} connection error - '{}'", ex.getMessage(), ex);
         } else {
@@ -259,20 +261,20 @@ class SubcommandServer implements Runnable {
       }
     }
 
-    private Optional<RequestProcessor<?>> findProcessor (Request request, Socket socket) {
+    private Optional<RequestProcessor<?>> findProcessor (Request request, Socket clientSocket) {
       switch (request.getTag()) {
       case ALIVE2_REQUEST:
-        return of(new RegistrationRequestProcessor(request, socket));
+        return of(new RegistrationRequestProcessor(request, clientSocket));
       case DUMP_REQUEST:
-        return of(new DumpRequestProcessor(request, socket));
+        return of(new DumpRequestProcessor(request, clientSocket));
       case KILL_REQUEST:
-        return of(new KillRequestProcessor(request, socket));
+        return of(new KillRequestProcessor(request, clientSocket));
       case PORT_PLEASE2_REQUEST:
-        return of(new GetNodeInfoRequestProcessor(request, socket));
+        return of(new GetNodeInfoRequestProcessor(request, clientSocket));
       case NAMES_REQUEST:
-        return of(new GetEpmdInfoRequestProcessor(request, socket));
+        return of(new GetEpmdInfoRequestProcessor(request, clientSocket));
       case STOP_REQUEST:
-        return of(new StopRequestProcessor(request, socket));
+        return of(new StopRequestProcessor(request, clientSocket));
       default:
         log.warn("unsupported request's tag - {}", request.getTag());
         return empty();
@@ -395,13 +397,7 @@ class SubcommandServer implements Runnable {
         if (!unsafe) {
           return KillResult.NOK;
         }
-        nodes.values().forEach(it -> {
-          try {
-            it.getSocket().close();
-          } catch (IOException ex) {
-            // noop
-          }
-        });
+        nodes.values().forEach(Node::close);
         return KillResult.OK;
       }
 
@@ -513,6 +509,7 @@ class SubcommandServer implements Runnable {
     Socket socket;
 
     @Override
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     public void close () {
       try {
         socket.close();
@@ -522,12 +519,13 @@ class SubcommandServer implements Runnable {
     }
 
     @SneakyThrows
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     boolean isAlive () {
       val nodeSocketAddress = new InetSocketAddress(socket.getInetAddress(), port);
       try (val nodeSocket = new Socket()) {
         nodeSocket.connect(nodeSocketAddress, 2_000);
         nodeSocket.close();
-      } catch (Throwable ex) {
+      } catch (Exception ex) {
         return false;
       }
       return true;

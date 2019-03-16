@@ -24,8 +24,8 @@ import java.util.concurrent.TimeoutException;
 
 import io.appulse.epmd.java.client.EpmdClient;
 
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 

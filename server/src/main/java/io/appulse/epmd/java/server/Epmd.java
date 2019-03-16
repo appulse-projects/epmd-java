@@ -28,32 +28,32 @@ import picocli.CommandLine.Option;
 @NoArgsConstructor
 @AllArgsConstructor
 @Command(
-  name = "epmd",
-  description = "Erlang Port Mapper Daemon",
-  mixinStandardHelpOptions = true,
-  version = "epmd 2.0.0",
-  subcommands = {
-    SubcommandNames.class,
-    SubcommandServer.class,
-    SubcommandStop.class,
-    SubcommandKill.class
-  }
+    name = "epmd",
+    description = "Erlang Port Mapper Daemon",
+    mixinStandardHelpOptions = true,
+    version = "epmd 2.0.0",
+    subcommands = {
+      SubcommandNames.class,
+      SubcommandServer.class,
+      SubcommandStop.class,
+      SubcommandKill.class
+    }
 )
 class Epmd implements Runnable {
 
   @Option(
-    names = { "-p", "--port" },
-    paramLabel = "PORT",
-    description =
-      "Let epmd listen to another port than default ${DEFAULT-VALUE}. " +
-      "This can also be set using environment variable ERL_EPMD_PORT"
+      names = { "-p", "--port" },
+      paramLabel = "PORT",
+      description =
+        "Let epmd listen to another port than default ${DEFAULT-VALUE}. " +
+        "This can also be set using environment variable ERL_EPMD_PORT"
   )
   @Builder.Default
   int port = 4369;
 
   @Option(
-    names = { "-d", "--debug" },
-    description = "Enables debugging logs"
+      names = { "-d", "--debug" },
+      description = "Enables debugging logs"
   )
   boolean debug;
 

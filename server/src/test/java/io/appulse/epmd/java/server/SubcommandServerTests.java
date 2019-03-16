@@ -33,13 +33,13 @@ import java.util.concurrent.Future;
 import io.appulse.epmd.java.client.EpmdClient;
 import io.appulse.epmd.java.client.exception.EpmdRegistrationException;
 import io.appulse.epmd.java.core.model.request.Registration;
-import io.appulse.epmd.java.core.model.response.NodeInfo;
 import io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump;
+import io.appulse.epmd.java.core.model.response.NodeInfo;
 import io.appulse.utils.SocketUtils;
 import io.appulse.utils.threads.AppulseExecutors;
 
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
