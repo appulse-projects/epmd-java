@@ -29,9 +29,17 @@ import picocli.CommandLine.Option;
 @AllArgsConstructor
 @Command(
     name = "epmd",
-    description = "Erlang Port Mapper Daemon",
+    sortOptions = false,
+    descriptionHeading = "%n",
+    parameterListHeading = "%nParameters:%n",
+    optionListHeading = "%nOptions:%n",
+    commandListHeading = "%nCommands:%n",
+    description =
+      "Erlang port mapper daemon. This is a small name server " +
+      "used by Erlang programs when establishing distributed " +
+      "Erlang communications.",
     mixinStandardHelpOptions = true,
-    version = "epmd 2.0.0",
+    version = "epmd version \"2.0.0\" 2019-03-17",
     subcommands = {
       SubcommandNames.class,
       SubcommandServer.class,
