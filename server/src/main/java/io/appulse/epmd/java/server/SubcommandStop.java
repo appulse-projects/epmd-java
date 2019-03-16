@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.cli;
+package io.appulse.epmd.java.server;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 

@@ -1,7 +1,21 @@
-package io.appulse.epmd.java.cli;
+/*
+ * Copyright 2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import static java.util.stream.Collectors.joining;
-import static java.util.Locale.ENGLISH;
+package io.appulse.epmd.java.server;
+
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.concurrent.CompletionException;
@@ -16,8 +30,8 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
 @Slf4j
-@Command(name = "names")
-class SubcommandNames implements Runnable {
+@Command(name = "kill")
+class SubcommandKill implements Runnable {
 
   @ParentCommand
   Epmd options;
@@ -25,21 +39,11 @@ class SubcommandNames implements Runnable {
   @Override
   public void run () {
     try (val client = new EpmdClient(options.port)) {
-      val descriptionsString = client.getNodes()
-          .get(2, SECONDS)
-          .stream()
-          .map(it -> String.format(ENGLISH, " - node '%s' at port %d",
-                                   it.getName(),
-                                   it.getPort())
-          )
-          .collect(joining("\n"));
-
-      if (descriptionsString.isEmpty()) {
-        log.info("EPMD up and running on port {} without any registered node",
-                 client.getPort());
+      if (client.kill().get(2, SECONDS)) {
+        log.info("EPMD server was killed");
       } else {
-        log.info("EPMD up and running on port {} with the registered node(s):\n{}",
-                 client.getPort(), descriptionsString);
+        log.error("killing is not allowed - there are living nodes in database.");
+        Runtime.getRuntime().exit(1);
       }
     } catch (CompletionException | ExecutionException ex) {
       val cause = ex.getCause();

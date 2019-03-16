@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.cli;
+package io.appulse.epmd.java.server;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Slf4j
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Command(
   name = "epmd",
+  description = "Erlang Port Mapper Daemon",
   mixinStandardHelpOptions = true,
   version = "epmd 2.0.0",
   subcommands = {
@@ -34,10 +41,20 @@ import picocli.CommandLine.Option;
 )
 class Epmd implements Runnable {
 
-  @Option(names = { "-p", "--port" })
+  @Option(
+    names = { "-p", "--port" },
+    paramLabel = "PORT",
+    description =
+      "Let epmd listen to another port than default ${DEFAULT-VALUE}. " +
+      "This can also be set using environment variable ERL_EPMD_PORT"
+  )
+  @Builder.Default
   int port = 4369;
 
-  @Option(names = { "-d", "--debug" })
+  @Option(
+    names = { "-d", "--debug" },
+    description = "Enables debugging logs"
+  )
   boolean debug;
 
   @Override

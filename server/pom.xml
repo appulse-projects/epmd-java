@@ -36,33 +36,15 @@ limitations under the License.
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>client</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>com.beust</groupId>
-      <artifactId>jcommander</artifactId>
-      <version>1.72</version>
+      <groupId>info.picocli</groupId>
+      <artifactId>picocli</artifactId>
+      <version>3.9.5</version>
     </dependency>
-
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-all</artifactId>
-      <version>4.1.33.Final</version>
-    </dependency>
-
-    <!-- <dependency>
-      <groupId>com.github.stefanbirkner</groupId>
-      <artifactId>system-rules</artifactId>
-      <version>1.17.1</version>
-      <scope>test</scope>
-    </dependency> -->
   </dependencies>
 
   <build>
@@ -70,31 +52,40 @@ limitations under the License.
 
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.1</version>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
         <executions>
           <execution>
+            <id>default-cli</id>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <skip>false</skip>
+          <mainClass>io.appulse.epmd.java.server.Main</mainClass>
+          <includeProjectDependencies>true</includeProjectDependencies>
+          <includePluginDependencies>false</includePluginDependencies>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>com.github.chrisdchristo</groupId>
+        <artifactId>capsule-maven-plugin</artifactId>
+        <version>1.5.1</version>
+        <executions>
+          <execution>
+            <id>fat-jar</id>
             <phase>package</phase>
             <goals>
-              <goal>shade</goal>
+              <goal>build</goal>
             </goals>
             <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>io.appulse.epmd.java.server.Main</mainClass>
-                </transformer>
-              </transformers>
-              <filters>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>META-INF/*.SF</exclude>
-                    <exclude>META-INF/*.DSA</exclude>
-                    <exclude>META-INF/*.RSA</exclude>
-                  </excludes>
-                </filter>
-              </filters>
+              <execPluginConfig>default-cli</execPluginConfig>
+              <type>fat</type>
+              <chmod>true</chmod>
             </configuration>
           </execution>
         </executions>

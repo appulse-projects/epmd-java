@@ -16,7 +16,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<configuration>
+<configuration debug="false">
+  <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
   <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
 
   <include resource="io/appulse/logging/logback/base.xml" />

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.cli;
+package io.appulse.epmd.java.server;
 
 import static ch.qos.logback.classic.Level.DEBUG;
-import static java.util.Collections.singleton;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.Optional.of;
@@ -33,16 +34,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
 
-import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.Logger;
 import io.appulse.epmd.java.core.model.NodeType;
 import io.appulse.epmd.java.core.model.Protocol;
 import io.appulse.epmd.java.core.model.Version;
@@ -67,26 +67,34 @@ import io.appulse.utils.SocketUtils;
 import io.appulse.utils.threads.AppulseExecutors;
 import io.appulse.utils.threads.AppulseThreadFactory;
 
+import ch.qos.logback.classic.Logger;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Singular;
 import lombok.SneakyThrows;
-import lombok.Value;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Value;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
 @Slf4j
+@NoArgsConstructor
 @Command(name = "server")
 class SubcommandServer implements Runnable {
 
-  private static final InetAddress ANY_ADDRESS;
+  static final InetAddress ANY_ADDRESS;
+
+  static final InetAddress LOOPBACK_ADDRESS;
 
   static {
     try {
       ANY_ADDRESS = InetAddress.getByName("0.0.0.0");
+      LOOPBACK_ADDRESS = InetAddress.getLoopbackAddress();
     } catch (UnknownHostException ex) {
       throw new RuntimeException(ex);
     }
@@ -96,7 +104,7 @@ class SubcommandServer implements Runnable {
   Epmd options;
 
   @Option(names = { "-a", "--allowed-ips" })
-  Set<InetAddress> ips = singleton(ANY_ADDRESS);
+  Set<InetAddress> ips = new HashSet<>(asList(LOOPBACK_ADDRESS));
 
   @Option(names = { "-u", "--unsafe-commands" })
   boolean unsafe;
@@ -105,9 +113,56 @@ class SubcommandServer implements Runnable {
 
   ExecutorService executor;
 
+  @Builder
+  SubcommandServer (@NonNull Epmd options,
+                    @Singular Set<InetAddress> ips,
+                    boolean unsafe
+  ) {
+    this.options = options;
+    this.unsafe = unsafe;
+
+    ofNullable(ips)
+        .filter(it -> !it.isEmpty())
+        .map(HashSet::new)
+        .ifPresent(it -> this.ips = it);
+  }
+
+  private void setupEnvironmentVariables () {
+    ips.add(LOOPBACK_ADDRESS);
+    if (ips.size() == 1) {
+      ips = ofNullable(System.getProperty("ERL_EPMD_ADDRESS"))
+          .map(it -> it.split(",\\s*"))
+          .map(it -> Stream.of(it)
+              .map(ip -> {
+                try {
+                  return InetAddress.getByName(ip);
+                } catch (UnknownHostException ex) {
+                  return null;
+                }
+              })
+              .collect(toList()))
+          .map(HashSet::new)
+          .map(it -> (Set<InetAddress>) it)
+          .map(it -> {
+            it.add(LOOPBACK_ADDRESS);
+            return it;
+          })
+          .orElse(ips);
+    }
+
+    if (!unsafe) {
+      val string = ofNullable(System.getProperty("ERL_EPMD_RELAXED_COMMAND_CHECK"))
+          .filter(it -> !it.isEmpty())
+          .orElse("true");
+      unsafe = Boolean.valueOf(string);
+    }
+  }
+
   @Override
   @SneakyThrows
   public void run () {
+    setupEnvironmentVariables();
+
     val root = (Logger) LoggerFactory.getLogger(ROOT_LOGGER_NAME);
     if (options.debug) {
       root.setLevel(DEBUG);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.appulse.epmd.java.server.command.server;
+package io.appulse.epmd.java.server;
 
 import static io.appulse.epmd.java.core.model.NodeType.R3_ERLANG;
 import static io.appulse.epmd.java.core.model.Protocol.TCP;
@@ -24,52 +24,62 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.net.ServerSocket;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import io.appulse.epmd.java.client.EpmdClient;
 import io.appulse.epmd.java.client.exception.EpmdRegistrationException;
 import io.appulse.epmd.java.core.model.request.Registration;
-import io.appulse.epmd.java.server.cli.CommonOptions;
+import io.appulse.epmd.java.core.model.response.NodeInfo;
+import io.appulse.epmd.java.core.model.response.EpmdDump.NodeDump;
 import io.appulse.utils.SocketUtils;
 import io.appulse.utils.threads.AppulseExecutors;
 
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class ServerCommandExecutorTest {
+@Slf4j
+class SubcommandServerTests {
 
   ExecutorService executorService = AppulseExecutors.newSingleThreadExecutor().build();
 
   EpmdClient client;
 
-  ServerCommandExecutor server;
-
   Future<?> future;
 
   @BeforeEach
   void before () throws Exception {
-    val port = SocketUtils.findFreePort()
-        .orElseThrow(RuntimeException::new);
+    val server = SubcommandServer.builder()
+        .options(Epmd.builder()
+            .port(SocketUtils.findFreePort().orElseThrow(RuntimeException::new))
+            .build())
+        .ip(SubcommandServer.ANY_ADDRESS)
+        .build();
 
-    val commonOptions = new CommonOptions();
-    commonOptions.setPort(port);
-    server = new ServerCommandExecutor(commonOptions, new ServerCommandOptions());
-
-    future = executorService.submit(server::execute);
+    future = executorService.submit(() -> {
+      try {
+        server.run();
+      } catch (Throwable ex) {
+        log.error("popa", ex);
+      }
+    });
 
     SECONDS.sleep(1);
 
-    client = new EpmdClient(port);
+    client = new EpmdClient(server.options.port);
   }
 
   @AfterEach
   void after () {
     client.close();
-    server.close();
     future.cancel(true);
   }
 
@@ -91,7 +101,10 @@ class ServerCommandExecutorTest {
 
     client.register(registration).get(3, SECONDS);
 
-    val optional = client.lookup("registers", client.getPort()).get(3, SECONDS);
+    Optional<NodeInfo> optional;
+    try (val serverSocket = new ServerSocket(registration.getPort(), 1000)) {
+      optional = client.lookup("registers", client.getPort()).get(3, SECONDS);
+    }
     assertThat(optional).isPresent();
 
     val nodeInfo = optional.get();
@@ -143,7 +156,11 @@ class ServerCommandExecutorTest {
         .build();
 
     client.register(registration).get(3, SECONDS);
-    val nodes = client.dump().get(3, SECONDS);
+
+    List<NodeDump> nodes;
+    try (val serverSocket = new ServerSocket(registration.getPort(), 1000)) {
+      nodes = client.dump().get(3, SECONDS);
+    }
     assertThat(nodes)
         .isNotNull()
         .hasSize(1)

@@ -16,10 +16,14 @@
 
 package io.appulse.epmd.java.server;
 
-import io.appulse.epmd.java.server.cli.CommandLineParser;
+import static java.util.Optional.ofNullable;
+import static java.util.Arrays.asList;
 
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.List;
+
+import lombok.val;
+import picocli.CommandLine;
 
 /**
  * Main class, program's entry point.
@@ -27,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
  * @since 0.3.2
  * @author Artem Labazin
  */
-@Slf4j
 public final class Main {
 
   /**
@@ -35,17 +38,19 @@ public final class Main {
    *
    * @param args program's arguments
    */
-  @SuppressWarnings("PMD.AvoidPrintStackTrace")
-  public static void main (@NonNull String[] args) {
-    try {
-      CommandLineParser.parse(args)
-          .execute();
-    } catch (Exception ex) {
-      if (log.isDebugEnabled()) {
-        ex.printStackTrace();
-      }
-      System.exit(1);
-    }
+  public static void main (String[] args) {
+    val arguments = new ArrayList<>();
+
+    ofNullable(System.getProperty("ERL_EPMD_PORT"))
+        .filter(port -> !port.isEmpty())
+        .ifPresent(port -> {
+          arguments.add("--port");
+          arguments.add(port);
+        });
+
+    arguments.addAll(asList(args));
+
+    CommandLine.run(new Epmd(), arguments.toArray(new String[0]));
   }
 
   private Main () {
