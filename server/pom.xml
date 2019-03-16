@@ -48,7 +48,7 @@ limitations under the License.
   </dependencies>
 
   <build>
-    <finalName>epmd-${project.version}</finalName>
+    <finalName>epmd-${project.version}-no-dependencies</finalName>
 
     <plugins>
       <plugin>
@@ -75,6 +75,10 @@ limitations under the License.
         <groupId>com.github.chrisdchristo</groupId>
         <artifactId>capsule-maven-plugin</artifactId>
         <version>1.5.1</version>
+        <configuration>
+          <fileName>epmd</fileName>
+          <fileDesc>-${project.version}</fileDesc>
+        </configuration>
         <executions>
           <execution>
             <id>fat-jar</id>
