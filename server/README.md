@@ -9,73 +9,43 @@
 Run it as a regular `Java` CLI app:
 
 ```bash
-$> java -jar epmd-2.0.0.jar
-2019-06-06 00:10:18.869  INFO : Starting server on port 4369
+$> java -jar epmd-2.0.0.jar server
+2019-03-17 01:38:09.302  INFO : EPMD server started (debug: false, port: 4369, allowed-ips: [localhost/127.0.0.1], unsafe-commands: true)
 
 ```
 
 To get names of all registered nodes:
 
 ```bash
-$> java -jar epmd-2.0.0.jar -names
-popa
-echo
+$> java -jar epmd-2.0.0.jar names
+2019-03-17 01:45:39.310  INFO : EPMD up and running on port 4369 with the registered node(s):
+ - node 'echo' at port 60045
 ```
 
 To see another options and commands, just type:
 
 ```bash
 $> java -jar epmd-2.0.0.jar --help
-usage: java -jar epmd.jar [-d|-debug] [DbgExtra...] [-address List]
-                          [-port No] [-daemon] [-relaxed_command_check]
-       java -jar epmd.jar [-d|-debug] [-port No] [-names|-kill|-stop name]
+Usage: epmd [-dhV] [-p=PORT] [COMMAND]
 
-Regular options
-    -address List
-        Let epmd listen only on the comma-separated list of IP
-        addresses (and on the loopback interface).
-    -port No
-        Let epmd listen to another port than default 4369
-    -d
-    -debug
-        Enable debugging. This will give a log to
-        the standard error stream. It will shorten
-        the number of saved used node names to 5.
+Erlang port mapper daemon. This is a small name server used by Erlang programs
+when establishing distributed Erlang communications.
 
-        If you give more than one debug flag you may
-        get more debugging information.
-    -relaxed_command_check
-        Allow this instance of epmd to be killed with
-        epmd -kill even if there are registered nodes.
-        Also allows forced unregister (epmd -stop).
+Options:
+  -p, --port=PORT   Let epmd listen to another port than default 4369. This can also
+                      be set using environment variable ERL_EPMD_PORT
+  -d, --debug       Enables debugging logs
+  -h, --help        Show this help message and exit.
+  -V, --version     Print version information and exit.
 
-DbgExtra options
-    -packet_timeout Seconds
-        Set the number of seconds a connection can be
-        inactive before epmd times out and closes the
-        connection (default 60).
+Commands:
+  help    Displays help information about the specified command
+  names   Lists names registered with the currently running epmd.
+  server  Starts the epmd server.
+  stop    Forcibly unregisters a live node from the epmd database.
+  kill    Kills the currently running epmd.
 
-    -delay_accept Seconds
-        To simulate a busy server you can insert a
-        delay between epmd gets notified about that
-        a new connection is requested and when the
-        connections gets accepted.
-
-    -delay_write Seconds
-        Also a simulation of a busy server. Inserts
-        a delay before a reply is sent.
-
-Interactive options
-    -names
-        List names registered with the currently running epmd
-    -kill
-        Kill the currently running epmd
-        (only allowed if -names show empty database or
-        -relaxed_command_check was given when epmd was started).
-    -stop Name
-        Forcibly unregisters a name with epmd
-        (only allowed if -relaxed_command_check was given when
-        epmd was started).
+Run 'epmd help COMMAND' for more information on a command.
 
 ```
 
@@ -104,12 +74,13 @@ compile 'io.appulse.epmd.java:server:2.0.0'
 To start EPMD server in your code:
 
 ```java
+import io.appulse.epmd.java.server.SubcommandServer;
 // ...
-CommonOptions commonOptions = new CommonOptions();
-commonOptions.setPort(4369);
+val server = SubcommandServer.builder()
+    .port(6666) // if not set, default is 4369
+    .ip(SubcommandServer.ANY_ADDRESS) // if not set, default is LOOPBACK
+    .build();
 
-ServerCommandExecutor server = new ServerCommandExecutor(commonOptions, new ServerCommandOptions());
-
-server.execute(); // it starts Netty server and blocks current thread
+server.run(); // it starts the server and blocks the current thread
 // ...
 ```

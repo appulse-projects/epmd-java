@@ -30,7 +30,15 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
 @Slf4j
-@Command(name = "kill")
+@Command(
+    name = "kill",
+    sortOptions = false,
+    descriptionHeading = "%n",
+    parameterListHeading = "%nParameters:%n",
+    optionListHeading = "%nOptions:%n",
+    commandListHeading = "%nCommands:%n",
+    description = "Kills the currently running epmd."
+)
 class SubcommandKill implements Runnable {
 
   @ParentCommand

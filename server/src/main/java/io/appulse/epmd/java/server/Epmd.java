@@ -19,11 +19,14 @@ package io.appulse.epmd.java.server;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Option;
 
 @Slf4j
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -39,8 +42,10 @@ import picocli.CommandLine.Option;
       "used by Erlang programs when establishing distributed " +
       "Erlang communications.",
     mixinStandardHelpOptions = true,
+    footer = "%nRun 'epmd help COMMAND' for more information on a command.",
     version = "epmd version \"2.0.0\" 2019-03-17",
     subcommands = {
+      HelpCommand.class,
       SubcommandNames.class,
       SubcommandServer.class,
       SubcommandStop.class,

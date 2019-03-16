@@ -58,9 +58,7 @@ class SubcommandServerTests {
   @BeforeEach
   void before () throws Exception {
     val server = SubcommandServer.builder()
-        .options(Epmd.builder()
-            .port(SocketUtils.findFreePort().orElseThrow(RuntimeException::new))
-            .build())
+        .port(SocketUtils.findFreePort().orElseThrow(RuntimeException::new))
         .ip(SubcommandServer.ANY_ADDRESS)
         .build();
 

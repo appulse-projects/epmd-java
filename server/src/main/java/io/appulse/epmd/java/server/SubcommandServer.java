@@ -85,17 +85,28 @@ import picocli.CommandLine.ParentCommand;
 
 @Slf4j
 @NoArgsConstructor
-@Command(name = "server")
-class SubcommandServer implements Runnable {
+@Command(
+    name = "server",
+    sortOptions = false,
+    descriptionHeading = "%n",
+    parameterListHeading = "%nParameters:%n",
+    optionListHeading = "%nOptions:%n",
+    commandListHeading = "%nCommands:%n",
+    description = "Starts the epmd server."
+)
+public class SubcommandServer implements Runnable {
 
   static final InetAddress ANY_ADDRESS;
 
   static final InetAddress LOOPBACK_ADDRESS;
 
+  static final InetAddress LOCALHOST;
+
   static {
     try {
       ANY_ADDRESS = InetAddress.getByName("0.0.0.0");
       LOOPBACK_ADDRESS = InetAddress.getLoopbackAddress();
+      LOCALHOST = InetAddress.getLocalHost();
     } catch (UnknownHostException ex) {
       throw new IllegalStateException(ex);
     }
@@ -104,10 +115,23 @@ class SubcommandServer implements Runnable {
   @ParentCommand
   Epmd options;
 
-  @Option(names = { "-a", "--allowed-ips" })
+  @Option(
+      names = { "-a", "--allowed-ips" },
+      description =
+          "Lets this instance of epmd listen only on the comma-separated list of IP addresses" +
+          "and on the loopback address (which is implicitly added to the list if it has not been " +
+          "specified). This can also be set using environment variable ERL_EPMD_ADDRESS"
+  )
   Set<InetAddress> ips = new HashSet<>(asList(LOOPBACK_ADDRESS));
 
-  @Option(names = { "-u", "--unsafe-commands" })
+  @Option(
+      names = { "-u", "--unsafe-commands" },
+      description = {
+        "Start the epmd program with relaxed command checking. This affects the following:",
+        "With relaxed command checking, the epmd daemon can be killed from the localhost with i.e. epmd -kill even if there are active nodes registered. Normally only daemons with an empty node database can be killed with the epmd \"kill\" command.",
+        "With relaxed command checking enabled, you can forcibly unregister live nodes by \"stop\" command."
+      }
+  )
   boolean unsafe;
 
   Map<String, Node> nodes;
@@ -115,11 +139,14 @@ class SubcommandServer implements Runnable {
   ExecutorService executor;
 
   @Builder
-  SubcommandServer (@NonNull Epmd options,
+  SubcommandServer (Integer port,
                     @Singular Set<InetAddress> ips,
                     boolean unsafe
   ) {
-    this.options = options;
+    options = new Epmd();
+    ofNullable(port)
+        .ifPresent(options::setPort);
+
     this.unsafe = unsafe;
 
     ofNullable(ips)
@@ -199,7 +226,7 @@ class SubcommandServer implements Runnable {
         if (remoteAddress == null) {
           log.warn("uh?");
           continue;
-        } else if (!ips.contains(ANY_ADDRESS) && !ips.contains(remoteAddress)) {
+        } else if (!ips.contains(ANY_ADDRESS) && !ips.contains(remoteAddress) && !LOCALHOST.equals(remoteAddress)) {
           clientSocket.close();
           log.warn("unacceptable remote client's address {}", remoteAddress);
           continue;

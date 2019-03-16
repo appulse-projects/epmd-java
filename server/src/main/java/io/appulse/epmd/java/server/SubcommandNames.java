@@ -32,7 +32,15 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
 @Slf4j
-@Command(name = "names")
+@Command(
+    name = "names",
+    sortOptions = false,
+    descriptionHeading = "%n",
+    parameterListHeading = "%nParameters:%n",
+    optionListHeading = "%nOptions:%n",
+    commandListHeading = "%nCommands:%n",
+    description = "Lists names registered with the currently running epmd."
+)
 class SubcommandNames implements Runnable {
 
   @ParentCommand

@@ -31,13 +31,24 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
 
 @Slf4j
-@Command(name = "stop")
+@Command(
+    name = "stop",
+    sortOptions = false,
+    descriptionHeading = "%n",
+    parameterListHeading = "%nParameters:%n",
+    optionListHeading = "%nOptions:%n",
+    commandListHeading = "%nCommands:%n",
+    description = "Forcibly unregisters a live node from the epmd database."
+)
 class SubcommandStop implements Runnable {
 
   @ParentCommand
   Epmd options;
 
-  @Parameters
+  @Parameters(
+      paramLabel = "NAME",
+      description = "A node's name for stopping"
+  )
   String name;
 
   @Override
