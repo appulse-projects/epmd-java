@@ -83,6 +83,9 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
+/**
+ * EPMD server command.
+ */
 @Slf4j
 @NoArgsConstructor
 @Command(
@@ -128,7 +131,9 @@ public class SubcommandServer implements Runnable {
       names = { "-u", "--unsafe-commands" },
       description = {
         "Start the epmd program with relaxed command checking. This affects the following:",
-        "With relaxed command checking, the epmd daemon can be killed from the localhost with i.e. epmd -kill even if there are active nodes registered. Normally only daemons with an empty node database can be killed with the epmd \"kill\" command.",
+        "With relaxed command checking, the epmd daemon can be killed from the localhost with i.e. " +
+        "epmd -kill even if there are active nodes registered. Normally only daemons with an empty node " +
+        "database can be killed with the epmd \"kill\" command.",
         "With relaxed command checking enabled, you can forcibly unregister live nodes by \"stop\" command."
       }
   )
@@ -153,37 +158,6 @@ public class SubcommandServer implements Runnable {
         .filter(it -> !it.isEmpty())
         .map(HashSet::new)
         .ifPresent(it -> this.ips = it);
-  }
-
-  private void setupEnvironmentVariables () {
-    if (new SubcommandServer().ips.equals(ips)) {
-      ips = ofNullable(System.getProperty("ERL_EPMD_ADDRESS"))
-          .map(it -> it.split(","))
-          .map(it -> Stream.of(it)
-              .map(String::trim)
-              .filter(ip -> !ip.isEmpty())
-              .map(ip -> {
-                try {
-                  return InetAddress.getByName(ip);
-                } catch (UnknownHostException ex) {
-                  throw new IllegalArgumentException("Invalid host " + ip, ex);
-                }
-              })
-              .collect(toSet()))
-          .map(it -> {
-            it.add(LOOPBACK_ADDRESS);
-            return it;
-          })
-          .orElse(ips);
-    }
-    ips.add(LOOPBACK_ADDRESS);
-
-    if (!unsafe) {
-      val string = ofNullable(System.getProperty("ERL_EPMD_RELAXED_COMMAND_CHECK"))
-          .filter(it -> !it.isEmpty())
-          .orElse("true");
-      unsafe = Boolean.valueOf(string);
-    }
   }
 
   @Override
@@ -243,17 +217,60 @@ public class SubcommandServer implements Runnable {
     }
   }
 
-  private Collection<Node> getNodes () {
+  /**
+   * Gets all registered and alive nodes in the server.
+   *
+   * @return all alive nodes
+   */
+  public Collection<Node> getNodes () {
     nodes.entrySet()
         .removeIf(entry -> !entry.getValue().isAlive());
 
     return nodes.values();
   }
 
-  private Optional<Node> getNode (String name) {
+  /**
+   * Returns a registered node, only if it is alive.
+   *
+   * @param name the node's name
+   *
+   * @return the registered and alive node
+   */
+  public Optional<Node> getNode (String name) {
     return ofNullable(name)
         .map(nodes::get)
         .filter(Node::isAlive);
+  }
+
+  private void setupEnvironmentVariables () {
+    if (new SubcommandServer().ips.equals(ips)) { // checks it is not set
+      ips = ofNullable(System.getProperty("ERL_EPMD_ADDRESS"))
+          .map(it -> it.split(","))
+          .map(it -> Stream.of(it)
+              .map(String::trim)
+              .filter(ip -> !ip.isEmpty())
+              .map(ip -> {
+                try {
+                  return InetAddress.getByName(ip);
+                } catch (UnknownHostException ex) {
+                  throw new IllegalArgumentException("Invalid host " + ip, ex);
+                }
+              })
+              .collect(toSet()))
+          .map(it -> {
+            it.add(LOOPBACK_ADDRESS);
+            return it;
+          })
+          .orElse(ips);
+    }
+    ips.add(LOOPBACK_ADDRESS);
+
+    if (!unsafe) {
+      val string = ofNullable(System.getProperty("ERL_EPMD_RELAXED_COMMAND_CHECK"))
+          .filter(it -> !it.isEmpty())
+          .orElse("true");
+      unsafe = Boolean.valueOf(string);
+    }
   }
 
   @Value
