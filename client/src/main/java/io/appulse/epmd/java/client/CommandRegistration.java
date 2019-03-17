@@ -28,8 +28,8 @@ import io.appulse.epmd.java.core.model.response.Response;
 
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import lombok.experimental.FieldDefaults;
+import lombok.val;
 
 /**
  * A command for registration a node in a remote EPMD server.
