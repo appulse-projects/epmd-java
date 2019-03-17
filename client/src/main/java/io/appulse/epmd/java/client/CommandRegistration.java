@@ -27,8 +27,8 @@ import io.appulse.epmd.java.core.model.response.RegistrationResult;
 import io.appulse.epmd.java.core.model.response.Response;
 
 import lombok.Builder;
-import lombok.extern.slf4j.Slf4j;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 /**
