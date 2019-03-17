@@ -23,8 +23,8 @@ import static lombok.AccessLevel.PRIVATE;
 import java.io.Closeable;
 import java.net.InetAddress;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -63,7 +63,7 @@ import lombok.val;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public final class EpmdClient implements Closeable {
 
-  Set<String> registered = ConcurrentHashMap.<String>newKeySet();
+  Map<String, Connection> registered = new ConcurrentHashMap<>();
 
   ExecutorService executor;
 
@@ -137,13 +137,14 @@ public final class EpmdClient implements Closeable {
    * @return creation id from EPMD
    */
   public CompletableFuture<RegistrationResult> register (@NonNull Registration request) {
-    if (registered.contains(request.getName())) {
+    if (registered.containsKey(request.getName())) {
       val exception = new EpmdRegistrationNameConflictException(request.getName());
       log.error(exception.getMessage(), exception);
       return FutureUtils.completedExceptionally(exception);
     }
 
     val supplier = CommandRegistration.builder()
+        .registered(registered)
         .address(address)
         .port(port)
         .request(request)
@@ -155,7 +156,6 @@ public final class EpmdClient implements Closeable {
           throw new EpmdRegistrationException(throwable);
         })
         .thenApply(result -> {
-          registered.add(request.getName());
           log.info("'{}' was registered successfully", request.getName());
           return result;
         });
@@ -359,8 +359,11 @@ public final class EpmdClient implements Closeable {
   @SneakyThrows
   public void close () {
     executor.shutdown();
-    registered.clear();
+
     val terminated = executor.awaitTermination(5, SECONDS);
     log.debug("EPMD was successfully terminated - {}", terminated);
+
+    registered.values().forEach(Connection::close);
+    registered.clear();
   }
 }

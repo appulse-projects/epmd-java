@@ -16,7 +16,10 @@
 
 package io.appulse.epmd.java.client;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import java.net.InetAddress;
+import java.util.Map;
 
 import io.appulse.epmd.java.client.exception.EpmdRegistrationException;
 import io.appulse.epmd.java.core.model.request.Registration;
@@ -26,6 +29,7 @@ import io.appulse.epmd.java.core.model.response.Response;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.experimental.FieldDefaults;
 
 /**
  * A command for registration a node in a remote EPMD server.
@@ -34,7 +38,10 @@ import lombok.val;
  * @author Artem Labazin
  */
 @Slf4j
+@FieldDefaults(level = PRIVATE, makeFinal = true)
 final class CommandRegistration extends CommandAbstract<Registration, RegistrationResult> {
+
+  Map<String, Connection> registered;
 
   /**
    * Constructs the command object.
@@ -46,8 +53,9 @@ final class CommandRegistration extends CommandAbstract<Registration, Registrati
    * @param request the command's request to the remote EPMD server
    */
   @Builder
-  CommandRegistration (InetAddress address, Integer port, Registration request) {
+  CommandRegistration (InetAddress address, Integer port, Registration request, Map<String, Connection> registered) {
     super(address, port, request);
+    this.registered = registered;
   }
 
   @Override
@@ -69,6 +77,7 @@ final class CommandRegistration extends CommandAbstract<Registration, Registrati
       throw new EpmdRegistrationException();
     }
 
+    registered.put(request.getName(), connection);
     return result;
   }
 }
