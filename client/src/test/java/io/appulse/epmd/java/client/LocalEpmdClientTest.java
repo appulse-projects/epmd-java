@@ -31,10 +31,10 @@ import io.appulse.epmd.java.core.model.request.Registration;
 
 import lombok.val;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class LocalEpmdClientTest {
@@ -196,7 +196,7 @@ class LocalEpmdClientTest {
   }
 
   @Test
-  @Ignore
+  @Disabled
   void dumpEmpty () throws Exception {
     val nodes = client.dump().get(3, SECONDS);
     assertThat(nodes)
