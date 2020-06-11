@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ class GetNodeInfoTest {
         .write2B(1 + name.getBytes().length)
         .write1B(PORT_PLEASE2_REQUEST.getCode())
         .writeNB(name)
-        .array();
+        .arrayCopy();
 
     val request = new GetNodeInfo(name);
     assertThat(request.toBytes())
@@ -47,7 +47,7 @@ class GetNodeInfoTest {
         .write2B(1 + name.getBytes().length)
         .write1B(PORT_PLEASE2_REQUEST.getCode())
         .writeNB(name)
-        .array();
+        .arrayCopy();
 
     val result = (GetNodeInfo) Request.parse(bytes);
     assertThat(result.getName())

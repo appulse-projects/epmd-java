@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ class NodeInfoTest {
     val expected = Bytes.resizableArray()
         .write1B(PORT2_RESPONSE.getCode())
         .write1B(1)
-        .array();
+        .arrayCopy();
 
     val request = NodeInfo.builder()
         .ok(false)
@@ -59,7 +59,7 @@ class NodeInfoTest {
         .write2B(name.getBytes().length)
         .writeNB(name)
         .write2B(0)
-        .array();
+        .arrayCopy();
 
     val request = NodeInfo.builder()
         .ok(true)
@@ -80,7 +80,7 @@ class NodeInfoTest {
     val bytes = Bytes.resizableArray()
         .write1B(PORT2_RESPONSE.getCode())
         .write1B(1)
-        .array();
+        .arrayCopy();
 
     val response = Response.parse(bytes, NodeInfo.class);
 
@@ -120,7 +120,7 @@ class NodeInfoTest {
         .write2B(name.getBytes().length)
         .writeNB(name, ISO_8859_1)
         .write2B(0)
-        .array();
+        .arrayCopy();
 
     val response = Response.parse(bytes, NodeInfo.class);
 

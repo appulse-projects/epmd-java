@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ class RegistrationResultTest {
         .write1B(ALIVE2_RESPONSE.getCode())
         .write1B(0)
         .write2B(42)
-        .array();
+        .arrayCopy();
 
     val request = RegistrationResult.builder()
         .ok(true)
@@ -49,7 +49,7 @@ class RegistrationResultTest {
         .write1B(ALIVE2_RESPONSE.getCode())
         .write1B(0)
         .write2B(42)
-        .array();
+        .arrayCopy();
 
     val response = Response.parse(bytes, RegistrationResult.class);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ class EpmdInfoTest {
   void serializeEmpty () {
     val expected = Bytes.resizableArray()
         .write4B(8080)
-        .array();
+        .arrayCopy();
 
     val request = EpmdInfo.builder()
         .port(8080)
@@ -51,7 +51,7 @@ class EpmdInfoTest {
     val expected = Bytes.resizableArray()
         .write4B(8080)
         .writeNB(str, ISO_8859_1)
-        .array();
+        .arrayCopy();
 
     val request = EpmdInfo.builder()
         .port(8080)
@@ -80,7 +80,7 @@ class EpmdInfoTest {
   void deserializeEmpty () {
     val bytes = Bytes.resizableArray()
         .write4B(8080)
-        .array();
+        .arrayCopy();
 
     val response = Response.parse(bytes, EpmdInfo.class);
 
@@ -103,7 +103,7 @@ class EpmdInfoTest {
     val bytes = Bytes.resizableArray()
         .write4B(8080)
         .writeNB(str, ISO_8859_1)
-        .array();
+        .arrayCopy();
 
     val response = Response.parse(bytes, EpmdInfo.class);
 

@@ -14,7 +14,7 @@ Client's library for `EPMD` server.
     <dependency>
         <groupId>io.appulse.epmd.java</groupId>
         <artifactId>client</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.1</version>
     </dependency>
     ...
 </dependencies>

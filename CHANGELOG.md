@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add more unit and integration tests.
 
+## [2.0.1](https://github.com/appulse-projects/epmd-java/releases/tag/2.0.1) - 2020-06-12
+
+### Changed
+
+- Updated dependencies;
+- Updated copyrights;
+- Unknown version has `Integer.MAX_VALUE` code instead of `-1`.
+
 ## [2.0.0](https://github.com/appulse-projects/epmd-java/releases/tag/2.0.0) - 2019-03-17
 
 ### Added
