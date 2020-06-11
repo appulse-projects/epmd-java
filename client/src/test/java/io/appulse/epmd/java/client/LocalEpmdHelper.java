@@ -24,8 +24,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+@Slf4j
 final class LocalEpmdHelper {
 
   @SneakyThrows
@@ -44,40 +46,47 @@ final class LocalEpmdHelper {
     return process.exitValue() == 0;
   }
 
-  @SneakyThrows
   static void run () {
     if (isRunning()) {
       kill();
     }
 
     val builder = new ProcessBuilder("epmd", "-daemon", "-relaxed_command_check");
-    val process = builder.start();
-    if (!process.waitFor(1, MINUTES)) {
-      process.destroy();
-      throw new RuntimeException("Local EPMD daemon doesn't respond");
+    try {
+      val process = builder.start();
+      if (!process.waitFor(1, MINUTES)) {
+        process.destroy();
+        throw new RuntimeException("Local EPMD daemon doesn't respond");
+      }
+      if (process.exitValue() != 0) {
+        process.destroy();
+        throw new RuntimeException("Local EPMD daemon doesn't run");
+      }
+      SECONDS.sleep(1);
+    } catch (Exception ex) {
+      log.error("starting EPMD error", ex);
     }
-    if (process.exitValue() != 0) {
-      process.destroy();
-      throw new RuntimeException("Local EPMD daemon doesn't run");
-    }
-    SECONDS.sleep(1);
   }
 
-  @SneakyThrows
   static void kill () {
     if (!isRunning()) {
       return;
     }
+
     val pids = getEpmdPids();
-    val builder = new ProcessBuilder("kill", "-9", pids);
-    val process = builder.start();
-    if (!process.waitFor(1, MINUTES)) {
-      process.destroy();
-      throw new RuntimeException("Killing local EPMD is too long, pid: " + pids);
-    }
-    if (process.exitValue() != 0) {
-      process.destroy();
-      throw new RuntimeException("Couldn't kill local EPMD with PID " + pids);
+    val builder = new ProcessBuilder("kill", "-s 9", pids);
+    try {
+      val process = builder.start();
+      if (!process.waitFor(1, MINUTES)) {
+        process.destroy();
+        throw new RuntimeException("Killing local EPMD is too long, pid: " + pids);
+      }
+      if (process.exitValue() != 0) {
+        process.destroy();
+        throw new RuntimeException("Couldn't kill local EPMD with PID " + pids);
+      }
+    } catch (Exception ex) {
+      log.error("killing EPMD error", ex);
     }
   }
 
