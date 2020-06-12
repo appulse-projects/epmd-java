@@ -9,7 +9,7 @@
 Run it as a regular `Java` CLI app:
 
 ```bash
-$> java -jar epmd-2.0.1.jar server
+$> java -jar epmd-2.0.2.jar server
 2019-03-17 01:38:09.302  INFO : EPMD server started (debug: false, port: 4369, allowed-ips: [localhost/127.0.0.1], unsafe-commands: true)
 
 ```
@@ -17,7 +17,7 @@ $> java -jar epmd-2.0.1.jar server
 To get names of all registered nodes:
 
 ```bash
-$> java -jar epmd-2.0.1.jar names
+$> java -jar epmd-2.0.2.jar names
 2019-03-17 01:45:39.310  INFO : EPMD up and running on port 4369 with the registered node(s):
  - node 'echo' at port 60045
 ```
@@ -25,7 +25,7 @@ $> java -jar epmd-2.0.1.jar names
 To see another options and commands, just type:
 
 ```bash
-$> java -jar epmd-2.0.1.jar --help
+$> java -jar epmd-2.0.2.jar --help
 Usage: epmd [-dhV] [-p=PORT] [COMMAND]
 
 Erlang port mapper daemon. This is a small name server used by Erlang programs
@@ -59,7 +59,7 @@ Run 'epmd help COMMAND' for more information on a command.
     <dependency>
         <groupId>io.appulse.epmd.java</groupId>
         <artifactId>server</artifactId>
-        <version>2.0.1</version>
+        <version>2.0.2</version>
     </dependency>
     ...
 </dependencies>
@@ -68,7 +68,7 @@ Run 'epmd help COMMAND' for more information on a command.
 **Gradle**:
 
 ```groovy
-compile 'io.appulse.epmd.java:server:2.0.1'
+compile 'io.appulse.epmd.java:server:2.0.2'
 ```
 
 To start EPMD server in your code:

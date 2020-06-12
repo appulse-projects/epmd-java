@@ -43,7 +43,7 @@ import picocli.CommandLine.Option;
       "Erlang communications.",
     mixinStandardHelpOptions = true,
     footer = "%nRun 'epmd help COMMAND' for more information on a command.",
-    version = "epmd version \"2.0.1\" 2019-03-17",
+    version = "epmd version \"2.0.2\" 2019-03-17",
     subcommands = {
       HelpCommand.class,
       SubcommandNames.class,
