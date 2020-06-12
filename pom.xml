@@ -444,7 +444,7 @@ limitations under the License.
         <executions>
           <execution>
             <id>sign-artifacts</id>
-            <phase>verify</phase>
+            <phase>install</phase>
             <goals>
               <goal>sign</goal>
             </goals>

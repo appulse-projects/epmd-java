@@ -15,10 +15,10 @@ before_install:
   - sudo apt-get install erlang -y
 
 install:
-  ./mvnw compile -B -U
+  ./mvnw compile --batch-mode --update-snapshots
 
 script:
-  ./mvnw install -B
+  ./mvnw install --batch-mode -Dgpg.skip
 
 before_deploy:
   - mvn help:evaluate -N -Dexpression=project.version | grep -v '\['
